@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
+@theme {
+  --color-kb-green-950: #0d2318;
+  --color-kb-green-900: #143425;
+  --color-kb-green-800: #1c4834;
+  --color-kb-green-700: #255d43;
+  --color-kb-green-600: #337a59;
+  --color-kb-green-100: #e8f2ec;
+  --color-kb-green-50: #f4f8f5;
+
+  --color-kb-gold-600: #a87e28;
+  --color-kb-gold-500: #c89b3c;
+  --color-kb-gold-400: #d6ad53;
+  --color-kb-gold-100: #fbf5e8;
+  --color-kb-gold-50: #fdfbf5;
+
+  --color-kb-earth-900: #422d20;
+  --color-kb-earth-800: #573c2a;
+  --color-kb-earth-700: #6e4d38;
+  --color-kb-earth-600: #8c644b;
+  --color-kb-earth-100: #f6efe9;
+
+  --color-kb-cream-300: #e8ded1;
+  --color-kb-cream-200: #f2ece1;
+  --color-kb-cream-100: #f9f6f0;
+  --color-kb-cream-50: #fdfbf8;
+
+  --color-kb-sand-400: #c5b49d;
+  --color-kb-sand-300: #d9cbb8;
+  --color-kb-sand-200: #e8ded2;
+
+  --color-kb-charcoal-900: #1a1d1a;
+  --color-kb-charcoal-800: #2d332e;
+  --color-kb-charcoal-700: #454d46;
+  --color-kb-charcoal-500: #59635c;
+  --color-kb-charcoal-400: #7b887f;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #f9f6f0;
+  --foreground: #1a1d1a;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Custom Utilities for KB Brand */
+.kb-gradient-accent {
+  background: linear-gradient(135deg, #143425 0%, #1c4834 50%, #c89b3c 100%);
+}
+
+.kb-gradient-subtle {
+  background: linear-gradient(180deg, #fdfbf8 0%, #f9f6f0 100%);
+}
+
