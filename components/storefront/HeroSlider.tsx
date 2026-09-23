@@ -8,7 +8,6 @@ import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, ShieldCheck, Clock, Aw
 export interface SlideItem {
   id: string;
   brand: string;
-  badge: string;
   title: string;
   highlightText: string;
   description: string;
@@ -31,7 +30,6 @@ const HERO_SLIDES: SlideItem[] = [
   {
     id: "slide-vrinda",
     brand: "VRINDA HERITAGE",
-    badge: "Master Crafted Tea Premix",
     title: "Royal Cardamom & Saffron",
     highlightText: "Authentic Indian Chai.",
     description:
@@ -53,7 +51,6 @@ const HERO_SLIDES: SlideItem[] = [
   {
     id: "slide-sangam",
     brand: "SANGAM BOTANICALS",
-    badge: "Instant Summer Cooler",
     title: "Crisp Sun-Ripened Lemon",
     highlightText: "Botanical Iced Tea.",
     description:
@@ -75,7 +72,6 @@ const HERO_SLIDES: SlideItem[] = [
   {
     id: "slide-urban-roast",
     brand: "URBAN ROAST",
-    badge: "Small Batch Roastery",
     title: "Bold & Aromatic 100% Arabica",
     highlightText: "Artisan Coffee Blend.",
     description:
@@ -135,7 +131,7 @@ export function HeroSlider() {
             {/* Left Content Column */}
             <div className="lg:col-span-6 space-y-5 md:space-y-6">
               {/* Badges strip */}
-              <div className="flex flex-wrap items-center gap-2.5">
+              {/* <div className="flex flex-wrap items-center gap-2.5">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide bg-[#F2ECE1] text-[#143425] border border-[#D9CBB8]">
                   <Sparkles className="h-3.5 w-3.5 text-[#C89B3C]" />
                   <span>{slide.badge}</span>
@@ -143,7 +139,7 @@ export function HeroSlider() {
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wider uppercase bg-[#C89B3C]/15 text-[#A87E28]">
                   {slide.offerText}
                 </span>
-              </div>
+              </div> */}
 
               {/* Title & Tagline */}
               <div className="space-y-3">
@@ -162,14 +158,12 @@ export function HeroSlider() {
               </div>
 
               {/* Price Callout */}
-              <div className="flex items-baseline gap-3 pt-1">
-                <span className="text-sm font-medium text-stone-500">
-                  {slide.priceTag}
-                </span>
+              {/* <div className="flex items-baseline gap-3 pt-1">
+              
                 <span className="text-xs text-[#143425] bg-[#E8F2EC] px-2 py-0.5 rounded font-semibold">
-                  Free Delivery Available
+                   {slide.priceTag}
                 </span>
-              </div>
+              </div> */}
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap items-center gap-3.5 pt-2">
