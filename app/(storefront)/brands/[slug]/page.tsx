@@ -13,9 +13,11 @@ interface BrandPageProps {
 
 export async function generateStaticParams() {
   const brands = getBrands();
-  return brands.map((b) => ({
+  const slugs = brands.map((b) => ({
     slug: b.slug,
   }));
+  slugs.push({ slug: "coco-joy" });
+  return slugs;
 }
 
 export async function generateMetadata({

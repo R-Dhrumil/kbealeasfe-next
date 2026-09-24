@@ -43,7 +43,7 @@ export default function SearchPage() {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Try 'Cardamom', 'Guava Chilly', 'Cold Brew', 'Assam', 'Coconut'..."
+            placeholder="Try 'Cardamom', 'Guava Chilly', 'Cold Brew', 'Assam', 'Hot Chocolate'..."
             className="w-full h-14 pl-12 pr-12 rounded-2xl border-2 border-stone-200 bg-white text-base text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#143425] shadow-sm transition-all"
           />
           {query && (
@@ -60,7 +60,7 @@ export default function SearchPage() {
         {/* Quick Suggestion Pills */}
         <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-stone-600">
           <span className="font-semibold text-stone-400">Trending:</span>
-          {["Cardamom Premix", "Guava Chilly", "Masala Chai", "Mysore Gold", "Tender Coconut"].map(
+          {["Cardamom Premix", "Guava Chilly", "Masala Chai", "Mysore Gold", "Hot Chocolate", "Cold Cocoa"].map(
             (term) => (
               <button
                 key={term}

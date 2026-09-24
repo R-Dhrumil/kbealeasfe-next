@@ -24,7 +24,7 @@ export const HERO_CONTENT: HeroSlide = {
   tagline: "Master Crafted Beverages",
   title: "Authentic Chai, Refreshing Iced Teas & Artisan Brews",
   highlightText: "Crafted for Everyday Moments.",
-  description: "Experience the timeless richness of Vrinda tea premixes, exhilarating Sangam botanical iced teas, Urban Roast crafted coffees, and CocoJoy pure coastal hydration.",
+  description: "Experience the timeless richness of Vrinda tea premixes, exhilarating Sangam botanical iced teas, Urban Roast crafted coffees, and CocoJoy decadent chocolate drinks.",
   primaryCtaText: "Shop Products",
   primaryCtaHref: "/shop",
   secondaryCtaText: "Explore Categories",

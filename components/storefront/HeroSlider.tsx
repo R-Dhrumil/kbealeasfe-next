@@ -70,6 +70,22 @@ const HERO_SLIDES: SlideItem[] = [
     image: "/assets/hero/hero-urban-roast.png",
     themeColor: "#1E2638",
   },
+  {
+    id: "slide-cocojoy",
+    brand: "COCOJOY CHOCOLATE",
+    title: "Velvety Dutch Hot Chocolate & Cold Cocoa",
+    highlightText: "Decadent Cocoa Drinks.",
+    description:
+      "Crafted with 22% European Dutch cocoa and wholesome desi jaggery. Transforms hot or chilled milk into thick, cafe-style chocolate indulgence in 10 seconds.",
+    priceTag: "Starting at ₹399",
+    offerText: "Rich Belgian Style",
+    primaryCtaText: "Shop Chocolate Drinks",
+    primaryCtaHref: "/shop?category=cat-chocolate-drinks",
+    secondaryCtaText: "Explore CocoJoy",
+    secondaryCtaHref: "/brands/cocojoy",
+    image: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=1200&q=80",
+    themeColor: "#4A2810",
+  },
 ];
 
 export function HeroSlider() {

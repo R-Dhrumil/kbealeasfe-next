@@ -6,7 +6,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 
 export const metadata: Metadata = {
   title: "Our Brands Portfolio | KB Beverage",
-  description: "Explore Vrinda tea premixes, Sangam botanical iced teas, Urban Roast coffees, and CocoJoy coconut specialties.",
+  description: "Explore Vrinda tea premixes, Sangam botanical iced teas, Urban Roast coffees, and CocoJoy rich chocolate drinks.",
 };
 
 export default function BrandsPage() {

@@ -47,7 +47,7 @@ export function CategoryShareChart() {
     { name: "Tea Premixes (Vrinda)", share: 48, color: "bg-[#143425]" },
     { name: "Iced Teas (Sangam)", share: 28, color: "bg-[#C89B3C]" },
     { name: "Artisan Coffee (Urban Roast)", share: 16, color: "bg-[#6E4D38]" },
-    { name: "Plant-Based (CocoJoy)", share: 8, color: "bg-[#337A59]" },
+    { name: "Chocolate Drinks (CocoJoy)", share: 8, color: "bg-[#5C3826]" },
   ];
 
   return (

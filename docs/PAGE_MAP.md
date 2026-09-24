@@ -216,7 +216,7 @@ The Admin Panel is an operational workspace characterized by dense data presenta
   - Tea Premixes
   - Iced Teas
   - Artisan Coffee
-  - Plant-Based & Coconut Specialties
+  - Chocolate Drinks & Cocoa Premixes
 - **Table / Card Grid:** Category hero image, Name, Tagline, Description, Product count, Active status toggle, Edit modal.
 
 #### `GET /admin/brands` — Brand Portfolio Manager
@@ -224,7 +224,7 @@ The Admin Panel is an operational workspace characterized by dense data presenta
   - **Vrinda:** Authentic traditional tea premixes (Cardamom, Masala, Ginger).
   - **Sangam:** Modern botanical iced teas (Guava Chilly, Lemon, Watermelon).
   - **Urban Roast:** Premium crafted coffees and specialty blends.
-  - **CocoJoy:** Pure coconut water & tropical plant-based beverages.
+  - **CocoJoy:** Decadent European hot chocolate & thick Vadodara-style cold cocoa premixes.
 - **Controls:** Brand logo, tagline, description, product count, status, action menu.
 
 #### `GET /admin/orders` — Orders Fulfillment

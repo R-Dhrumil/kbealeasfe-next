@@ -36,10 +36,10 @@ export default function AdminReviewsPage() {
     {
       id: "rev-4",
       customer: "Sneha Kulkarni",
-      product: "100% Tender Coconut Hydration (CocoJoy)",
+      product: "Classic Hot Chocolate Premix (CocoJoy)",
       rating: 5,
       date: "15 Sep 2026",
-      comment: "Dissolves instantly in ice water. Great for post-workout hydration.",
+      comment: "Thick, velvety, and intensely chocolatey without being overly sweet. My kids love it with warm milk!",
       status: "Approved",
     },
   ]);

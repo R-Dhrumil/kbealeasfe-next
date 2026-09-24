@@ -104,7 +104,7 @@ export function ProductsAdminClient({
             <option value="cat-tea-premixes">Tea Premixes</option>
             <option value="cat-iced-teas">Iced Teas</option>
             <option value="cat-artisan-coffee">Artisan Coffee</option>
-            <option value="cat-plant-based-specialties">Plant-Based Specialties</option>
+            <option value="cat-chocolate-drinks">Chocolate Drinks</option>
           </select>
         </div>
       </div>

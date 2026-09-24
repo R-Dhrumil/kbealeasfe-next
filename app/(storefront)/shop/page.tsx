@@ -5,7 +5,7 @@ import { ShopCatalogClient } from "./ShopCatalogClient";
 
 export const metadata: Metadata = {
   title: "Shop Full Beverage Collection | KB Beverage",
-  description: "Browse authentic Vrinda tea premixes, Sangam botanical iced teas, Urban Roast crafted coffees, and CocoJoy coconut specialties.",
+  description: "Browse authentic Vrinda tea premixes, Sangam botanical iced teas, Urban Roast crafted coffees, and CocoJoy rich chocolate drinks.",
 };
 
 export default function ShopPage() {

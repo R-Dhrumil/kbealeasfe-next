@@ -14,9 +14,12 @@ interface CategoryPageProps {
 
 export async function generateStaticParams() {
   const categories = getCategories();
-  return categories.map((cat) => ({
+  const slugs = categories.map((cat) => ({
     slug: cat.slug,
   }));
+  slugs.push({ slug: "plant-based-specialties" });
+  slugs.push({ slug: "chocolate" });
+  return slugs;
 }
 
 export async function generateMetadata({

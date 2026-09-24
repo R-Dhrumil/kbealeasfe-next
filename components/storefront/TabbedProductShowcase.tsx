@@ -38,7 +38,7 @@ export function TabbedProductShowcase() {
             Popular & Flagship Brews
           </h2>
           <p className="text-stone-500 text-xs sm:text-sm mt-1 max-w-xl">
-            Single-origin tea extracts, authentic crushed whole spices, and small-batch roasted coffees.
+            Single-origin tea extracts, authentic crushed whole spices, roasted coffees, and velvety chocolate drinks.
           </p>
         </div>
 

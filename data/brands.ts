@@ -41,13 +41,13 @@ export const BRANDS: Brand[] = [
     id: "brand-cocojoy",
     slug: "cocojoy",
     name: "CocoJoy",
-    tagline: "Pure Coastal Sunshine",
-    description: "100% natural tender coconut waters, coconut milk lattes, and tropical revitalizers.",
-    logo: "🥥",
-    accentColor: "#337A59",
-    productCount: 5,
+    tagline: "Joy in Every Sip — Decadent Chocolate Drinks",
+    description: "Luxurious European hot chocolate and velvety street-style cold cocoa premixes crafted with pure Dutch cocoa and wholesome jaggery.",
+    logo: "🍫",
+    accentColor: "#5C3826",
+    productCount: 3,
     featured: true,
-    story: "Harvested from coastal coconut groves, CocoJoy captures nature's purest isotonic beverage. Packed with natural electrolytes and zero artificial flavorings.",
+    story: "CocoJoy was born for pure chocolate indulgence. From rich, steaming European-style winter mugs to thick, chilled Vadodara street-style cold cocoa, our instant premixes deliver velvety cafe-grade chocolate drinks in seconds with rich cocoa aromas and zero chemical preservatives.",
   },
 ];
 
@@ -56,5 +56,8 @@ export function getBrands(): Brand[] {
 }
 
 export function getBrandBySlug(slug: string): Brand | undefined {
+  if (slug === "coco-joy") {
+    return BRANDS.find((b) => b.slug === "cocojoy");
+  }
   return BRANDS.find((b) => b.slug === slug);
 }

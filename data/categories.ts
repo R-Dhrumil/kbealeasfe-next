@@ -35,13 +35,13 @@ export const CATEGORIES: Category[] = [
     order: 3,
   },
   {
-    id: "cat-plant-based-specialties",
-    slug: "plant-based-specialties",
-    name: "Plant-Based Specialties",
-    tagline: "Pure Tropical Nourishment",
-    description: "Naturally hydrating tender coconut waters and plant-based lattes with zero artificial preservatives.",
-    image: "https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=800&q=80",
-    productCount: 5,
+    id: "cat-chocolate-drinks",
+    slug: "chocolate-drinks",
+    name: "Chocolate Drinks",
+    tagline: "Velvety, Rich & Decadent Indulgence",
+    description: "Decadent European hot chocolates and thick Gujarat-style chilled cocoa premixes crafted with rich Dutch cocoa and wholesome jaggery.",
+    image: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=800&q=80",
+    productCount: 3,
     featured: true,
     order: 4,
   },
@@ -52,5 +52,8 @@ export function getCategories(): Category[] {
 }
 
 export function getCategoryBySlug(slug: string): Category | undefined {
+  if (slug === "plant-based-specialties" || slug === "chocolate") {
+    return CATEGORIES.find((c) => c.slug === "chocolate-drinks");
+  }
   return CATEGORIES.find((c) => c.slug === slug);
 }
