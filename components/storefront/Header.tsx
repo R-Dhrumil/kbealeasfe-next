@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Menu,
   X,
@@ -12,9 +13,7 @@ import {
   ShieldAlert,
   ArrowRight,
   User,
-  Package,
   LogOut,
-  MapPin,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -46,11 +45,17 @@ export function Header() {
 
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="h-11 w-11 rounded-xl bg-[#143425] flex items-center justify-center text-[#F9F6F0] font-serif font-bold text-xl tracking-wider shadow-sm group-hover:bg-[#1C4834] transition-colors">
-              KB
+            <div className="relative h-12 w-16 sm:h-14 sm:w-20 overflow-hidden rounded-xl bg-white p-1 border border-stone-200/60 shadow-2xs group-hover:border-[#143425]/30 transition-all">
+              <Image
+                src="/kbealeas_logo.jpeg"
+                alt="KB Beverage - Pure Taste, Every Time"
+                fill
+                priority
+                className="object-contain"
+              />
             </div>
             <div>
-              <span className="font-serif text-xl font-bold tracking-tight text-[#143425] block leading-none">
+              <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#143425] block leading-none">
                 KB BEVERAGE
               </span>
               <span className="text-[10px] uppercase tracking-widest text-[#A87E28] font-semibold block mt-0.5">
@@ -196,19 +201,13 @@ export function Header() {
               </Link>
 
               {accountOpen && (
-                <div className="absolute top-full right-0 w-64 bg-white rounded-2xl shadow-xl border border-stone-100 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute top-full right-0 w-48 bg-white rounded-2xl shadow-xl border border-stone-100 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   {isLoggedIn && customer ? (
                     <>
-                      <div className="p-3 border-b border-stone-100">
+                      <div className="px-3 py-2 border-b border-stone-100">
                         <p className="text-xs font-bold text-[#143425] line-clamp-1">
                           {customer.fullName}
                         </p>
-                        <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
-                          {customer.email}
-                        </p>
-                        <span className="inline-block mt-1.5 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#143425]/10 text-[#143425]">
-                          {customer.memberTier}
-                        </span>
                       </div>
 
                       <div className="py-1">
@@ -218,28 +217,7 @@ export function Header() {
                           className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-[#F9F6F0] rounded-xl transition-colors"
                         >
                           <User className="h-4 w-4 text-[#A87E28]" />
-                          <span>My Account Overview</span>
-                        </Link>
-                        <Link
-                          href="/account/orders"
-                          onClick={() => setAccountOpen(false)}
-                          className="flex items-center justify-between px-3 py-2 text-xs font-medium text-stone-700 hover:bg-[#F9F6F0] rounded-xl transition-colors"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <Package className="h-4 w-4 text-[#A87E28]" />
-                            <span>My Orders</span>
-                          </div>
-                          <span className="font-mono text-[10px] text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">
-                            {orders.length}
-                          </span>
-                        </Link>
-                        <Link
-                          href="/account#addresses"
-                          onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-[#F9F6F0] rounded-xl transition-colors"
-                        >
-                          <MapPin className="h-4 w-4 text-[#A87E28]" />
-                          <span>Saved Addresses</span>
+                          <span>Profile</span>
                         </Link>
                       </div>
 
@@ -253,7 +231,7 @@ export function Header() {
                           className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left"
                         >
                           <LogOut className="h-3.5 w-3.5" />
-                          <span>Sign Out</span>
+                          <span>Log Out</span>
                         </button>
                       </div>
                     </>
@@ -304,9 +282,18 @@ export function Header() {
           <div className="relative w-full max-w-xs bg-[#F9F6F0] h-full shadow-2xl p-6 flex flex-col justify-between overflow-y-auto z-10 animate-in slide-in-from-left duration-200">
             <div>
               <div className="flex items-center justify-between pb-5 border-b border-[#E8DED1]">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-lg bg-[#143425] flex items-center justify-center text-white font-serif font-bold">
-                    KB
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5"
+                >
+                  <div className="relative h-10 w-14 overflow-hidden rounded-lg bg-white p-0.5 border border-stone-200/60 shadow-2xs">
+                    <Image
+                      src="/kbealeas_logo.jpeg"
+                      alt="KB Beverage Logo"
+                      fill
+                      className="object-contain"
+                    />
                   </div>
                   <div>
                     <span className="font-serif font-bold text-[#143425] text-base block">
@@ -316,7 +303,7 @@ export function Header() {
                       Pure Taste, Every Time.
                     </span>
                   </div>
-                </div>
+                </Link>
 
                 <button
                   type="button"
@@ -337,7 +324,6 @@ export function Header() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-stone-900">{customer.fullName}</p>
-                        <p className="text-[10px] text-stone-500">{customer.email}</p>
                       </div>
                     </div>
                     <Link

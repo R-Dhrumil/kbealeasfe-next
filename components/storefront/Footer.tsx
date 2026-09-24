@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Sparkles, ArrowUpRight, Mail, Phone, MapPin } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 import { BRANDS } from "@/data/brands";
@@ -11,9 +12,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-14 border-b border-stone-800">
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-[#C89B3C] text-[#143425] font-serif font-bold text-xl flex items-center justify-center">
-                KB
+            <Link href="/" className="inline-flex items-center gap-3 group">
+              <div className="relative h-12 w-16 overflow-hidden rounded-xl bg-white p-1 border border-white/20 shadow-xs">
+                <Image
+                  src="/kbealeas_logo.jpeg"
+                  alt="KB Beverage - Pure Taste, Every Time"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <div>
                 <span className="font-serif text-xl font-bold tracking-tight text-white block leading-none">
@@ -23,7 +29,7 @@ export function Footer() {
                   Pure Taste, Every Time.
                 </span>
               </div>
-            </div>
+            </Link>
 
             <p className="text-stone-300 text-sm max-w-sm leading-relaxed">
               Crafting authentic Indian tea premixes, invigorating iced teas, and artisan roasted beverages with unyielding dedication to purity, hygiene, and natural origin.

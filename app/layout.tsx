@@ -4,6 +4,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "KB Beverage | Pure Taste, Every Time.",
   description: "Premium beverage manufacturer and tea premix crafts including Vrinda, Sangam, Urban Roast, and CocoJoy.",
+  icons: {
+    icon: "/kbealeas_logo.jpeg",
+    shortcut: "/kbealeas_logo.jpeg",
+    apple: "/kbealeas_logo.jpeg",
+  },
 };
 
 export default function RootLayout({
