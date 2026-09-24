@@ -5,7 +5,7 @@ import { PromoBanners } from "@/components/storefront/PromoBanners";
 import { TabbedProductShowcase } from "@/components/storefront/TabbedProductShowcase";
 import { HeritageStory } from "@/components/storefront/HeritageStory";
 import { BrandCarousel } from "@/components/storefront/BrandCarousel";
-import { SocialShowcase } from "@/components/storefront/SocialShowcase";
+import { ClienteleShowcase } from "@/components/storefront/ClienteleShowcase";
 
 export default function HomePage() {
   return (
@@ -28,8 +28,8 @@ export default function HomePage() {
       {/* 6. BRAND ARCHITECTURE & CERTIFICATIONS */}
       <BrandCarousel />
 
-      {/* 7. INSTAGRAM & COMMUNITY SOCIAL GALLERY */}
-      <SocialShowcase />
+      {/* 7. VERIFIED CLIENTELE SHOWCASE (FROM OFFICIAL BROCHURE) */}
+      <ClienteleShowcase />
     </div>
   );
 }
