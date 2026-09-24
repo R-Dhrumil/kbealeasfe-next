@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,17 +18,19 @@ import {
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/formatters";
 import { Button } from "@/components/ui/Button";
+import { useCustomer } from "@/context/CustomerContext";
 
 type PaymentMethodType = "upi" | "card" | "netbanking" | "cod";
 
 export default function CheckoutPage() {
   const { items, summary, clearCart } = useCart();
+  const { customer, isLoggedIn, placeOrder } = useCustomer();
 
   // Form State
-  const [email, setEmail] = useState("aarav.sharma@example.com");
-  const [phone, setPhone] = useState("+91 98201 44521");
-  const [fullName, setFullName] = useState("Aarav Sharma");
-  const [addressLine, setAddressLine] = useState("Flat 402, Nilgiri Heights, Baner Road");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [addressLine, setAddressLine] = useState("");
   const [city, setCity] = useState("Pune");
   const [state, setState] = useState("Maharashtra");
   const [postalCode, setPostalCode] = useState("411045");
@@ -41,24 +43,89 @@ export default function CheckoutPage() {
   const [confirmedOrderId, setConfirmedOrderId] = useState("");
   const [validationError, setValidationError] = useState("");
 
-  const handleSubmitOrder = (e: React.FormEvent) => {
+  // Pre-fill if customer profile exists
+  useEffect(() => {
+    if (customer) {
+      setEmail((prev) => prev || customer.email);
+      setPhone((prev) => prev || customer.phone);
+      setFullName((prev) => prev || customer.fullName);
+
+      const defaultAddr = customer.addresses.find((a) => a.isDefault) || customer.addresses[0];
+      if (defaultAddr) {
+        setAddressLine((prev) => prev || defaultAddr.addressLine1);
+        setCity((prev) => prev || defaultAddr.city);
+        setState((prev) => prev || defaultAddr.state);
+        setPostalCode((prev) => prev || defaultAddr.postalCode);
+      }
+    } else {
+      setEmail((prev) => prev || "aarav.sharma@example.com");
+      setPhone((prev) => prev || "+91 98201 44521");
+      setFullName((prev) => prev || "Aarav Sharma");
+      setAddressLine((prev) => prev || "Flat 402, Nilgiri Heights, Baner Road");
+    }
+  }, [customer]);
+
+  const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !addressLine.trim() || !postalCode.trim() || !phone.trim()) {
-      setValidationError("Please fill out all required shipping fields.");
+    if (!fullName.trim() || !addressLine.trim() || !postalCode.trim() || !phone.trim() || !email.trim()) {
+      setValidationError("Please fill out all required shipping and contact fields.");
       return;
     }
 
     setValidationError("");
     setIsSubmitting(true);
 
-    // Simulate mock order placement latency
-    setTimeout(() => {
-      const orderNum = `KB-${Math.floor(1000 + Math.random() * 9000)}`;
-      setConfirmedOrderId(orderNum);
+    const mappedPaymentMethod =
+      paymentMethod === "upi"
+        ? "UPI"
+        : paymentMethod === "card"
+        ? "Credit/Debit Card"
+        : paymentMethod === "netbanking"
+        ? "Net Banking"
+        : "Cash on Delivery";
+
+    const orderItems = items.map((item, idx) => ({
+      id: `oi-${Date.now()}-${idx}`,
+      productId: item.product.id,
+      productName: item.product.name,
+      brandName: item.product.brandName || "KB Beverage",
+      image: item.product.images?.[0] || "/images/brands/vrinda.jpg",
+      unitPrice: item.product.price,
+      quantity: item.quantity,
+      lineTotal: item.product.price * item.quantity,
+      sku: item.product.sku || `SKU-${item.product.id}`,
+    }));
+
+    try {
+      const placed = await placeOrder({
+        customerName: fullName,
+        customerEmail: email,
+        customerPhone: phone,
+        shippingAddress: {
+          fullName,
+          phone,
+          addressLine1: addressLine,
+          city,
+          state,
+          postalCode,
+        },
+        items: orderItems,
+        subtotal: summary.subtotal,
+        shippingFee: summary.shippingFee,
+        discount: summary.discount,
+        tax: summary.tax,
+        total: summary.total,
+        paymentMethod: mappedPaymentMethod,
+      });
+
+      setConfirmedOrderId(placed.id);
       setIsSubmitting(false);
       setIsConfirmed(true);
       clearCart();
-    }, 1200);
+    } catch {
+      setIsSubmitting(false);
+      setValidationError("Failed to place order. Please try again.");
+    }
   };
 
   // SUCCESS CONFIRMATION STATE
@@ -111,15 +178,20 @@ export default function CheckoutPage() {
         </div>
 
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link href={`/account/orders/${confirmedOrderId}`}>
+            <Button variant="primary" size="md" className="gap-2">
+              <span>Track This Order</span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
           <Link href="/account/orders">
             <Button variant="outline" size="md">
-              View Order Tracking
+              All Orders
             </Button>
           </Link>
           <Link href="/shop">
-            <Button variant="primary" size="md" className="gap-2">
-              <span>Continue Shopping</span>
-              <ArrowRight className="h-4 w-4" />
+            <Button variant="ghost" size="md">
+              Continue Shopping
             </Button>
           </Link>
         </div>
@@ -163,6 +235,36 @@ export default function CheckoutPage() {
           <span>Encrypted Checkout</span>
         </div>
       </div>
+
+      {/* Customer Status Banner */}
+      {isLoggedIn && customer ? (
+        <div className="p-4 rounded-2xl bg-[#E8F2EC]/70 border border-[#143425]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-600 animate-pulse" />
+            <span className="text-stone-700">
+              Ordering as <strong className="text-[#143425]">{customer.fullName}</strong> ({customer.email})
+            </span>
+          </div>
+          <Link
+            href="/account"
+            className="text-xs font-semibold text-[#143425] hover:text-[#C89B3C] underline underline-offset-2"
+          >
+            Manage Saved Addresses
+          </Link>
+        </div>
+      ) : (
+        <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <span className="text-amber-900">
+            Have an existing KB Beverage account? Sign in to automatically populate your delivery address and track orders.
+          </span>
+          <Link
+            href="/account/login?redirect=/checkout"
+            className="font-semibold text-[#143425] hover:text-[#C89B3C] shrink-0 underline underline-offset-2"
+          >
+            Sign In / Register
+          </Link>
+        </div>
+      )}
 
       <form onSubmit={handleSubmitOrder}>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">

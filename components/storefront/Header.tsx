@@ -11,16 +11,23 @@ import {
   ChevronDown,
   ShieldAlert,
   ArrowRight,
+  User,
+  Package,
+  LogOut,
+  MapPin,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCustomer } from "@/context/CustomerContext";
 import { BRAND_COLLECTIONS } from "@/data/collections";
 
 export function Header() {
   const { openCart, summary } = useCart();
   const { wishlistCount } = useWishlist();
+  const { customer, isLoggedIn, logout, orders } = useCustomer();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   return (
     <>
@@ -142,8 +149,8 @@ export function Header() {
             </Link>
           </nav>
 
-          {/* Right Action Icons */}
-          <div className="flex items-center gap-2 sm:gap-4">
+          {/* Right Action Icons (Search, Wishlist, Account, Cart) */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/search"
               aria-label="Search catalog"
@@ -165,6 +172,110 @@ export function Header() {
               )}
             </Link>
 
+            {/* Account / User Menu Dropdown */}
+            <div
+              className="relative py-2"
+              onMouseEnter={() => setAccountOpen(true)}
+              onMouseLeave={() => setAccountOpen(false)}
+            >
+              <Link
+                href="/account"
+                aria-label="Customer Account"
+                className="flex items-center gap-1.5 p-2 text-stone-700 hover:text-[#143425] hover:bg-stone-200/50 rounded-lg transition-colors group"
+              >
+                {isLoggedIn && customer ? (
+                  <div className="h-6 w-6 rounded-full bg-[#143425] text-white flex items-center justify-center text-[10px] font-bold">
+                    {customer.fullName.charAt(0)}
+                  </div>
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
+                <span className="hidden xl:inline text-xs font-semibold text-stone-800">
+                  {isLoggedIn && customer ? customer.fullName.split(" ")[0] : "Account"}
+                </span>
+              </Link>
+
+              {accountOpen && (
+                <div className="absolute top-full right-0 w-64 bg-white rounded-2xl shadow-xl border border-stone-100 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {isLoggedIn && customer ? (
+                    <>
+                      <div className="p-3 border-b border-stone-100">
+                        <p className="text-xs font-bold text-[#143425] line-clamp-1">
+                          {customer.fullName}
+                        </p>
+                        <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
+                          {customer.email}
+                        </p>
+                        <span className="inline-block mt-1.5 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#143425]/10 text-[#143425]">
+                          {customer.memberTier}
+                        </span>
+                      </div>
+
+                      <div className="py-1">
+                        <Link
+                          href="/account"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-[#F9F6F0] rounded-xl transition-colors"
+                        >
+                          <User className="h-4 w-4 text-[#A87E28]" />
+                          <span>My Account Overview</span>
+                        </Link>
+                        <Link
+                          href="/account/orders"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center justify-between px-3 py-2 text-xs font-medium text-stone-700 hover:bg-[#F9F6F0] rounded-xl transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Package className="h-4 w-4 text-[#A87E28]" />
+                            <span>My Orders</span>
+                          </div>
+                          <span className="font-mono text-[10px] text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">
+                            {orders.length}
+                          </span>
+                        </Link>
+                        <Link
+                          href="/account#addresses"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-[#F9F6F0] rounded-xl transition-colors"
+                        >
+                          <MapPin className="h-4 w-4 text-[#A87E28]" />
+                          <span>Saved Addresses</span>
+                        </Link>
+                      </div>
+
+                      <div className="pt-1 border-t border-stone-100">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            logout();
+                            setAccountOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left"
+                        >
+                          <LogOut className="h-3.5 w-3.5" />
+                          <span>Sign Out</span>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-3 space-y-2 text-center">
+                      <p className="text-xs text-stone-600">
+                        Sign in to access your orders, saved addresses, and member privileges.
+                      </p>
+                      <Link
+                        href="/account/login"
+                        onClick={() => setAccountOpen(false)}
+                        className="block w-full py-2 rounded-xl bg-[#143425] text-white text-xs font-semibold hover:bg-[#1C4834] transition-colors"
+                      >
+                        Sign In / Register
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Cart Trigger */}
             <button
               type="button"
               onClick={openCart}
@@ -216,6 +327,41 @@ export function Header() {
                 </button>
               </div>
 
+              {/* Mobile Customer Status Card */}
+              <div className="mt-4 p-3.5 rounded-2xl bg-white border border-[#E8DED1] shadow-2xs">
+                {isLoggedIn && customer ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-full bg-[#143425] text-white flex items-center justify-center text-xs font-bold">
+                        {customer.fullName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-stone-900">{customer.fullName}</p>
+                        <p className="text-[10px] text-stone-500">{customer.email}</p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/account"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-[11px] font-semibold text-[#143425] hover:underline"
+                    >
+                      Account &rarr;
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-stone-600">Welcome, Guest</span>
+                    <Link
+                      href="/account/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-xs font-semibold text-[#143425] underline"
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                )}
+              </div>
+
               <div className="mt-6 space-y-4">
                 <Link
                   href="/shop"
@@ -251,6 +397,21 @@ export function Header() {
 
                 <div className="pt-2 border-t border-[#E8DED1] space-y-2">
                   <Link
+                    href="/account/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between text-sm font-medium text-stone-800"
+                  >
+                    <span>My Orders</span>
+                    <span className="font-mono text-xs text-stone-400">({orders.length})</span>
+                  </Link>
+                  <Link
+                    href="/account"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-sm font-medium text-stone-800"
+                  >
+                    Profile &amp; Addresses
+                  </Link>
+                  <Link
                     href="/about"
                     onClick={() => setMobileMenuOpen(false)}
                     className="block text-sm font-medium text-stone-800"
@@ -263,13 +424,6 @@ export function Header() {
                     className="block text-sm font-medium text-stone-800"
                   >
                     Contact &amp; Distribution
-                  </Link>
-                  <Link
-                    href="/account"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-sm font-medium text-stone-800"
-                  >
-                    My Account / Orders
                   </Link>
                 </div>
               </div>

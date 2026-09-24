@@ -13,8 +13,7 @@ export default function HomePage() {
       {/* 1. HERO BANNER SLIDER */}
       <HeroSlider />
 
-      {/* 2. VALUE PROPOSITION & TRUST BADGES */}
-      <FeatureStrip />
+      
 
       {/* 3. PROMOTIONAL ASYMMETRIC BANNER GRID */}
       <PromoBanners />
