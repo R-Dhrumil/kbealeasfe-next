@@ -24,7 +24,7 @@ export default function HomePage() {
       <PromoBanners />
 
       {/* 4. THE FOUR PRIMARY CATEGORIES */}
-      <section id="categories" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-14">
+      {/* <section id="categories" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-14">
         <SectionHeader
           eyebrow="Curated Portfolio"
           title="The Four Core Categories"
@@ -38,7 +38,7 @@ export default function HomePage() {
             <CategoryCard key={category.id} category={category} />
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* 5. TABBED POPULAR PRODUCTS CATALOG */}
       <TabbedProductShowcase />
@@ -47,7 +47,7 @@ export default function HomePage() {
       <HeritageStory />
 
       {/* 7. DEAL OF THE DAY / DISCOVERY BOX BANNER */}
-      <DealBanner />
+      {/* <DealBanner /> */}
 
       {/* 8. BRAND ARCHITECTURE & CERTIFICATIONS */}
       <BrandCarousel />

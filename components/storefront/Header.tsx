@@ -25,7 +25,7 @@ export function Header() {
 
   return (
     <>
-      {/* Top Notification Bar */}
+      {/* Top Notification Bar
       <div className="bg-[#143425] text-[#F9F6F0] text-xs py-2 px-4 border-b border-[#1C4834]">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export function Header() {
             </Link>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Header */}
       <header className="sticky top-0 z-40 bg-[#F9F6F0]/95 backdrop-blur-md border-b border-[#E8DED1]/80 transition-all">
