@@ -35,47 +35,72 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Categories Column */}
+          {/* Brand Collections Column */}
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-widest text-[#C89B3C] mb-4">
-              Categories
+              Brand Collections
             </h3>
             <ul className="space-y-2.5 text-sm text-stone-300">
-              {CATEGORIES.map((cat) => (
-                <li key={cat.id}>
-                  <Link
-                    href={`/category/${cat.slug}`}
-                    className="hover:text-white transition-colors"
-                  >
-                    {cat.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Brands Column */}
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-[#C89B3C] mb-4">
-              Brand Portfolio
-            </h3>
-            <ul className="space-y-2.5 text-sm text-stone-300">
-              {BRANDS.map((brand) => (
-                <li key={brand.id}>
-                  <Link
-                    href={`/brands/${brand.slug}`}
-                    className="hover:text-white transition-colors"
-                  >
-                    {brand.name}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link href="/brands/vrinda" className="hover:text-white transition-colors">
+                  Vrinda <span className="text-xs text-stone-400">• Tea Premixes</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/brands/sangam" className="hover:text-white transition-colors">
+                  Sangam <span className="text-xs text-stone-400">• Botanical Iced Teas</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/brands/urban-roast" className="hover:text-white transition-colors">
+                  Urban Roast <span className="text-xs text-stone-400">• Artisan Coffee</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/brands/cocojoy" className="hover:text-white transition-colors">
+                  CocoJoy <span className="text-xs text-stone-400">• Chocolate Drinks</span>
+                </Link>
+              </li>
               <li>
                 <Link
                   href="/shop"
                   className="text-[#C89B3C] hover:underline inline-flex items-center gap-1 text-xs font-medium pt-1"
                 >
                   View All Products <ArrowUpRight className="h-3 w-3" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Quick Links Column */}
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-[#C89B3C] mb-4">
+              Quick Links
+            </h3>
+            <ul className="space-y-2.5 text-sm text-stone-300">
+              <li>
+                <Link href="/about" className="hover:text-white transition-colors">
+                  About Heritage
+                </Link>
+              </li>
+              <li>
+                <Link href="/brands" className="hover:text-white transition-colors">
+                  Brand Architecture
+                </Link>
+              </li>
+              <li>
+                <Link href="/account/orders" className="hover:text-white transition-colors">
+                  Track Your Order
+                </Link>
+              </li>
+              <li>
+                <Link href="/wishlist" className="hover:text-white transition-colors">
+                  Saved Wishlist
+                </Link>
+              </li>
+              <li>
+                <Link href="/account" className="hover:text-white transition-colors">
+                  Customer Account
                 </Link>
               </li>
             </ul>

@@ -8,15 +8,24 @@ export const metadata: Metadata = {
   description: "Browse authentic Vrinda tea premixes, Sangam botanical iced teas, Urban Roast crafted coffees, and CocoJoy rich chocolate drinks.",
 };
 
-export default function ShopPage() {
+interface ShopPageProps {
+  searchParams?: Promise<{
+    category?: string;
+    brand?: string;
+    collection?: string;
+  }>;
+}
+
+export default async function ShopPage({ searchParams }: ShopPageProps) {
   const products = getProducts();
+  const params = searchParams ? await searchParams : {};
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-8">
       {/* Page Header */}
       <div>
         <span className="text-xs font-semibold uppercase tracking-widest text-[#A87E28]">
-          Catalog & Collections
+          Catalog &amp; Collections
         </span>
         <h1 className="text-3xl sm:text-4xl font-serif text-[#143425] tracking-tight font-normal mt-1">
           Explore Our Pure Beverage Portfolio
@@ -27,7 +36,12 @@ export default function ShopPage() {
       </div>
 
       {/* Catalog Client Interface */}
-      <ShopCatalogClient initialProducts={products} />
+      <ShopCatalogClient
+        initialProducts={products}
+        initialCategory={params.category}
+        initialBrand={params.brand}
+        initialCollection={params.collection}
+      />
     </div>
   );
 }

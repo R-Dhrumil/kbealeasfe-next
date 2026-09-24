@@ -11,18 +11,36 @@ interface ShopCatalogClientProps {
   initialProducts: Product[];
   initialCategory?: string;
   initialBrand?: string;
+  initialCollection?: string;
 }
 
 export function ShopCatalogClient({
   initialProducts,
   initialCategory = "",
   initialBrand = "",
+  initialCollection = "",
 }: ShopCatalogClientProps) {
+  // Normalize initial collection from category or brand
+  const startingCollection =
+    initialCollection ||
+    (initialBrand ? initialBrand.replace(/^brand-/, "") : "") ||
+    (initialCategory === "tea-premixes" || initialCategory === "cat-tea-premixes"
+      ? "vrinda"
+      : initialCategory === "iced-teas" || initialCategory === "cat-iced-teas"
+      ? "sangam"
+      : initialCategory === "artisan-coffee" || initialCategory === "cat-artisan-coffee"
+      ? "urban-roast"
+      : initialCategory === "chocolate-drinks" || initialCategory === "cat-chocolate-drinks" || initialCategory === "plant-based-specialties"
+      ? "cocojoy"
+      : "");
+
   const [filters, setFilters] = useState<FilterState>({
-    category: initialCategory,
-    brand: initialBrand,
+    collection: startingCollection,
+    serveStyle: "",
     priceRange: "",
     inStockOnly: false,
+    category: initialCategory,
+    brand: initialBrand,
   });
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,21 +64,47 @@ export function ShopCatalogClient({
       );
     }
 
-    // Category filter
-    if (filters.category) {
+    // Unified Collection filter
+    const activeCol =
+      filters.collection ||
+      (filters.brand ? filters.brand.replace(/^brand-/, "") : "") ||
+      (filters.category === "tea-premixes" || filters.category === "cat-tea-premixes"
+        ? "vrinda"
+        : filters.category === "iced-teas" || filters.category === "cat-iced-teas"
+        ? "sangam"
+        : filters.category === "artisan-coffee" || filters.category === "cat-artisan-coffee"
+        ? "urban-roast"
+        : filters.category === "chocolate-drinks" || filters.category === "cat-chocolate-drinks" || filters.category === "plant-based-specialties"
+        ? "cocojoy"
+        : "");
+
+    if (activeCol) {
       result = result.filter(
         (p) =>
-          p.categoryId === `cat-${filters.category}` ||
-          p.categoryName.toLowerCase().replace(/\s+/g, "-") === filters.category
+          p.brandId.includes(activeCol) ||
+          p.brandName.toLowerCase().replace(/\s+/g, "-").includes(activeCol) ||
+          (activeCol === "vrinda" && (p.categoryId.includes("tea-premixes") || p.categoryName.toLowerCase().includes("tea"))) ||
+          (activeCol === "sangam" && (p.categoryId.includes("iced-teas") || p.categoryName.toLowerCase().includes("iced"))) ||
+          (activeCol === "urban-roast" && (p.categoryId.includes("coffee") || p.categoryName.toLowerCase().includes("coffee"))) ||
+          (activeCol === "cocojoy" && (p.categoryId.includes("chocolate") || p.categoryName.toLowerCase().includes("chocolate") || p.categoryId.includes("plant-based")))
       );
     }
 
-    // Brand filter
-    if (filters.brand) {
+    // Serving style filter
+    if (filters.serveStyle === "hot") {
       result = result.filter(
         (p) =>
-          p.brandId === `brand-${filters.brand}` ||
-          p.brandName.toLowerCase().replace(/\s+/g, "-") === filters.brand
+          p.brandId === "brand-vrinda" ||
+          p.brandId === "brand-urban-roast" ||
+          p.slug.includes("hot-chocolate")
+      );
+    } else if (filters.serveStyle === "cold") {
+      result = result.filter(
+        (p) =>
+          p.brandId === "brand-sangam" ||
+          p.slug.includes("cold-cocoa") ||
+          p.tagline.toLowerCase().includes("chill") ||
+          p.name.toLowerCase().includes("iced")
       );
     }
 
@@ -96,10 +140,12 @@ export function ShopCatalogClient({
 
   const handleResetFilters = () => {
     setFilters({
-      category: "",
-      brand: "",
+      collection: "",
+      serveStyle: "",
       priceRange: "",
       inStockOnly: false,
+      category: "",
+      brand: "",
     });
     setSearchQuery("");
   };
@@ -172,7 +218,7 @@ export function ShopCatalogClient({
             Showing <span className="font-semibold text-stone-900">{filteredProducts.length}</span>{" "}
             beverages
           </p>
-          {(filters.category || filters.brand || filters.priceRange || searchQuery) && (
+          {(filters.collection || filters.category || filters.brand || filters.serveStyle || filters.priceRange || searchQuery) && (
             <button
               type="button"
               onClick={handleResetFilters}

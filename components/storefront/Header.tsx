@@ -3,57 +3,27 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
+  Menu,
+  X,
   ShoppingBag,
   Heart,
   Search,
-  Menu,
-  X,
   ChevronDown,
-  Sparkles,
   ShieldAlert,
+  ArrowRight,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { CATEGORIES } from "@/data/categories";
-import { BRANDS } from "@/data/brands";
+import { BRAND_COLLECTIONS } from "@/data/collections";
 
 export function Header() {
   const { openCart, summary } = useCart();
   const { wishlistCount } = useWishlist();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [collectionsOpen, setCollectionsOpen] = useState(false);
 
   return (
     <>
-      {/* Top Notification Bar
-      <div className="bg-[#143425] text-[#F9F6F0] text-xs py-2 px-4 border-b border-[#1C4834]">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-flex items-center gap-1 text-[#C89B3C] font-semibold">
-              <Sparkles className="h-3 w-3" /> Pure Taste, Every Time.
-            </span>
-            <span className="text-stone-300">
-              Free nationwide delivery on orders over ₹499
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs font-medium">
-            <Link
-              href="/admin"
-              className="text-[#C89B3C] hover:text-[#D6AD53] flex items-center gap-1 transition-colors"
-            >
-              <ShieldAlert className="h-3.5 w-3.5" /> Admin Panel UI
-            </Link>
-            <Link
-              href="/contact"
-              className="hidden md:inline hover:text-[#C89B3C] transition-colors"
-            >
-              B2B & Wholesale
-            </Link>
-          </div>
-        </div>
-      </div> */}
-
       {/* Main Header */}
       <header className="sticky top-0 z-40 bg-[#F9F6F0]/95 backdrop-blur-md border-b border-[#E8DED1]/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -91,59 +61,70 @@ export function Header() {
               Shop All
             </Link>
 
-            {/* Categories Dropdown */}
+            {/* Unified Collections Dropdown */}
             <div
               className="relative group py-2"
-              onMouseEnter={() => setCategoriesOpen(true)}
-              onMouseLeave={() => setCategoriesOpen(false)}
+              onMouseEnter={() => setCollectionsOpen(true)}
+              onMouseLeave={() => setCollectionsOpen(false)}
             >
               <button
                 type="button"
                 className="flex items-center gap-1 hover:text-[#143425] transition-colors"
               >
-                <span>Categories</span>
+                <span>Collections</span>
                 <ChevronDown className="h-3.5 w-3.5 text-stone-400 group-hover:rotate-180 transition-transform duration-200" />
               </button>
 
-              {categoriesOpen && (
-                <div className="absolute top-full -left-4 w-72 bg-white rounded-2xl shadow-xl border border-stone-100 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              {collectionsOpen && (
+                <div className="absolute top-full -left-4 w-80 bg-white rounded-2xl shadow-xl border border-stone-100 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-stone-400 border-b border-stone-100">
-                    The 4 Primary Collections
+                    Our 4 Dedicated Collections
                   </div>
-                  <div className="pt-1.5 space-y-0.5">
-                    {CATEGORIES.map((cat) => (
+                  <div className="pt-1.5 space-y-1">
+                    {BRAND_COLLECTIONS.map((col) => (
                       <Link
-                        key={cat.id}
-                        href={`/category/${cat.slug}`}
-                        onClick={() => setCategoriesOpen(false)}
+                        key={col.id}
+                        href={`/brands/${col.brandSlug}`}
+                        onClick={() => setCollectionsOpen(false)}
                         className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#F9F6F0] transition-colors group/item"
                       >
                         <div>
-                          <p className="text-sm font-medium text-stone-900 group-hover/item:text-[#143425]">
-                            {cat.name}
+                          <p className="text-sm font-semibold text-stone-900 group-hover/item:text-[#143425]">
+                            {col.brandName}{" "}
+                            <span className="text-xs font-normal text-stone-500">
+                              • {col.categoryName}
+                            </span>
                           </p>
-                          <p className="text-xs text-stone-500 line-clamp-1">
-                            {cat.tagline}
+                          <p className="text-[11px] text-stone-400 line-clamp-1">
+                            {col.tagline}
                           </p>
                         </div>
                         <span className="text-[11px] font-mono text-stone-400">
-                          {cat.productCount}
+                          {col.productCount}
                         </span>
                       </Link>
                     ))}
                   </div>
+
+                  <div className="mt-2 pt-2 border-t border-stone-100 px-3 py-1 flex items-center justify-between">
+                    <Link
+                      href="/brands"
+                      onClick={() => setCollectionsOpen(false)}
+                      className="text-xs font-semibold text-[#143425] hover:text-[#C89B3C] inline-flex items-center gap-1 transition-colors"
+                    >
+                      <span>Brand Heritage</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                    <Link
+                      href="/shop"
+                      onClick={() => setCollectionsOpen(false)}
+                      className="text-xs text-stone-500 hover:text-stone-900"
+                    >
+                      View All
+                    </Link>
+                  </div>
                 </div>
               )}
-            </div>
-
-            {/* Brands Dropdown */}
-            <div className="relative group py-2">
-              <Link
-                href="/brands"
-                className="flex items-center gap-1 hover:text-[#143425] transition-colors"
-              >
-                <span>Brands</span>
-              </Link>
             </div>
 
             <Link
@@ -178,7 +159,7 @@ export function Header() {
             >
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
-                <span className="absolute 1 top-1.5 right-1.5 h-4 w-4 bg-[#C89B3C] text-stone-950 font-bold text-[10px] rounded-full flex items-center justify-center">
+                <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-[#C89B3C] text-stone-950 font-bold text-[10px] rounded-full flex items-center justify-center">
                   {wishlistCount}
                 </span>
               )}
@@ -246,35 +227,23 @@ export function Header() {
 
                 <div className="pt-2 border-t border-[#E8DED1]">
                   <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-2">
-                    Four Categories
+                    Brand Collections
                   </p>
                   <div className="space-y-2 pl-2">
-                    {CATEGORIES.map((cat) => (
+                    {BRAND_COLLECTIONS.map((col) => (
                       <Link
-                        key={cat.id}
-                        href={`/category/${cat.slug}`}
+                        key={col.id}
+                        href={`/brands/${col.brandSlug}`}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block text-sm text-stone-700 hover:text-[#143425]"
+                        className="flex items-center justify-between text-sm text-stone-700 hover:text-[#143425] py-1"
                       >
-                        {cat.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-[#E8DED1]">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-2">
-                    Brand Portfolio
-                  </p>
-                  <div className="space-y-2 pl-2">
-                    {BRANDS.map((brand) => (
-                      <Link
-                        key={brand.id}
-                        href={`/brands/${brand.slug}`}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block text-sm text-stone-700 hover:text-[#143425]"
-                      >
-                        {brand.name}
+                        <span className="flex items-center gap-1.5">
+                          <span className="font-medium text-stone-900">{col.brandName}</span>
+                          <span className="text-xs text-stone-500">({col.categoryName})</span>
+                        </span>
+                        <span className="text-xs font-mono text-stone-400">
+                          {col.productCount}
+                        </span>
                       </Link>
                     ))}
                   </div>
@@ -293,7 +262,7 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="block text-sm font-medium text-stone-800"
                   >
-                    Contact & Distribution
+                    Contact &amp; Distribution
                   </Link>
                   <Link
                     href="/account"
@@ -307,7 +276,7 @@ export function Header() {
             </div>
 
             <div className="pt-6 border-t border-[#E8DED1] text-xs text-stone-500 space-y-2">
-              <p>Customer Support: support@kbbeverage.com</p>
+              <p>Customer Support: care@kbbeverage.com</p>
               <Link
                 href="/admin"
                 onClick={() => setMobileMenuOpen(false)}

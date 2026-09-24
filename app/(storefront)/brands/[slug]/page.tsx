@@ -60,7 +60,7 @@ export default async function BrandDetailPage({ params }: BrandPageProps) {
           </Link>
 
           <div className="flex flex-col md:flex-row md:items-center gap-6">
-            <div className="h-20 w-20 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-4xl shrink-0">
+            <div className="h-20 w-20 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center font-serif font-bold text-2xl tracking-widest text-[#F9F6F0] shrink-0">
               {brand.logo}
             </div>
 

@@ -1,15 +1,16 @@
 "use client";
 
 import React from "react";
-import { CATEGORIES } from "@/data/categories";
-import { BRANDS } from "@/data/brands";
+import { BRAND_COLLECTIONS } from "@/data/collections";
 import { X, RotateCcw } from "lucide-react";
 
 export interface FilterState {
-  category: string;
-  brand: string;
+  collection: string;
+  serveStyle: string;
   priceRange: string;
   inStockOnly: boolean;
+  category?: string;
+  brand?: string;
 }
 
 export interface FilterPanelProps {
@@ -27,17 +28,33 @@ export function FilterPanel({
   isMobileDrawer = false,
   onCloseMobile,
 }: FilterPanelProps) {
-  const handleCategoryChange = (slug: string) => {
+  // Active collection ID: checks direct collection, or matches legacy category/brand
+  const activeCollection =
+    filters.collection ||
+    (filters.brand ? filters.brand.replace(/^brand-/, "") : "") ||
+    (filters.category === "tea-premixes"
+      ? "vrinda"
+      : filters.category === "iced-teas"
+      ? "sangam"
+      : filters.category === "artisan-coffee"
+      ? "urban-roast"
+      : filters.category === "chocolate-drinks" || filters.category === "plant-based-specialties"
+      ? "cocojoy"
+      : "");
+
+  const handleCollectionChange = (id: string) => {
     onChange({
       ...filters,
-      category: filters.category === slug ? "" : slug,
+      collection: activeCollection === id ? "" : id,
+      category: "",
+      brand: "",
     });
   };
 
-  const handleBrandChange = (slug: string) => {
+  const handleServeStyleChange = (style: string) => {
     onChange({
       ...filters,
-      brand: filters.brand === slug ? "" : slug,
+      serveStyle: filters.serveStyle === style ? "" : style,
     });
   };
 
@@ -56,8 +73,8 @@ export function FilterPanel({
   };
 
   const hasActiveFilters =
-    Boolean(filters.category) ||
-    Boolean(filters.brand) ||
+    Boolean(activeCollection) ||
+    Boolean(filters.serveStyle) ||
     Boolean(filters.priceRange) ||
     filters.inStockOnly;
 
@@ -91,30 +108,45 @@ export function FilterPanel({
         </button>
       )}
 
-      {/* Category Filter */}
+      {/* Unified Brand Collections Filter */}
       <div className="space-y-3">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-[#143425]">
-          Four Categories
-        </h4>
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-[#143425]">
+            Brand Collections
+          </h4>
+          <span className="text-[10px] text-stone-400 font-medium">4 Lines</span>
+        </div>
+
         <div className="space-y-2">
-          {CATEGORIES.map((cat) => {
-            const isChecked = filters.category === cat.slug;
+          {BRAND_COLLECTIONS.map((col) => {
+            const isChecked = activeCollection === col.id;
             return (
               <label
-                key={cat.id}
-                className="flex items-center justify-between text-sm cursor-pointer group select-none"
+                key={col.id}
+                className={`flex items-center justify-between p-2 rounded-xl border text-sm cursor-pointer select-none transition-all ${
+                  isChecked
+                    ? "bg-[#143425]/5 border-[#143425]/30 shadow-2xs"
+                    : "border-transparent hover:bg-stone-50"
+                }`}
               >
-                <span className="flex items-center gap-2 text-stone-700 group-hover:text-stone-950">
+                <span className="flex items-center gap-2.5 text-stone-700">
                   <input
                     type="checkbox"
                     checked={isChecked}
-                    onChange={() => handleCategoryChange(cat.slug)}
+                    onChange={() => handleCollectionChange(col.id)}
                     className="h-4 w-4 rounded border-stone-300 text-[#143425] focus:ring-[#143425]"
                   />
-                  <span>{cat.name}</span>
+                  <div>
+                    <span className="font-semibold text-stone-900 block leading-tight">
+                      {col.brandName}
+                    </span>
+                    <span className="text-[11px] text-stone-500 block leading-tight">
+                      {col.categoryName}
+                    </span>
+                  </div>
                 </span>
-                <span className="text-xs font-mono text-stone-400">
-                  {cat.productCount}
+                <span className="text-xs font-mono text-stone-400 px-1.5 py-0.5 rounded-md bg-stone-100">
+                  {col.productCount}
                 </span>
               </label>
             );
@@ -122,34 +154,34 @@ export function FilterPanel({
         </div>
       </div>
 
-      {/* Brand Filter */}
+      {/* Serving Style Filter */}
       <div className="pt-4 border-t border-stone-200/80 space-y-3">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-[#143425]">
-          Brand Portfolio
+          Serving Temperature
         </h4>
-        <div className="space-y-2">
-          {BRANDS.map((brand) => {
-            const isChecked = filters.brand === brand.slug;
-            return (
-              <label
-                key={brand.id}
-                className="flex items-center justify-between text-sm cursor-pointer group select-none"
-              >
-                <span className="flex items-center gap-2 text-stone-700 group-hover:text-stone-950">
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => handleBrandChange(brand.slug)}
-                    className="h-4 w-4 rounded border-stone-300 text-[#143425] focus:ring-[#143425]"
-                  />
-                  <span>{brand.name}</span>
-                </span>
-                <span className="text-xs font-mono text-stone-400">
-                  {brand.productCount}
-                </span>
-              </label>
-            );
-          })}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => handleServeStyleChange("hot")}
+            className={`flex items-center justify-center py-2 px-3 rounded-xl border text-xs font-medium transition-all ${
+              filters.serveStyle === "hot"
+                ? "bg-[#143425] text-white border-[#143425]"
+                : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
+            }`}
+          >
+            Hot Brew
+          </button>
+          <button
+            type="button"
+            onClick={() => handleServeStyleChange("cold")}
+            className={`flex items-center justify-center py-2 px-3 rounded-xl border text-xs font-medium transition-all ${
+              filters.serveStyle === "cold"
+                ? "bg-[#143425] text-white border-[#143425]"
+                : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
+            }`}
+          >
+            Chilled / Iced
+          </button>
         </div>
       </div>
 

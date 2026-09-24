@@ -20,7 +20,7 @@ export function BrandCard({ brand, className }: BrandCardProps) {
     >
       <div>
         <div className="flex items-center justify-between mb-4">
-          <div className="h-12 w-12 rounded-xl bg-[#F2ECE1] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+          <div className="h-12 w-12 rounded-xl bg-[#F2ECE1] flex items-center justify-center font-serif font-bold text-sm text-[#143425] tracking-wider border border-stone-200/60">
             {brand.logo}
           </div>
           <span className="text-xs font-mono text-stone-400">
