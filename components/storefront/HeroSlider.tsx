@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, ShieldCheck, Clock, Award } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 export interface SlideItem {
   id: string;
@@ -19,11 +19,6 @@ export interface SlideItem {
   secondaryCtaHref: string;
   image: string;
   themeColor: string;
-  trustPill: {
-    icon: "ShieldCheck" | "Clock" | "Award";
-    title: string;
-    desc: string;
-  };
 }
 
 const HERO_SLIDES: SlideItem[] = [
@@ -42,11 +37,6 @@ const HERO_SLIDES: SlideItem[] = [
     secondaryCtaHref: "#categories",
     image: "/assets/hero/hero-vrinda-chai.png",
     themeColor: "#143425",
-    trustPill: {
-      icon: "ShieldCheck",
-      title: "KB Purity Pledge",
-      desc: "Zero chemical preservatives & multi-foil sealed",
-    },
   },
   {
     id: "slide-sangam",
@@ -63,11 +53,6 @@ const HERO_SLIDES: SlideItem[] = [
     secondaryCtaHref: "/shop",
     image: "/assets/hero/hero-sangam-iced-tea.png",
     themeColor: "#0E4D7A",
-    trustPill: {
-      icon: "Clock",
-      title: "Instant Chill",
-      desc: "Dissolves in cold water in 10 seconds",
-    },
   },
   {
     id: "slide-urban-roast",
@@ -84,11 +69,6 @@ const HERO_SLIDES: SlideItem[] = [
     secondaryCtaHref: "/about",
     image: "/assets/hero/hero-urban-roast.png",
     themeColor: "#1E2638",
-    trustPill: {
-      icon: "Award",
-      title: "Estate Certified",
-      desc: "100% Shade-grown Arabica from Western Ghats",
-    },
   },
 ];
 
@@ -218,23 +198,6 @@ export function HeroSlider() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover object-center transition-all duration-700 hover:scale-105"
                 />
-
-                {/* Floating Guarantee Badge Pill */}
-                <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:right-6 bg-white/95 backdrop-blur-md p-3.5 rounded-xl shadow-md border border-stone-200/80 flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-[#143425] text-[#C89B3C] flex items-center justify-center shrink-0">
-                    {slide.trustPill.icon === "ShieldCheck" && <ShieldCheck className="h-5 w-5" />}
-                    {slide.trustPill.icon === "Clock" && <Clock className="h-5 w-5" />}
-                    {slide.trustPill.icon === "Award" && <Award className="h-5 w-5" />}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#143425]">
-                      {slide.trustPill.title}
-                    </p>
-                    <p className="text-[11px] text-stone-500 leading-tight">
-                      {slide.trustPill.desc}
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
