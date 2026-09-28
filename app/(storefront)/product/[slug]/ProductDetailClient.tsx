@@ -64,7 +64,7 @@ export function ProductDetailClient({
           {/* Main Large Image */}
           <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-square w-full rounded-3xl bg-[#F7F4EE] border border-stone-200/80 overflow-hidden shadow-sm">
             <Image
-              src={(product.images && product.images.length > 0) ? (product.images[activeImageIndex] || product.images[0]) : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+              src={(product.images && product.images[0]) ? (product.images[activeImageIndex] || product.images[0]) : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
               alt={product.name}
               fill
               priority
@@ -88,9 +88,9 @@ export function ProductDetailClient({
           </div>
 
           {/* Thumbnails */}
-          {(product.images && product.images.length > 1) && (
+          {(product.images && product.images.filter(img => typeof img === 'string' && img.trim() !== "").length > 1) && (
             <div className="flex items-center gap-3">
-              {product.images.map((img, idx) => (
+              {product.images.filter(img => typeof img === 'string' && img.trim() !== "").map((img, idx) => (
                 <button
                   key={idx}
                   type="button"

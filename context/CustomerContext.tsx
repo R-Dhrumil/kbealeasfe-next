@@ -55,10 +55,10 @@ interface CustomerContextType {
   login: (email: string, password?: string) => Promise<boolean>;
   register: (data: { fullName: string; email: string; phone: string; password?: string }) => Promise<boolean>;
   logout: () => void;
-  updateProfile: (data: { fullName: string; email: string; phone: string }) => void;
-  addAddress: (address: Omit<CustomerAddress, "id">) => void;
-  deleteAddress: (id: string) => void;
-  setDefaultAddress: (id: string) => void;
+  updateProfile: (data: { fullName: string; email: string; phone: string }) => Promise<void>;
+  addAddress: (address: Omit<CustomerAddress, "id">) => Promise<void>;
+  deleteAddress: (id: string) => Promise<void>;
+  setDefaultAddress: (id: string) => Promise<void>;
   placeOrder: (input: PlaceOrderInput) => Promise<Order>;
   getOrderById: (id: string) => Order | undefined;
 }
@@ -148,6 +148,16 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
                 addresses: addresses
               });
               setIsLoggedIn(true);
+              
+              // Load Orders
+              try {
+                const fetchedOrders = await fetchApi("/account/orders");
+                if (Array.isArray(fetchedOrders) && fetchedOrders.length > 0) {
+                  setOrders(fetchedOrders);
+                }
+              } catch (err) {
+                console.error("Error fetching orders from server", err);
+              }
             } catch (err) {
               console.error("Error loading profile/addresses", err);
               // Fallback if profile fails but auth is valid
@@ -227,6 +237,15 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             addresses: []
           });
           setIsLoggedIn(true);
+
+          try {
+            const fetchedOrders = await fetchApi("/account/orders");
+            if (Array.isArray(fetchedOrders) && fetchedOrders.length > 0) {
+              setOrders(fetchedOrders);
+            }
+          } catch (err) {
+            console.error("Error fetching orders after login", err);
+          }
           return true;
         }
       }
@@ -292,44 +311,98 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
     syncCustomer(null, false);
   };
 
-  const updateProfile = (data: { fullName: string; email: string; phone: string }) => {
+  const updateProfile = async (data: { fullName: string; email: string; phone: string }) => {
     if (!customer) return;
-    const updated: CustomerProfile = {
-      ...customer,
-      fullName: data.fullName.trim(),
-      email: data.email.trim(),
-      phone: data.phone.trim(),
-    };
-    syncCustomer(updated, true);
-  };
-
-  const addAddress = (address: Omit<CustomerAddress, "id">) => {
-    if (!customer) return;
-    const newAddr: CustomerAddress = {
-      ...address,
-      id: `addr-${Date.now()}`,
-    };
-    let updatedAddrs = [...customer.addresses];
-    if (newAddr.isDefault) {
-      updatedAddrs = updatedAddrs.map((a) => ({ ...a, isDefault: false }));
+    try {
+      await fetchApi("/account/profile", {
+        method: "PUT",
+        body: JSON.stringify({
+          fullName: data.fullName.trim(),
+          phone: data.phone.trim(),
+        }),
+      });
+      const updated: CustomerProfile = {
+        ...customer,
+        fullName: data.fullName.trim(),
+        // email can't be updated in this endpoint
+        phone: data.phone.trim(),
+      };
+      syncCustomer(updated, true);
+    } catch (err) {
+      console.error("Failed to update profile", err);
+      throw err;
     }
-    updatedAddrs.push(newAddr);
-    syncCustomer({ ...customer, addresses: updatedAddrs }, true);
   };
 
-  const deleteAddress = (id: string) => {
+  const addAddress = async (address: Omit<CustomerAddress, "id">) => {
     if (!customer) return;
-    const updatedAddrs = customer.addresses.filter((a) => a.id !== id);
-    syncCustomer({ ...customer, addresses: updatedAddrs }, true);
+    try {
+      const created = await fetchApi("/account/addresses", {
+        method: "POST",
+        body: JSON.stringify({
+          recipientName: address.fullName,
+          phone: address.phone,
+          streetAddress: address.addressLine1,
+          city: address.city,
+          state: address.state,
+          postalCode: address.postalCode,
+          country: "India",
+          isDefaultShipping: address.isDefault,
+          isDefaultBilling: address.isDefault,
+        }),
+      });
+
+      const newAddr: CustomerAddress = {
+        ...address,
+        id: created.id,
+      };
+      
+      let updatedAddrs = [...customer.addresses];
+      if (newAddr.isDefault) {
+        updatedAddrs = updatedAddrs.map((a) => ({ ...a, isDefault: false }));
+      }
+      updatedAddrs.push(newAddr);
+      syncCustomer({ ...customer, addresses: updatedAddrs }, true);
+    } catch (err) {
+      console.error("Failed to add address", err);
+      throw err;
+    }
   };
 
-  const setDefaultAddress = (id: string) => {
+  const deleteAddress = async (id: string) => {
     if (!customer) return;
-    const updatedAddrs = customer.addresses.map((a) => ({
-      ...a,
-      isDefault: a.id === id,
-    }));
-    syncCustomer({ ...customer, addresses: updatedAddrs }, true);
+    try {
+      // Don't let users delete mock addresses from local storage if they are not in DB, but since we re-fetched them they should be real DB ids.
+      if (!id.startsWith("addr-")) {
+        await fetchApi(`/account/addresses/${id}`, {
+          method: "DELETE",
+        });
+      }
+      const updatedAddrs = customer.addresses.filter((a) => a.id !== id);
+      syncCustomer({ ...customer, addresses: updatedAddrs }, true);
+    } catch (err) {
+      console.error("Failed to delete address", err);
+      throw err;
+    }
+  };
+
+  const setDefaultAddress = async (id: string) => {
+    if (!customer) return;
+    try {
+      if (!id.startsWith("addr-")) {
+        await fetchApi(`/account/addresses/${id}/set-default-shipping`, {
+          method: "PATCH",
+        });
+      }
+      const updatedAddrs = customer.addresses.map((a) => ({
+        ...a,
+        isDefault: a.id === id,
+      }));
+      syncCustomer({ ...customer, addresses: updatedAddrs }, true);
+    } catch (err) {
+      console.error("Failed to set default address", err);
+      throw err;
+    }
   };
 
   const placeOrder = async (input: PlaceOrderInput): Promise<Order> => {

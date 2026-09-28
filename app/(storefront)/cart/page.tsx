@@ -90,7 +90,7 @@ export default function CartPage() {
                 <div className="flex items-center gap-4">
                   <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-[#F7F4EE] overflow-hidden shrink-0 border border-stone-100">
                     <Image
-                      src={item.product.images[0]}
+                      src={(item.product.images && item.product.images[0]) ? item.product.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
                       alt={item.product.name}
                       fill
                       className="object-cover"

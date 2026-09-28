@@ -107,7 +107,7 @@ export function CartDrawer() {
               >
                 <div className="relative h-20 w-20 rounded-xl bg-stone-100 overflow-hidden shrink-0">
                   <Image
-                    src={item.product.images[0]}
+                    src={(item.product.images && item.product.images[0]) ? item.product.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
                     alt={item.product.name}
                     fill
                     className="object-cover"

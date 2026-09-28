@@ -72,7 +72,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         className="relative aspect-square w-full rounded-xl bg-[#F7F4EE] overflow-hidden flex items-center justify-center mb-3.5"
       >
         <Image
-          src={(product.images && product.images.length > 0) ? product.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+          src={(product.images && product.images[0]) ? product.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
           alt={product.name}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

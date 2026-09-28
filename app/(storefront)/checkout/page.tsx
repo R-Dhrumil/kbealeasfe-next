@@ -495,7 +495,7 @@ export default function CheckoutPage() {
                     <div className="flex items-center gap-2.5">
                       <div className="relative h-12 w-12 rounded-lg bg-stone-100 overflow-hidden shrink-0">
                         <Image
-                          src={item.product.images[0]}
+                          src={(item.product.images && item.product.images[0]) ? item.product.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
                           alt=""
                           fill
                           className="object-cover"
