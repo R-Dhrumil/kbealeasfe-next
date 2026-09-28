@@ -171,7 +171,7 @@ export function Header() {
               onMouseLeave={() => setAccountOpen(false)}
             >
               <Link
-                href="/account"
+                href={customer?.memberTier === "Admin" ? "/admin" : "/account"}
                 aria-label="Customer Account"
                 className="flex items-center gap-1.5 p-2 text-stone-700 hover:text-[#143425] hover:bg-stone-200/50 rounded-lg transition-colors group"
               >
@@ -199,7 +199,7 @@ export function Header() {
 
                       <div className="py-1">
                         <Link
-                          href="/account"
+                          href={customer?.memberTier === "Admin" ? "/admin" : "/account"}
                           onClick={() => setAccountOpen(false)}
                           className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-[#F9F6F0] rounded-xl transition-colors"
                         >
@@ -319,7 +319,7 @@ export function Header() {
                       </div>
                     </div>
                     <Link
-                      href="/account"
+                      href={customer?.memberTier === "Admin" ? "/admin" : "/account"}
                       onClick={() => setMobileMenuOpen(false)}
                       className="text-[11px] font-semibold text-[#143425] hover:underline"
                     >
@@ -383,7 +383,7 @@ export function Header() {
                     <span className="font-mono text-xs text-stone-400">({orders.length})</span>
                   </Link>
                   <Link
-                    href="/account"
+                    href={customer?.memberTier === "Admin" ? "/admin" : "/account"}
                     onClick={() => setMobileMenuOpen(false)}
                     className="block text-sm font-medium text-stone-800"
                   >

@@ -5,11 +5,40 @@ import { INVENTORY } from "@/data/inventory";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Search, AlertTriangle, CheckCircle2, RotateCw } from "lucide-react";
+import { fetchApi } from "@/lib/api";
 
 export default function AdminInventoryPage() {
-  const [items, setItems] = useState(INVENTORY);
+  const [items, setItems] = useState<any[]>(INVENTORY);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  React.useEffect(() => {
+    async function loadInventory() {
+      try {
+        const data = await fetchApi("/inventory?pageSize=100");
+        if (data && data.items && Array.isArray(data.items)) {
+          // Map backend InventoryDto to the frontend's expected format
+          const mappedItems = data.items.map((i: any) => ({
+            id: i.id, // using inventory Id for list mapping
+            variantId: i.productVariantId,
+            productId: i.productId,
+            productName: i.productName,
+            sku: i.variantSKU,
+            brandName: i.brandName,
+            categoryName: i.categoryName,
+            warehouseLocation: i.warehouseLocation || "Main Warehouse",
+            currentStock: i.availableQuantity,
+            bufferThreshold: i.lowStockThreshold,
+            status: i.isOutOfStock ? "Out of Stock" : (i.isLowStock ? "Low Stock" : "In Stock"),
+          }));
+          setItems(mappedItems);
+        }
+      } catch (err) {
+        console.error("Failed to load inventory", err);
+      }
+    }
+    loadInventory();
+  }, []);
 
   const filteredItems = items.filter((item) => {
     const matchSearch =
@@ -21,12 +50,42 @@ export default function AdminInventoryPage() {
     return matchSearch && matchStatus;
   });
 
-  const handleRestock = (id: string) => {
-    setItems((prev) =>
-      prev.map((i) =>
-        i.id === id ? { ...i, currentStock: i.currentStock + 50, status: "In Stock" } : i
-      )
-    );
+  const handleRestock = async (variantId: string) => {
+    // If it's a mock string ID from INVENTORY, just do local state update
+    if (!variantId || variantId.startsWith("prod-")) {
+      setItems((prev) =>
+        prev.map((i) =>
+          i.id === variantId ? { ...i, currentStock: i.currentStock + 50, status: "In Stock" } : i
+        )
+      );
+      return;
+    }
+
+    try {
+      const res = await fetchApi(`/inventory/${variantId}/adjust`, {
+        method: "PUT",
+        body: JSON.stringify({
+          adjustmentAmount: 50,
+          reason: "Quick Restock from Admin Dashboard"
+        }),
+      });
+      if (res && res.id) {
+        setItems((prev) =>
+          prev.map((i) =>
+            i.variantId === variantId
+              ? {
+                  ...i,
+                  currentStock: res.availableQuantity,
+                  status: res.isOutOfStock ? "Out of Stock" : (res.isLowStock ? "Low Stock" : "In Stock"),
+                }
+              : i
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Failed to restock", err);
+      alert("Failed to restock inventory.");
+    }
   };
 
   const healthyCount = items.filter((i) => i.status === "In Stock").length;
@@ -178,7 +237,7 @@ export default function AdminInventoryPage() {
                   <td className="py-3.5 px-4 text-right">
                     <button
                       type="button"
-                      onClick={() => handleRestock(item.id)}
+                      onClick={() => handleRestock(item.variantId || item.id)}
                       className="inline-flex items-center gap-1 text-xs font-semibold text-[#143425] hover:text-[#C89B3C] bg-stone-100 hover:bg-stone-200 px-2.5 py-1 rounded-md transition-colors"
                     >
                       <RotateCw className="h-3 w-3" />

@@ -16,6 +16,7 @@ import { Product } from "@/types/product";
 import { formatPrice } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { fetchApi } from "@/lib/api";
 
 export function ProductsAdminClient({
   initialProducts,
@@ -41,8 +42,16 @@ export function ProductsAdminClient({
     });
   }, [products, search, selectedBrand, selectedCategory]);
 
-  const handleDeleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      if (!id.startsWith("prod-")) {
+        await fetchApi(`/catalog/products/${id}`, { method: "DELETE" });
+      }
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error("Failed to delete product", err);
+      alert("Failed to delete product. Please ensure you are logged in as admin.");
+    }
     setActiveMenuId(null);
   };
 

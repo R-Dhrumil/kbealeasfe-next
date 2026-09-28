@@ -52,7 +52,7 @@ interface CustomerContextType {
   isLoggedIn: boolean;
   isLoaded: boolean;
   orders: Order[];
-  login: (email: string, password?: string) => Promise<boolean>;
+  login: (email: string, password?: string) => Promise<string | boolean>;
   register: (data: { fullName: string; email: string; phone: string; password?: string }) => Promise<boolean>;
   logout: () => void;
   updateProfile: (data: { fullName: string; email: string; phone: string }) => Promise<void>;
@@ -209,7 +209,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (email: string, password?: string): Promise<boolean> => {
+  const login = async (email: string, password?: string): Promise<string | boolean> => {
     if (!password) {
       // For demo fallback if needed, but we should always have password now
       password = "Password@123"; 
@@ -232,7 +232,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             fullName: meData.fullName,
             email: meData.email,
             phone: meData.phone || "",
-            memberTier: "KB Member",
+            memberTier: meData.role === "Admin" ? "Admin" : "KB Member",
             joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
             addresses: []
           });
@@ -246,7 +246,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
           } catch (err) {
             console.error("Error fetching orders after login", err);
           }
-          return true;
+          return meData.role || true;
         }
       }
       return false;

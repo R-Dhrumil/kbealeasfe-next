@@ -4,9 +4,12 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, CheckCircle2, Plus, Trash2 } from "lucide-react";
-import { CATEGORIES } from "@/data/categories";
-import { BRANDS } from "@/data/brands";
+import { CATEGORIES as MOCK_CATEGORIES } from "@/data/categories";
+import { BRANDS as MOCK_BRANDS } from "@/data/brands";
 import { Button } from "@/components/ui/Button";
+import { fetchApi } from "@/lib/api";
+import { Brand } from "@/types/brand";
+import { Category } from "@/types/category";
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -29,6 +32,32 @@ export default function AddProductPage() {
     "Stir gently for 10 seconds and enjoy.",
   ]);
   const [isSaved, setIsSaved] = useState(false);
+  
+  const [brands, setBrands] = useState<Brand[]>(MOCK_BRANDS);
+  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
+
+  React.useEffect(() => {
+    async function loadData() {
+      try {
+        const [brandsData, catsData] = await Promise.all([
+          fetchApi("/catalog/brands"),
+          fetchApi("/catalog/categories")
+        ]);
+        if (Array.isArray(brandsData)) setBrands(brandsData);
+        if (Array.isArray(catsData)) setCategories(catsData);
+        
+        if (Array.isArray(brandsData) && brandsData.length > 0) {
+          setBrandId(brandsData[0].id);
+        }
+        if (Array.isArray(catsData) && catsData.length > 0) {
+          setCategoryId(catsData[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to load reference data", err);
+      }
+    }
+    loadData();
+  }, []);
 
   const handleAddStep = () => {
     setPrepSteps([...prepSteps, ""]);
@@ -44,12 +73,38 @@ export default function AddProductPage() {
     setPrepSteps(prepSteps.filter((_, idx) => idx !== index));
   };
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaved(true);
-    setTimeout(() => {
-      router.push("/admin/products");
-    }, 1000);
+    try {
+      await fetchApi("/catalog/products", {
+        method: "POST",
+        body: JSON.stringify({
+          name: name,
+          slug: sku.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+          brandId: brandId,
+          categoryId: categoryId,
+          tagline: tagline,
+          shortDescription: description,
+          basePrice: parseFloat(price),
+          costPrice: null,
+          sku: sku,
+          isFeatured: false,
+          isBestseller: false,
+          isActive: true,
+          displayOrder: 0,
+          variants: [],
+          images: [],
+          // Mock some additional detail info using FullDescription as a JSON payload for now if needed
+        }),
+      });
+      setIsSaved(true);
+      setTimeout(() => {
+        router.push("/admin/products");
+      }, 1000);
+    } catch (err) {
+      console.error("Failed to save product", err);
+      alert("Failed to save product. Check console.");
+    }
   };
 
   return (
@@ -127,7 +182,7 @@ export default function AddProductPage() {
                 onChange={(e) => setBrandId(e.target.value)}
                 className="w-full h-10 px-3 rounded-lg border border-stone-300 text-xs bg-white focus:ring-1 focus:ring-[#143425]"
               >
-                {BRANDS.map((b) => (
+                {brands.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
                   </option>
@@ -144,7 +199,7 @@ export default function AddProductPage() {
                 onChange={(e) => setCategoryId(e.target.value)}
                 className="w-full h-10 px-3 rounded-lg border border-stone-300 text-xs bg-white focus:ring-1 focus:ring-[#143425]"
               >
-                {CATEGORIES.map((c) => (
+                {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>

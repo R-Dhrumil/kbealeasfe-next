@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { HERO_CONTENT } from "@/data/homepage";
 import { Button } from "@/components/ui/Button";
 import { CheckCircle2, Sparkles, Layers, Sliders, LayoutTemplate } from "lucide-react";
+import { fetchApi } from "@/lib/api";
 
 export default function AdminContentPage() {
   const [heroBadge, setHeroBadge] = useState(HERO_CONTENT.badgeText);
@@ -15,10 +16,27 @@ export default function AdminContentPage() {
   );
   const [saved, setSaved] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    try {
+      await fetchApi("/catalog/banners", {
+        method: "POST",
+        body: JSON.stringify({
+          title: heroTitle,
+          subtitle: heroDesc,
+          badgeText: heroBadge,
+          imageUrl: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80",
+          linkUrl: "/shop",
+          placement: "HomeHero",
+          isActive: true
+        }),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      console.error("Failed to save content", err);
+      alert("Failed to save banner content.");
+    }
   };
 
   return (

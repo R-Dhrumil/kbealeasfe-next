@@ -76,8 +76,12 @@ function LoginFormContent() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      router.push(redirectUrl);
+      const role = await login(email, password);
+      if (role === "Admin") {
+        router.push("/admin");
+      } else {
+        router.push(redirectUrl);
+      }
     } catch {
       setError("Failed to sign in. Please verify your credentials.");
       setIsLoading(false);
@@ -104,8 +108,12 @@ function LoginFormContent() {
 
   const handleDemoLogin = async () => {
     setIsLoading(true);
-    await login("aarav.sharma@example.com");
-    router.push(redirectUrl);
+    const role = await login("aarav.sharma@example.com");
+    if (role === "Admin") {
+      router.push("/admin");
+    } else {
+      router.push(redirectUrl);
+    }
   };
 
   return (
