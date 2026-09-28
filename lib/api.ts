@@ -1,0 +1,37 @@
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5153/api";
+
+export async function fetchApi(endpoint: string, options: RequestInit = {}) {
+  const token = typeof window !== "undefined" ? localStorage.getItem("kb_auth_token") : null;
+  
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string> || {}),
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    let errorMessage = "An error occurred";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
+      // Ignore JSON parse error if response is not JSON
+    }
+    throw new Error(errorMessage);
+  }
+
+  // Some endpoints like logout return 200 OK with no body or empty json, handling it
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Order, OrderItem, ShippingAddress, PaymentMethod } from "@/types/order";
 import { ORDERS as SEED_ORDERS } from "@/data/orders";
+import { fetchApi } from "@/lib/api";
 
 export interface CustomerAddress {
   id: string;
@@ -66,7 +67,7 @@ const CustomerContext = createContext<CustomerContextType | undefined>(undefined
 
 const CUSTOMER_STORAGE_KEY = "kb_customer_profile";
 const ORDERS_STORAGE_KEY = "kb_customer_orders";
-const AUTH_STATE_KEY = "kb_customer_is_logged_in";
+const AUTH_TOKEN_KEY = "kb_auth_token";
 
 const DEFAULT_DEMO_CUSTOMER: CustomerProfile = {
   id: "cust-demo-1",
@@ -107,35 +108,74 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
 
   // Load state from localStorage on mount
   useEffect(() => {
-    try {
-      const savedAuth = localStorage.getItem(AUTH_STATE_KEY);
-      const savedCustomer = localStorage.getItem(CUSTOMER_STORAGE_KEY);
-      const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
-
-      if (savedOrders) {
-        const parsed = JSON.parse(savedOrders);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setOrders(parsed);
+    async function loadUser() {
+      const token = localStorage.getItem(AUTH_TOKEN_KEY);
+      
+      try {
+        const savedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
+        if (savedOrders) {
+          const parsed = JSON.parse(savedOrders);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setOrders(parsed);
+          }
         }
-      }
 
-      if (savedCustomer) {
-        setCustomer(JSON.parse(savedCustomer));
-        setIsLoggedIn(savedAuth === "true");
-      } else {
-        // Pre-initialize demo account so the user can test account features right away
-        setCustomer(DEFAULT_DEMO_CUSTOMER);
-        setIsLoggedIn(true);
-        localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(DEFAULT_DEMO_CUSTOMER));
-        localStorage.setItem(AUTH_STATE_KEY, "true");
+        if (token) {
+          // Verify token and load user
+          const meData = await fetchApi("/auth/me");
+          if (meData) {
+            // Can also fetch /account/profile and /account/addresses here
+            try {
+              const addressesData = await fetchApi("/account/addresses");
+              const addresses = Array.isArray(addressesData) ? addressesData.map(a => ({
+                id: a.id,
+                fullName: a.recipientName,
+                phone: a.phone,
+                addressLine1: a.streetAddress,
+                city: a.city,
+                state: a.state,
+                postalCode: a.postalCode,
+                isDefault: a.isDefaultShipping
+              })) : [];
+
+              setCustomer({
+                id: meData.id,
+                fullName: meData.fullName,
+                email: meData.email,
+                phone: meData.phone || "+91 00000 00000",
+                memberTier: meData.role === "Admin" ? "Admin" : "KB Member",
+                joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+                addresses: addresses
+              });
+              setIsLoggedIn(true);
+            } catch (err) {
+              console.error("Error loading profile/addresses", err);
+              // Fallback if profile fails but auth is valid
+              setCustomer({
+                id: meData.id,
+                fullName: meData.fullName,
+                email: meData.email,
+                phone: meData.phone || "",
+                memberTier: "KB Member",
+                joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+                addresses: []
+              });
+              setIsLoggedIn(true);
+            }
+          } else {
+            // Invalid token
+            localStorage.removeItem(AUTH_TOKEN_KEY);
+          }
+        }
+      } catch (err) {
+        console.error("Auth load error", err);
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+      } finally {
+        setIsLoaded(true);
       }
-    } catch {
-      // fallback
-      setCustomer(DEFAULT_DEMO_CUSTOMER);
-      setIsLoggedIn(true);
-    } finally {
-      setIsLoaded(true);
     }
+    
+    loadUser();
   }, []);
 
   // Sync customer profile
@@ -144,10 +184,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
     setIsLoggedIn(auth);
     if (updated) {
       localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(updated));
-      localStorage.setItem(AUTH_STATE_KEY, auth ? "true" : "false");
     } else {
       localStorage.removeItem(CUSTOMER_STORAGE_KEY);
-      localStorage.setItem(AUTH_STATE_KEY, "false");
     }
   };
 
@@ -161,22 +199,42 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (email: string, _password?: string): Promise<boolean> => {
-    const trimmed = email.trim().toLowerCase();
-    let profile = customer;
-    if (!profile || profile.email.toLowerCase() !== trimmed) {
-      profile = {
-        id: `cust-${Date.now()}`,
-        fullName: trimmed.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        email: trimmed,
-        phone: "+91 98200 00000",
-        memberTier: "KB Member",
-        joinedDate: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-        addresses: [],
-      };
+  const login = async (email: string, password?: string): Promise<boolean> => {
+    if (!password) {
+      // For demo fallback if needed, but we should always have password now
+      password = "Password@123"; 
     }
-    syncCustomer(profile, true);
-    return true;
+
+    try {
+      const res = await fetchApi("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ emailOrPhone: email, password })
+      });
+      
+      if (res && res.token) {
+        localStorage.setItem(AUTH_TOKEN_KEY, res.token);
+        
+        // Fetch user data
+        const meData = await fetchApi("/auth/me");
+        if (meData) {
+          setCustomer({
+            id: meData.id,
+            fullName: meData.fullName,
+            email: meData.email,
+            phone: meData.phone || "",
+            memberTier: "KB Member",
+            joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+            addresses: []
+          });
+          setIsLoggedIn(true);
+          return true;
+        }
+      }
+      return false;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   };
 
   const register = async (data: {
@@ -185,21 +243,53 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
     phone: string;
     password?: string;
   }): Promise<boolean> => {
-    const newProfile: CustomerProfile = {
-      id: `cust-${Date.now()}`,
-      fullName: data.fullName.trim(),
-      email: data.email.trim().toLowerCase(),
-      phone: data.phone.trim(),
-      memberTier: "KB Member",
-      joinedDate: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-      addresses: [],
-    };
-    syncCustomer(newProfile, true);
-    return true;
+    const password = data.password || "Password@123";
+    
+    try {
+      const res = await fetchApi("/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+          password: password,
+          confirmPassword: password
+        })
+      });
+      
+      if (res && res.token) {
+        localStorage.setItem(AUTH_TOKEN_KEY, res.token);
+        
+        const meData = await fetchApi("/auth/me");
+        if (meData) {
+          setCustomer({
+            id: meData.id,
+            fullName: meData.fullName,
+            email: meData.email,
+            phone: meData.phone || "",
+            memberTier: "KB Member",
+            joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+            addresses: []
+          });
+          setIsLoggedIn(true);
+          return true;
+        }
+      }
+      return false;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   };
 
-  const logout = () => {
-    syncCustomer(customer, false);
+  const logout = async () => {
+    try {
+      await fetchApi("/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    syncCustomer(null, false);
   };
 
   const updateProfile = (data: { fullName: string; email: string; phone: string }) => {

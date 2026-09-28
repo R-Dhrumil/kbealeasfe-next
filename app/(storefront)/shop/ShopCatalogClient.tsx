@@ -60,7 +60,7 @@ export function ShopCatalogClient({
           p.brandName.toLowerCase().includes(q) ||
           p.categoryName.toLowerCase().includes(q) ||
           p.tagline.toLowerCase().includes(q) ||
-          p.flavorNotes.some((fn) => fn.toLowerCase().includes(q))
+          (p.flavorNotes || []).some((fn) => fn.toLowerCase().includes(q))
       );
     }
 

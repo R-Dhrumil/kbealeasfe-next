@@ -17,7 +17,7 @@ interface ShopPageProps {
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
-  const products = getProducts();
+  const products = await getProducts();
   const params = searchParams ? await searchParams : {};
 
   return (

@@ -72,16 +72,16 @@ export function ProductCard({ product, className }: ProductCardProps) {
         className="relative aspect-square w-full rounded-xl bg-[#F7F4EE] overflow-hidden flex items-center justify-center mb-3.5"
       >
         <Image
-          src={product.images[0]}
+          src={(product.images && product.images.length > 0) ? product.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
           alt={product.name}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={cn(
             "object-cover transition-all duration-500 ease-out group-hover:scale-105",
-            product.images[1] && "group-hover:opacity-0"
+            (product.images && product.images[1]) && "group-hover:opacity-0"
           )}
         />
-        {product.images[1] && (
+        {(product.images && product.images[1]) && (
           <Image
             src={product.images[1]}
             alt={`${product.name} alternate view`}
@@ -120,7 +120,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
         {/* Flavor Notes Pills */}
         <div className="flex flex-wrap gap-1 mt-2.5 mb-3">
-          {product.flavorNotes.slice(0, 2).map((note, idx) => (
+          {(product.flavorNotes || []).slice(0, 2).map((note, idx) => (
             <span
               key={idx}
               className="text-[10px] bg-[#F2ECE1] text-[#6E4D38] px-1.5 py-0.5 rounded font-medium"

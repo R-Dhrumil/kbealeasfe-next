@@ -11,7 +11,7 @@ interface ProductPageProps {
 }
 
 export async function generateStaticParams() {
-  const products = getProducts();
+  const products = await getProducts();
   return products.map((p) => ({
     slug: p.slug,
   }));
@@ -21,7 +21,7 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     return { title: "Product Not Found | KB Beverage" };
@@ -35,13 +35,13 @@ export async function generateMetadata({
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();
   }
 
-  const relatedProducts = getProductsByCategory(product.categoryId)
+  const relatedProducts = (await getProductsByCategory(product.categoryId))
     .filter((p) => p.id !== product.id)
     .slice(0, 4);
 

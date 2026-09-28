@@ -19,8 +19,8 @@ export default function SearchPage() {
         p.brandName.toLowerCase().includes(q) ||
         p.categoryName.toLowerCase().includes(q) ||
         p.tagline.toLowerCase().includes(q) ||
-        p.flavorNotes.some((f) => f.toLowerCase().includes(q)) ||
-        p.details.ingredients.some((ing) => ing.toLowerCase().includes(q))
+        (p.flavorNotes || []).some((f) => f.toLowerCase().includes(q)) ||
+        (p.details?.ingredients || []).some((ing) => ing.toLowerCase().includes(q))
     );
   }, [query]);
 

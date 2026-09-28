@@ -1,4 +1,5 @@
 import { Product } from "@/types/product";
+import { fetchApi } from "@/lib/api";
 
 export const PRODUCTS: Product[] = [
   // VRINDA TEA PREMIXES
@@ -441,22 +442,47 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
-export function getProducts(): Product[] {
-  return PRODUCTS;
+export async function getProducts(): Promise<Product[]> {
+  try {
+    const data = await fetchApi("/catalog/products?pageSize=100");
+    return data?.items || PRODUCTS;
+  } catch (e) {
+    return PRODUCTS;
+  }
 }
 
-export function getProductBySlug(slug: string): Product | undefined {
-  return PRODUCTS.find((p) => p.slug === slug);
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  try {
+    const p = await fetchApi(`/catalog/products/${slug}`);
+    return p || PRODUCTS.find((p) => p.slug === slug);
+  } catch (e) {
+    return PRODUCTS.find((p) => p.slug === slug);
+  }
 }
 
-export function getProductsByCategory(categoryId: string): Product[] {
-  return PRODUCTS.filter((p) => p.categoryId === categoryId);
+export async function getProductsByCategory(categoryId: string): Promise<Product[]> {
+  try {
+    const data = await fetchApi(`/catalog/products?categoryId=${categoryId}&pageSize=100`);
+    return data?.items || PRODUCTS.filter((p) => p.categoryId === categoryId);
+  } catch (e) {
+    return PRODUCTS.filter((p) => p.categoryId === categoryId);
+  }
 }
 
-export function getProductsByBrand(brandId: string): Product[] {
-  return PRODUCTS.filter((p) => p.brandId === brandId);
+export async function getProductsByBrand(brandId: string): Promise<Product[]> {
+  try {
+    const data = await fetchApi(`/catalog/products?brandId=${brandId}&pageSize=100`);
+    return data?.items || PRODUCTS.filter((p) => p.brandId === brandId);
+  } catch (e) {
+    return PRODUCTS.filter((p) => p.brandId === brandId);
+  }
 }
 
-export function getFeaturedProducts(): Product[] {
-  return PRODUCTS.filter((p) => p.isFeatured || p.isBestSeller);
+export async function getFeaturedProducts(): Promise<Product[]> {
+  try {
+    const data = await fetchApi(`/catalog/featured`);
+    return data || PRODUCTS.filter((p) => p.isFeatured || p.isBestSeller);
+  } catch (e) {
+    return PRODUCTS.filter((p) => p.isFeatured || p.isBestSeller);
+  }
 }

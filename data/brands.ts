@@ -1,4 +1,5 @@
 import { Brand } from "@/types/brand";
+import { fetchApi } from "@/lib/api";
 
 export const BRANDS: Brand[] = [
   {
@@ -51,11 +52,22 @@ export const BRANDS: Brand[] = [
   },
 ];
 
-export function getBrands(): Brand[] {
-  return BRANDS;
+export async function getBrands(): Promise<Brand[]> {
+  try {
+    const data = await fetchApi("/catalog/brands");
+    return Array.isArray(data) ? data : BRANDS;
+  } catch (e) {
+    return BRANDS;
+  }
 }
 
-export function getBrandBySlug(slug: string): Brand | undefined {
+export async function getBrandBySlug(slug: string): Promise<Brand | undefined> {
+  try {
+    const brand = await fetchApi(`/catalog/brands/${slug}`);
+    if (brand && !brand.message) return brand;
+  } catch (e) {
+    // fallback
+  }
   if (slug === "coco-joy") {
     return BRANDS.find((b) => b.slug === "cocojoy");
   }

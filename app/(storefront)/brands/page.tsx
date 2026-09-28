@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   description: "Explore Vrinda tea premixes, Sangam botanical iced teas, Urban Roast coffees, and CocoJoy rich chocolate drinks.",
 };
 
-export default function BrandsPage() {
-  const brands = getBrands();
+export default async function BrandsPage() {
+  const brands = await getBrands();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 space-y-12">

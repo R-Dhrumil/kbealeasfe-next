@@ -64,7 +64,7 @@ export function ProductDetailClient({
           {/* Main Large Image */}
           <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-square w-full rounded-3xl bg-[#F7F4EE] border border-stone-200/80 overflow-hidden shadow-sm">
             <Image
-              src={product.images[activeImageIndex] || product.images[0]}
+              src={(product.images && product.images.length > 0) ? (product.images[activeImageIndex] || product.images[0]) : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
               alt={product.name}
               fill
               priority
@@ -88,7 +88,7 @@ export function ProductDetailClient({
           </div>
 
           {/* Thumbnails */}
-          {product.images.length > 1 && (
+          {(product.images && product.images.length > 1) && (
             <div className="flex items-center gap-3">
               {product.images.map((img, idx) => (
                 <button
@@ -168,7 +168,7 @@ export function ProductDetailClient({
               Sensory Flavor Profile
             </span>
             <div className="flex flex-wrap gap-2">
-              {product.flavorNotes.map((note, idx) => (
+              {(product.flavorNotes || []).map((note, idx) => (
                 <span
                   key={idx}
                   className="text-xs px-3 py-1 rounded-lg bg-white border border-stone-200 text-[#143425] font-medium"
@@ -186,7 +186,7 @@ export function ProductDetailClient({
             </span>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: product.details.netWeight, desc: "Standard Pouch" },
+                { label: product.details?.netWeight || "1 Kg", desc: "Standard Pouch" },
                 { label: "Twin Saver Pack", desc: "2 x Pouch (Save 10%)" },
               ].map((opt, idx) => (
                 <button
@@ -304,7 +304,7 @@ export function ProductDetailClient({
                 How to Brew the Perfect Cup
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                {product.details.preparationNotes.map((step, idx) => (
+                {(product.details?.preparationNotes || ["Add 1 scoop to hot/cold water."]).map((step, idx) => (
                   <div
                     key={idx}
                     className="p-4 rounded-2xl bg-stone-50 border border-stone-100 space-y-2"
@@ -330,7 +330,7 @@ export function ProductDetailClient({
                 Crafted with complete transparency. We never add synthetic caffeine boosters or artificial thickening gums.
               </p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-                {product.details.ingredients.map((ing, idx) => (
+                {(product.details?.ingredients || ["Natural Ingredients"]).map((ing, idx) => (
                   <li
                     key={idx}
                     className="flex items-center gap-2 text-xs sm:text-sm text-stone-800"
@@ -352,19 +352,19 @@ export function ProductDetailClient({
                 <div className="p-4 rounded-xl bg-stone-50">
                   <p className="text-stone-400 font-medium">Packaging Type</p>
                   <p className="font-semibold text-stone-900 mt-1">
-                    {product.details.packaging}
+                    {product.details?.packaging || "Standard Pouch"}
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-stone-50">
                   <p className="text-stone-400 font-medium">Shelf Life</p>
                   <p className="font-semibold text-stone-900 mt-1">
-                    {product.details.shelfLife}
+                    {product.details?.shelfLife || "12 Months"}
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-stone-50">
                   <p className="text-stone-400 font-medium">Storage Advice</p>
                   <p className="font-semibold text-stone-900 mt-1">
-                    {product.details.storageNotes}
+                    {product.details?.storageNotes || "Store in a cool, dry place."}
                   </p>
                 </div>
               </div>

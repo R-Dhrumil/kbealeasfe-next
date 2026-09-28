@@ -1,4 +1,5 @@
 import { Category } from "@/types/category";
+import { fetchApi } from "@/lib/api";
 
 export const CATEGORIES: Category[] = [
   {
@@ -47,11 +48,22 @@ export const CATEGORIES: Category[] = [
   },
 ];
 
-export function getCategories(): Category[] {
-  return CATEGORIES;
+export async function getCategories(): Promise<Category[]> {
+  try {
+    const data = await fetchApi("/catalog/categories");
+    return Array.isArray(data) ? data : CATEGORIES;
+  } catch (e) {
+    return CATEGORIES;
+  }
 }
 
-export function getCategoryBySlug(slug: string): Category | undefined {
+export async function getCategoryBySlug(slug: string): Promise<Category | undefined> {
+  try {
+    const cat = await fetchApi(`/catalog/categories/${slug}`);
+    if (cat && !cat.message) return cat;
+  } catch (e) {
+    // fallback
+  }
   if (slug === "plant-based-specialties" || slug === "chocolate") {
     return CATEGORIES.find((c) => c.slug === "chocolate-drinks");
   }

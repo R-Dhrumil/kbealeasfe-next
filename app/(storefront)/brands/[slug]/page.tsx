@@ -12,7 +12,7 @@ interface BrandPageProps {
 }
 
 export async function generateStaticParams() {
-  const brands = getBrands();
+  const brands = await getBrands();
   const slugs = brands.map((b) => ({
     slug: b.slug,
   }));
@@ -24,7 +24,7 @@ export async function generateMetadata({
   params,
 }: BrandPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const brand = getBrandBySlug(slug);
+  const brand = await getBrandBySlug(slug);
 
   if (!brand) {
     return { title: "Brand Not Found | KB Beverage" };
@@ -38,13 +38,13 @@ export async function generateMetadata({
 
 export default async function BrandDetailPage({ params }: BrandPageProps) {
   const { slug } = await params;
-  const brand = getBrandBySlug(slug);
+  const brand = await getBrandBySlug(slug);
 
   if (!brand) {
     notFound();
   }
 
-  const brandProducts = getProductsByBrand(brand.id);
+  const brandProducts = await getProductsByBrand(brand.id);
 
   return (
     <div className="space-y-12 pb-20">

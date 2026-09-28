@@ -13,7 +13,7 @@ interface CategoryPageProps {
 }
 
 export async function generateStaticParams() {
-  const categories = getCategories();
+  const categories = await getCategories();
   const slugs = categories.map((cat) => ({
     slug: cat.slug,
   }));
@@ -26,7 +26,7 @@ export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
 
   if (!category) {
     return { title: "Category Not Found | KB Beverage" };
@@ -40,13 +40,13 @@ export async function generateMetadata({
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
 
   if (!category) {
     notFound();
   }
 
-  const allProducts = getProducts();
+  const allProducts = await getProducts();
   const categoryProducts = allProducts.filter(
     (p) =>
       p.categoryId === category.id ||

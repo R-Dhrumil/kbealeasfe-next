@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Manage beverage products catalog, prices, and inventory statuses.",
 };
 
-export default function AdminProductsPage() {
-  const products = getProducts();
+export default async function AdminProductsPage() {
+  const products = await getProducts();
   return <ProductsAdminClient initialProducts={products} />;
 }
