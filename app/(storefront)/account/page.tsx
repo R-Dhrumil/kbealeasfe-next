@@ -16,8 +16,10 @@ import {
   Edit2,
   Mail,
   Phone,
+  Heart,
 } from "lucide-react";
 import { useCustomer, CustomerAddress } from "@/context/CustomerContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -34,6 +36,7 @@ export default function AccountPage() {
     deleteAddress,
     setDefaultAddress,
   } = useCustomer();
+  const { wishlistCount } = useWishlist();
 
   // Profile Edit modal/state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -284,17 +287,29 @@ export default function AccountPage() {
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white border border-stone-200/80 space-y-3">
-          <div className="h-10 w-10 rounded-xl bg-[#FBF5E8] text-[#A87E28] flex items-center justify-center">
-            <ShieldCheck className="h-5 w-5" />
+        <Link
+          href="/wishlist"
+          className="p-6 rounded-2xl bg-white border border-stone-200/80 space-y-3 hover:border-[#C89B3C]/50 transition-colors group block"
+        >
+          <div className="flex items-center justify-between">
+            <div className="h-10 w-10 rounded-xl bg-[#FBF5E8] text-[#A87E28] flex items-center justify-center">
+              <Heart className="h-5 w-5" />
+            </div>
+            {wishlistCount > 0 && (
+              <span className="h-6 px-2 bg-[#C89B3C] text-stone-950 font-bold text-[11px] rounded-full flex items-center justify-center">
+                {wishlistCount} saved
+              </span>
+            )}
           </div>
-          <h3 className="font-serif text-lg font-bold text-stone-900">
-            Purity Guarantee
+          <h3 className="font-serif text-lg font-bold text-stone-900 group-hover:text-[#143425] transition-colors">
+            Wishlist
           </h3>
           <p className="text-xs text-stone-500 leading-relaxed">
-            All orders are dispatched in temperature-stable aroma containers with verified purity test certificates.
+            {wishlistCount > 0
+              ? `You have ${wishlistCount} item${wishlistCount > 1 ? "s" : ""} saved. Tap to view your wishlist.`
+              : "Save your favourite products here for easy access later."}
           </p>
-        </div>
+        </Link>
       </div>
 
       {/* Saved Delivery Addresses */}

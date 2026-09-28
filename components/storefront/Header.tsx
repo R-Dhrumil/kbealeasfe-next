@@ -7,7 +7,6 @@ import {
   Menu,
   X,
   ShoppingBag,
-  Heart,
   Search,
   ChevronDown,
   ShieldAlert,
@@ -164,18 +163,6 @@ export function Header() {
               <Search className="h-5 w-5" />
             </Link>
 
-            <Link
-              href="/wishlist"
-              aria-label="View wishlist"
-              className="relative p-2 text-stone-700 hover:text-[#143425] hover:bg-stone-200/50 rounded-lg transition-colors"
-            >
-              <Heart className="h-5 w-5" />
-              {wishlistCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-[#C89B3C] text-stone-950 font-bold text-[10px] rounded-full flex items-center justify-center">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
 
             {/* Account / User Menu Dropdown */}
             <div
@@ -218,6 +205,11 @@ export function Header() {
                         >
                           <User className="h-4 w-4 text-[#A87E28]" />
                           <span>Profile</span>
+                          {wishlistCount > 0 && (
+                            <span className="ml-auto h-4 w-4 bg-[#C89B3C] text-stone-950 font-bold text-[10px] rounded-full flex items-center justify-center">
+                              {wishlistCount}
+                            </span>
+                          )}
                         </Link>
                       </div>
 
