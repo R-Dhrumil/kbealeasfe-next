@@ -25,7 +25,6 @@ export function OrdersAdminClient() {
           setError("Invalid data format received.");
         }
       } catch (err: any) {
-        console.error(err);
         setError(err.message || "Unable to connect");
         setOrders([]);
       } finally {

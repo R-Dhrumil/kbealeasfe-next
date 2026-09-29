@@ -35,7 +35,7 @@ const HERO_SLIDES: SlideItem[] = [
     primaryCtaHref: "/shop?category=cat-tea-premixes",
     secondaryCtaText: "Explore Collection",
     secondaryCtaHref: "#categories",
-    image: "/assets/hero/hero-vrinda-chai.png",
+    image: "/assets/HeroSlider_images/vrinda_tea.png",
     themeColor: "#143425",
   },
   {
@@ -51,7 +51,7 @@ const HERO_SLIDES: SlideItem[] = [
     primaryCtaHref: "/shop?category=cat-iced-teas",
     secondaryCtaText: "All Flavors",
     secondaryCtaHref: "/shop",
-    image: "/assets/hero/hero-sangam-iced-tea.png",
+    image: "/assets/HeroSlider_images/ice_tea.png",
     themeColor: "#0E4D7A",
   },
   {
@@ -67,7 +67,7 @@ const HERO_SLIDES: SlideItem[] = [
     primaryCtaHref: "/shop?category=cat-coffees",
     secondaryCtaText: "Brewing Guide",
     secondaryCtaHref: "/about",
-    image: "/assets/hero/hero-urban-roast.png",
+    image: "/assets/HeroSlider_images/Gemini_Generated_Image_ikp642ikp642ikp6.png",
     themeColor: "#1E2638",
   },
   {
