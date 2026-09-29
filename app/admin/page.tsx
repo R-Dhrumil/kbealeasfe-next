@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   DollarSign,
@@ -12,19 +14,38 @@ import {
 } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
 import { SalesTrendChart, CategoryShareChart } from "@/components/admin/ChartMock";
-import { ORDERS } from "@/data/orders";
-import { INVENTORY } from "@/data/inventory";
-import { PRODUCTS } from "@/data/products";
-import { CUSTOMERS } from "@/data/customers";
+import { fetchApi } from "@/lib/api";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
+import { ORDERS } from "@/data/orders";
+import { INVENTORY } from "@/data/inventory";
 
 export default function AdminDashboardPage() {
-  const lowStockItems = INVENTORY.filter(
-    (i) => i.status === "Low Stock" || i.status === "Out of Stock"
-  );
-  const recentOrders = ORDERS.slice(0, 4);
+  const [report, setReport] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await fetchApi("/admin/reports");
+        setReport(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  if (loading) return <div className="p-8 text-center text-stone-500">Loading dashboard...</div>;
+
+  const lowStockItems: any[] = INVENTORY.filter(
+    (i: any) => i.status === "Low Stock" || i.status === "Out of Stock"
+  );
+  
+  const recentOrders = ORDERS.slice(0, 4);
+  
   return (
     <div className="space-y-8">
       {/* Top Banner indicating Mock Mode */}
@@ -68,29 +89,29 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard
           label="Total Revenue"
-          value="₹1,42,850"
+          value={report ? `₹${report.totalRevenue?.toLocaleString()}` : "₹0"}
           delta="+14.2%"
           subtext="vs last month"
           icon={DollarSign}
         />
         <StatCard
           label="Total Orders"
-          value="384"
+          value={report?.totalOrders?.toString() || "0"}
           delta="+8.1%"
           subtext="fulfillment 98%"
           icon={ShoppingCart}
         />
         <StatCard
           label="Customers"
-          value={String(CUSTOMERS.length * 258)}
+          value={report?.totalCustomers?.toString() || "0"}
           delta="+19.5%"
           subtext="active accounts"
           icon={Users}
         />
         <StatCard
-          label="Active SKUs"
-          value={`${PRODUCTS.length} SKUs`}
-          subtext="across 4 brands"
+          label="Avg Order Value"
+          value={report ? `₹${report.averageOrderValue?.toLocaleString()}` : "₹0"}
+          subtext="across all orders"
           icon={Package}
         />
         <StatCard

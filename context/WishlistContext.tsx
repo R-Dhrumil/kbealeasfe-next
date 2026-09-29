@@ -18,16 +18,29 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setWishlistIds(JSON.parse(saved));
+    async function loadWishlist() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          setWishlistIds(JSON.parse(saved));
+        }
+
+        // Try to fetch from server if logged in
+        if (localStorage.getItem("kb_auth_token")) {
+          const { fetchApi } = await import("@/lib/api");
+          const serverWishlist = await fetchApi("/wishlist");
+          if (Array.isArray(serverWishlist)) {
+            const ids = serverWishlist.map((p: any) => p.id);
+            setWishlistIds(ids);
+          }
+        }
+      } catch {
+        // ignore
+      } finally {
+        setIsInitialized(true);
       }
-    } catch {
-      // ignore
-    } finally {
-      setIsInitialized(true);
     }
+    loadWishlist();
   }, []);
 
   useEffect(() => {
@@ -39,12 +52,27 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     }
   }, [wishlistIds, isInitialized]);
 
-  const toggleWishlist = (productId: string) => {
+  const toggleWishlist = async (productId: string) => {
+    const isAdding = !wishlistIds.includes(productId);
+    
     setWishlistIds((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
+      isAdding
+        ? [...prev, productId]
+        : prev.filter((id) => id !== productId)
     );
+
+    try {
+      if (localStorage.getItem("kb_auth_token")) {
+        const { fetchApi } = await import("@/lib/api");
+        if (isAdding) {
+          await fetchApi(`/wishlist/${productId}`, { method: "POST" });
+        } else {
+          await fetchApi(`/wishlist/${productId}`, { method: "DELETE" });
+        }
+      }
+    } catch {
+      // ignore
+    }
   };
 
   const isInWishlist = (productId: string) => wishlistIds.includes(productId);

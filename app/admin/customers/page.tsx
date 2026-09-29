@@ -1,20 +1,50 @@
 "use client";
 
-import React, { useState } from "react";
-import { CUSTOMERS } from "@/data/customers";
+import React, { useState, useEffect } from "react";
+import { fetchApi } from "@/lib/api";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
 import { Search, UserCheck } from "lucide-react";
 
+interface CustomerData {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  totalOrders: number;
+  totalSpent: number;
+  joinedAt: string;
+  status: string;
+}
+
 export default function AdminCustomersPage() {
   const [search, setSearch] = useState("");
+  const [customers, setCustomers] = useState<CustomerData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredCustomers = CUSTOMERS.filter(
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await fetchApi("/admin/customers");
+        if (Array.isArray(data)) setCustomers(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const filteredCustomers = customers.filter(
     (c) =>
-      c.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase()) ||
-      c.city.toLowerCase().includes(search.toLowerCase())
+      c.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+      c.email?.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) {
+    return <div className="p-8 text-center text-stone-500">Loading customers...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -48,7 +78,6 @@ export default function AdminCustomersPage() {
             <thead className="bg-stone-50/80 border-b border-stone-200 font-serif font-bold text-stone-700">
               <tr>
                 <th className="py-3.5 px-4">Customer Name & Contact</th>
-                <th className="py-3.5 px-4">Location</th>
                 <th className="py-3.5 px-4">Total Orders</th>
                 <th className="py-3.5 px-4">Lifetime Spend</th>
                 <th className="py-3.5 px-4">Joined Date</th>
@@ -64,10 +93,6 @@ export default function AdminCustomersPage() {
                     <p className="text-[11px] text-stone-400">{cust.email} • {cust.phone}</p>
                   </td>
 
-                  <td className="py-3.5 px-4 text-stone-600">
-                    {cust.city}, {cust.state}
-                  </td>
-
                   <td className="py-3.5 px-4 font-mono font-bold text-stone-800">
                     {cust.totalOrders} orders
                   </td>
@@ -77,7 +102,7 @@ export default function AdminCustomersPage() {
                   </td>
 
                   <td className="py-3.5 px-4 font-mono text-stone-500">
-                    {formatDate(cust.joinedDate)}
+                    {formatDate(cust.joinedAt)}
                   </td>
 
                   <td className="py-3.5 px-4">

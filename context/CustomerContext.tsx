@@ -406,59 +406,69 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
   };
 
   const placeOrder = async (input: PlaceOrderInput): Promise<Order> => {
-    const orderTimestamp = new Date().toISOString();
-    const orderRandomNumber = Math.floor(1000 + Math.random() * 9000);
-    const newOrderNumber = `KB-${orderRandomNumber}`;
-    const newOrderId = `ord-${Date.now()}`;
-
-    const newOrder: Order = {
-      id: newOrderId,
-      orderNumber: newOrderNumber,
-      customerName: input.customerName || (customer ? customer.fullName : "Customer"),
-      customerEmail: input.customerEmail || (customer ? customer.email : "customer@example.com"),
-      customerPhone: input.customerPhone || (customer ? customer.phone : ""),
-      createdAt: orderTimestamp,
-      status: "Confirmed",
-      paymentStatus: input.paymentMethod === "Cash on Delivery" ? "Pending" : "Paid",
-      paymentMethod: input.paymentMethod,
-      shippingAddress: {
-        fullName: input.shippingAddress.fullName,
-        email: input.customerEmail,
-        phone: input.shippingAddress.phone,
-        addressLine1: input.shippingAddress.addressLine1,
-        city: input.shippingAddress.city,
-        state: input.shippingAddress.state,
-        postalCode: input.shippingAddress.postalCode,
-        country: "India",
-      },
-      items: input.items,
-      subtotal: input.subtotal,
-      shippingFee: input.shippingFee,
-      discount: input.discount,
-      tax: input.tax,
-      total: input.total,
-      trackingNumber: `BLR-${Math.floor(100000 + Math.random() * 900000)}`,
-      carrier: "BlueDart Express",
-      notes: "Aroma-locked protective container",
-    };
-
-    const nextOrders = [newOrder, ...orders];
-    syncOrders(nextOrders);
-
-    // If customer has no default address, save this address
-    if (customer && customer.addresses.length === 0) {
-      addAddress({
-        fullName: input.shippingAddress.fullName,
-        phone: input.shippingAddress.phone,
-        addressLine1: input.shippingAddress.addressLine1,
-        city: input.shippingAddress.city,
-        state: input.shippingAddress.state,
-        postalCode: input.shippingAddress.postalCode,
-        isDefault: true,
+    try {
+      let addressId = "";
+      if (customer && customer.addresses.length > 0) {
+        // Try to find matching address
+        const addr = customer.addresses.find(a => a.addressLine1 === input.shippingAddress.addressLine1);
+        if (addr) addressId = addr.id;
+        else addressId = customer.addresses[0].id;
+      }
+      
+      if (!addressId) {
+        // Call POST /account/addresses
+        const newAddr = await fetchApi("/account/addresses", {
+          method: "POST",
+          body: JSON.stringify({
+            recipientName: input.shippingAddress.fullName,
+            phone: input.shippingAddress.phone,
+            streetAddress: input.shippingAddress.addressLine1,
+            city: input.shippingAddress.city,
+            state: input.shippingAddress.state,
+            postalCode: input.shippingAddress.postalCode,
+            country: "India",
+            isDefaultShipping: true,
+            isDefaultBilling: true,
+          }),
+        });
+        addressId = newAddr.id;
+        
+        if (customer) {
+          const newCustomerAddr: CustomerAddress = {
+            id: addressId,
+            fullName: input.shippingAddress.fullName,
+            phone: input.shippingAddress.phone,
+            addressLine1: input.shippingAddress.addressLine1,
+            city: input.shippingAddress.city,
+            state: input.shippingAddress.state,
+            postalCode: input.shippingAddress.postalCode,
+            isDefault: true
+          };
+          syncCustomer({ ...customer, addresses: [...customer.addresses, newCustomerAddr] }, true);
+        }
+      }
+      
+      const orderPayload = {
+         shippingAddressId: addressId,
+         paymentMethod: input.paymentMethod,
+         items: input.items.map(item => ({
+            productVariantId: item.id, // item.id is variant ID in cart
+            quantity: item.quantity
+         }))
+      };
+      
+      const newOrder = await fetchApi("/orders", {
+         method: "POST",
+         body: JSON.stringify(orderPayload)
       });
+      
+      const nextOrders = [newOrder, ...orders];
+      syncOrders(nextOrders);
+      return newOrder;
+    } catch (err) {
+      console.error("Place order failed", err);
+      throw err;
     }
-
-    return newOrder;
   };
 
   const getOrderById = (id: string): Order | undefined => {
