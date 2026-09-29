@@ -5,23 +5,42 @@ import Link from "next/link";
 import { Order, OrderStatus } from "@/types/order";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
-import { Search, Eye, Filter } from "lucide-react";
-
-export function OrdersAdminClient({
-  initialOrders,
-}: {
-  initialOrders: Order[];
-}) {
-  const [orders, setOrders] = useState(initialOrders);
+import { fetchApi } from "@/lib/api";
+import { Search, Eye, Filter, AlertCircle, RefreshCw } from "lucide-react";
+export function OrdersAdminClient() {
+  const [orders, setOrders] = useState<Order[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredOrders = orders.filter((o) => {
+  React.useEffect(() => {
+    async function loadOrders() {
+      try {
+        const data = await fetchApi("/admin/orders");
+        if (Array.isArray(data)) {
+          setOrders(data);
+        } else {
+          setOrders([]);
+          setError("Invalid data format received.");
+        }
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || "Unable to connect");
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadOrders();
+  }, []);
+
+  const filteredOrders = (orders || []).filter((o) => {
     const matchStatus = statusFilter === "All" || o.status === statusFilter;
     const matchSearch =
-      o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-      o.customerName.toLowerCase().includes(search.toLowerCase()) ||
-      o.customerEmail.toLowerCase().includes(search.toLowerCase());
+      o.orderNumber?.toLowerCase().includes(search.toLowerCase()) ||
+      o.customerName?.toLowerCase().includes(search.toLowerCase()) ||
+      o.customerEmail?.toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
 
@@ -79,8 +98,33 @@ export function OrdersAdminClient({
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white rounded-3xl border border-stone-200/80 overflow-hidden shadow-2xs">
+      {/* Main Content Area */}
+      {loading ? (
+        <div className="p-16 flex flex-col items-center justify-center text-stone-400 space-y-4">
+          <RefreshCw className="h-8 w-8 animate-spin text-[#143425]" />
+          <p className="text-sm font-medium">Syncing live orders...</p>
+        </div>
+      ) : error ? (
+        <div className="min-h-[400px] flex flex-col items-center justify-center p-8 bg-white rounded-3xl border border-stone-200/80 shadow-2xs">
+          <div className="h-16 w-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
+            <AlertCircle className="h-8 w-8" />
+          </div>
+          <h3 className="font-serif text-xl font-bold text-stone-900 mb-2">Unable to load orders</h3>
+          <p className="text-stone-500 text-sm max-w-md text-center mb-6">
+            We're having trouble connecting to the backend server. Please make sure the API is running or try refreshing the page.
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2.5 bg-[#143425] hover:bg-[#1C4834] text-white text-sm font-semibold rounded-lg transition-colors shadow-sm flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            <span>Try Again</span>
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Orders Table */}
+          <div className="bg-white rounded-3xl border border-stone-200/80 overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-stone-700">
             <thead className="bg-stone-50/80 border-b border-stone-200 font-serif font-bold text-stone-700">
@@ -158,6 +202,8 @@ export function OrdersAdminClient({
           </table>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }

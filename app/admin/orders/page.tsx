@@ -9,6 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminOrdersPage() {
-  const orders = getOrders();
-  return <OrdersAdminClient initialOrders={orders} />;
+  return <OrdersAdminClient />;
 }
