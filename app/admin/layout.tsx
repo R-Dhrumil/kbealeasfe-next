@@ -1,6 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import { AdminLayoutClient } from "./AdminLayoutClient";
+import { CustomerProvider } from "@/context/CustomerContext";
 
 export const metadata: Metadata = {
   title: "Admin Portal | KB Beverage Operations",
@@ -12,5 +13,9 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AdminLayoutClient>{children}</AdminLayoutClient>;
+  return (
+    <CustomerProvider>
+      <AdminLayoutClient>{children}</AdminLayoutClient>
+    </CustomerProvider>
+  );
 }

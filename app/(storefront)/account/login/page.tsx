@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Lock, Mail, User, Phone, CheckCircle2, ShieldCheck, ArrowRight } from "lucide-react";
+import { ArrowLeft, Lock, Mail, User, Phone, CheckCircle2, ShieldCheck, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
 import { Button } from "@/components/ui/Button";
 
@@ -21,6 +21,7 @@ function LoginFormContent() {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // If already logged in, show status & option to proceed or switch
   if (isLoggedIn && customer) {
@@ -208,13 +209,22 @@ function LoginFormContent() {
             </div>
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full h-11 pl-10 pr-3 rounded-xl border border-stone-200 text-xs text-stone-900 focus:outline-none focus:border-[#143425] focus:ring-1 focus:ring-[#143425] transition-colors"
+                className="w-full h-11 pl-10 pr-10 rounded-xl border border-stone-200 text-xs text-stone-900 focus:outline-none focus:border-[#143425] focus:ring-1 focus:ring-[#143425] transition-colors"
               />
-              <Lock className="h-4 w-4 text-stone-400 absolute left-3.5 top-3.5 pointer-events-none" />
+              <Lock className="h-4 w-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ left: "14px", top: "50%", transform: "translateY(-50%)" }} />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute text-stone-400 hover:text-stone-600 focus:outline-none transition-colors cursor-pointer"
+                style={{ right: "14px", top: "50%", transform: "translateY(-50%)" }}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
             <p className="text-[11px] text-stone-400 mt-1">
               For testing, any password or leaving it empty will sign in.
@@ -290,13 +300,22 @@ function LoginFormContent() {
             </label>
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full h-11 pl-10 pr-3 rounded-xl border border-stone-200 text-xs text-stone-900 focus:outline-none focus:border-[#143425] focus:ring-1 focus:ring-[#143425] transition-colors"
+                className="w-full h-11 pl-10 pr-10 rounded-xl border border-stone-200 text-xs text-stone-900 focus:outline-none focus:border-[#143425] focus:ring-1 focus:ring-[#143425] transition-colors"
               />
-              <Lock className="h-4 w-4 text-stone-400 absolute left-3.5 top-3.5 pointer-events-none" />
+              <Lock className="h-4 w-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ left: "14px", top: "50%", transform: "translateY(-50%)" }} />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute text-stone-400 hover:text-stone-600 focus:outline-none transition-colors cursor-pointer"
+                style={{ right: "14px", top: "50%", transform: "translateY(-50%)" }}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 

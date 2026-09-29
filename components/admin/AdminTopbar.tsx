@@ -2,8 +2,19 @@
 
 import React from "react";
 import { Menu, Bell, Search, UserCheck } from "lucide-react";
+import { useCustomer } from "@/context/CustomerContext";
 
 export function AdminTopbar({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  const { customer } = useCustomer();
+  const displayName = customer?.fullName || "Operations Lead";
+  const displayEmail = customer?.email || "admin@kbbeverage.com";
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+
   return (
     <header className="h-16 bg-white border-b border-stone-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
       <div className="flex items-center gap-3">
@@ -43,14 +54,14 @@ export function AdminTopbar({ onOpenSidebar }: { onOpenSidebar: () => void }) {
 
         <div className="flex items-center gap-2.5 pl-3 border-l border-stone-200">
           <div className="h-8 w-8 rounded-lg bg-[#143425] text-white flex items-center justify-center font-bold text-xs">
-            OP
+            {initials}
           </div>
           <div className="hidden sm:block text-left">
             <p className="text-xs font-bold text-stone-900 leading-none">
-              Operations Lead
+              {displayName}
             </p>
             <p className="text-[10px] text-stone-400 font-mono mt-0.5">
-              admin@kbbeverage.com
+              {displayEmail}
             </p>
           </div>
         </div>
