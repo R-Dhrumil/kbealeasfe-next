@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -63,8 +63,8 @@ export function ProductDetailClient({
         <div className="lg:col-span-7 space-y-4">
           {/* Main Large Image */}
           <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-square w-full rounded-3xl bg-[#F7F4EE] border border-stone-200/80 overflow-hidden shadow-sm">
-            <Image
-              src={(product.images && product.images[0]) ? (product.images[activeImageIndex] || product.images[0]) : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+            <SafeImage
+              src={(product.images && product.images[0]) ? (product.images[activeImageIndex] || product.images[0]) : null}
               alt={product.name}
               fill
               priority
@@ -102,7 +102,7 @@ export function ProductDetailClient({
                       : "border-stone-200 opacity-70 hover:opacity-100"
                   )}
                 >
-                  <Image src={img} alt="" fill className="object-cover" />
+                  <SafeImage src={img} alt="" fill className="object-cover" />
                 </button>
               ))}
             </div>

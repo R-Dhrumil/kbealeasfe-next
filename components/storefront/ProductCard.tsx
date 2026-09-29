@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { Heart, ShoppingBag, Star } from "lucide-react";
 import { Product } from "@/types/product";
@@ -71,8 +71,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
         href={`/product/${product.slug}`}
         className="relative aspect-square w-full rounded-xl bg-[#F7F4EE] overflow-hidden flex items-center justify-center mb-3.5"
       >
-        <Image
-          src={(product.images && product.images[0]) ? product.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+        <SafeImage
+          src={(product.images && product.images[0]) ? product.images[0] : null}
           alt={product.name}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -82,7 +82,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           )}
         />
         {(product.images && product.images[1]) && (
-          <Image
+          <SafeImage
             src={product.images[1]}
             alt={`${product.name} alternate view`}
             fill

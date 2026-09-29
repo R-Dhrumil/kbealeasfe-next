@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { X, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -106,8 +106,8 @@ export function CartDrawer() {
                 className="py-4 flex gap-4 first:pt-0 last:pb-0"
               >
                 <div className="relative h-20 w-20 rounded-xl bg-stone-100 overflow-hidden shrink-0">
-                  <Image
-                    src={(item.product.images && item.product.images[0]) ? item.product.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+                  <SafeImage
+                    src={(item.product.images && item.product.images[0]) ? item.product.images[0] : null}
                     alt={item.product.name}
                     fill
                     className="object-cover"
