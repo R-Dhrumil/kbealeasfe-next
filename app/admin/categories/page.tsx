@@ -31,13 +31,13 @@ export default function AdminCategoriesPage() {
         <div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#E8F2EC] text-[#143425] text-xs font-semibold mb-1">
             <Sparkles className="h-3 w-3 text-[#C89B3C]" />
-            <span>Strict Four Primary Categories System</span>
+            <span>Strict Four Primary Brands System</span>
           </div>
           <h1 className="text-2xl font-serif font-bold text-[#143425]">
-            Four Primary Categories
+            Four Primary Brands
           </h1>
           <p className="text-xs text-stone-500 mt-0.5">
-            The core architecture of the KB beverage menu. Exactly four primary categories are maintained.
+            The core architecture of the KB beverage menu. Exactly four primary brands are maintained.
           </p>
         </div>
       </div>
@@ -48,7 +48,7 @@ export default function AdminCategoriesPage() {
             <thead className="bg-stone-50/80 border-b border-stone-200 font-serif font-bold text-stone-700">
               <tr>
                 <th className="py-3.5 px-4">Order</th>
-                <th className="py-3.5 px-4">Category Image & Name</th>
+                <th className="py-3.5 px-4">Brand Image & Name</th>
                 <th className="py-3.5 px-4">Tagline</th>
                 <th className="py-3.5 px-4">Catalog Count</th>
                 <th className="py-3.5 px-4">Status</th>

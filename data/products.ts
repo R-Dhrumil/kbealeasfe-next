@@ -477,7 +477,8 @@ function mapBackendProductToFrontend(dto: any): Product {
     isFeatured: dto.isFeatured,
     rating: 5.0,
     reviewCount: 0,
-    flavorNotes: []
+    flavorNotes: [],
+    variantId: dto.variants && dto.variants.length > 0 ? dto.variants[0].id : undefined
   };
 }
 

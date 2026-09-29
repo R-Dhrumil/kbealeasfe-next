@@ -32,4 +32,5 @@ export interface Product {
   rating: number;
   reviewCount: number;
   flavorNotes: string[];
+  variantId?: string;
 }

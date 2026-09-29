@@ -31,8 +31,7 @@ const NAV_ITEMS = [
     group: "Catalog Management",
     items: [
       { href: "/admin/products", label: "Products", icon: Package },
-      { href: "/admin/categories", label: "Four Categories", icon: FolderTree },
-      { href: "/admin/brands", label: "Brand Portfolio", icon: Award },
+      { href: "/admin/categories", label: "Four Brands", icon: FolderTree },
     ],
   },
   {

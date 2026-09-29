@@ -86,7 +86,7 @@ export default function CheckoutPage() {
 
     const orderItems = items.map((item, idx) => ({
       id: `oi-${Date.now()}-${idx}`,
-      productId: item.product.id,
+      productId: item.product.variantId || item.product.id,
       productName: item.product.name,
       brandName: item.product.brandName || "KB Beverage",
       image: item.product.images?.[0] || "/images/brands/vrinda.jpg",
