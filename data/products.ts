@@ -442,10 +442,49 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
+function mapBackendProductToFrontend(dto: any): Product {
+  if (dto.price !== undefined) return dto as Product;
+
+  return {
+    id: dto.id,
+    slug: dto.slug,
+    name: dto.name,
+    brandId: dto.brandId,
+    brandName: dto.brandName,
+    categoryId: dto.categoryId,
+    categoryName: dto.categoryName,
+    tagline: dto.tagline || "",
+    description: dto.shortDescription || dto.fullDescription || "",
+    details: {
+      packaging: "Standard",
+      shelfLife: "12 Months",
+      servingSize: "Standard",
+      netWeight: "N/A",
+      form: "Standard",
+      ingredients: [],
+      preparationNotes: [],
+      storageNotes: ""
+    },
+    price: dto.basePrice || 0,
+    mrp: dto.costPrice || (dto.basePrice ? dto.basePrice * 1.2 : 0),
+    sku: dto.sku || "",
+    images: dto.images 
+      ? dto.images.map((img: any) => img.imageUrl) 
+      : (dto.primaryImageUrl ? [dto.primaryImageUrl] : []),
+    inStock: dto.inStock !== undefined ? dto.inStock : (dto.totalAvailableQuantity > 0),
+    stockCount: dto.totalAvailableQuantity || 0,
+    isBestSeller: dto.isBestseller,
+    isFeatured: dto.isFeatured,
+    rating: 5.0,
+    reviewCount: 0,
+    flavorNotes: []
+  };
+}
+
 export async function getProducts(): Promise<Product[]> {
   try {
     const data = await fetchApi("/catalog/products?pageSize=100");
-    return data?.items || PRODUCTS;
+    return data?.items ? data.items.map(mapBackendProductToFrontend) : PRODUCTS;
   } catch (e) {
     return PRODUCTS;
   }
@@ -454,7 +493,7 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
   try {
     const p = await fetchApi(`/catalog/products/${slug}`);
-    return p || PRODUCTS.find((p) => p.slug === slug);
+    return p ? mapBackendProductToFrontend(p) : PRODUCTS.find((p) => p.slug === slug);
   } catch (e) {
     return PRODUCTS.find((p) => p.slug === slug);
   }
@@ -463,7 +502,7 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
 export async function getProductsByCategory(categoryId: string): Promise<Product[]> {
   try {
     const data = await fetchApi(`/catalog/products?categoryId=${categoryId}&pageSize=100`);
-    return data?.items || PRODUCTS.filter((p) => p.categoryId === categoryId);
+    return data?.items ? data.items.map(mapBackendProductToFrontend) : PRODUCTS.filter((p) => p.categoryId === categoryId);
   } catch (e) {
     return PRODUCTS.filter((p) => p.categoryId === categoryId);
   }
@@ -472,7 +511,7 @@ export async function getProductsByCategory(categoryId: string): Promise<Product
 export async function getProductsByBrand(brandId: string): Promise<Product[]> {
   try {
     const data = await fetchApi(`/catalog/products?brandId=${brandId}&pageSize=100`);
-    return data?.items || PRODUCTS.filter((p) => p.brandId === brandId);
+    return data?.items ? data.items.map(mapBackendProductToFrontend) : PRODUCTS.filter((p) => p.brandId === brandId);
   } catch (e) {
     return PRODUCTS.filter((p) => p.brandId === brandId);
   }
@@ -481,7 +520,7 @@ export async function getProductsByBrand(brandId: string): Promise<Product[]> {
 export async function getFeaturedProducts(): Promise<Product[]> {
   try {
     const data = await fetchApi(`/catalog/featured`);
-    return data || PRODUCTS.filter((p) => p.isFeatured || p.isBestSeller);
+    return data ? data.map(mapBackendProductToFrontend) : PRODUCTS.filter((p) => p.isFeatured || p.isBestSeller);
   } catch (e) {
     return PRODUCTS.filter((p) => p.isFeatured || p.isBestSeller);
   }

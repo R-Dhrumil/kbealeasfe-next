@@ -31,6 +31,8 @@ export default function AddProductPage() {
     "Pour 100ml steaming hot water (90°C - 95°C).",
     "Stir gently for 10 seconds and enjoy.",
   ]);
+  const [images, setImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   
   const [brands, setBrands] = useState<Brand[]>(MOCK_BRANDS);
@@ -73,6 +75,39 @@ export default function AddProductPage() {
     setPrepSteps(prepSteps.filter((_, idx) => idx !== index));
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    setIsUploading(true);
+    try {
+      const newImageUrls: string[] = [];
+      for (let i = 0; i < e.target.files.length; i++) {
+        const file = e.target.files[i];
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        const data = await fetchApi("/catalog/upload-image", {
+          method: "POST",
+          body: formData,
+        });
+        
+        if (data && data.url) {
+          newImageUrls.push(data.url);
+        }
+      }
+      setImages(prev => [...prev, ...newImageUrls]);
+    } catch (err) {
+      console.error("Image upload failed", err);
+      alert("Failed to upload image(s).");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages(prev => prev.filter((_, idx) => idx !== index));
+  };
+
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -93,7 +128,11 @@ export default function AddProductPage() {
           isActive: true,
           displayOrder: 0,
           variants: [],
-          images: [],
+          images: images.map((url, idx) => ({
+            imageUrl: url,
+            isPrimary: idx === 0,
+            displayOrder: idx
+          })),
           // Mock some additional detail info using FullDescription as a JSON payload for now if needed
         }),
       });
@@ -323,6 +362,54 @@ export default function AddProductPage() {
                 )}
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Product Images */}
+        <div className="bg-white rounded-3xl border border-stone-200/80 p-6 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+            <h2 className="font-serif text-sm font-bold text-[#143425]">
+              4. Product Images
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-4">
+              {images.map((url, idx) => (
+                <div key={idx} className="relative h-24 w-24 rounded-lg border border-stone-200 overflow-hidden group bg-stone-50">
+                  <img src={url} alt={`Preview ${idx}`} className="object-cover h-full w-full" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(idx)}
+                    className="absolute top-1 right-1 bg-white/90 rounded-full p-1 text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                  {idx === 0 && (
+                    <span className="absolute bottom-0 inset-x-0 bg-[#143425]/80 text-white text-[9px] text-center py-0.5 font-medium">Primary</span>
+                  )}
+                </div>
+              ))}
+              <label className="h-24 w-24 rounded-lg border-2 border-dashed border-stone-300 flex flex-col items-center justify-center text-stone-500 hover:text-[#143425] hover:border-[#143425] cursor-pointer transition-colors bg-stone-50">
+                {isUploading ? (
+                  <span className="text-xs font-medium">Uploading...</span>
+                ) : (
+                  <>
+                    <Upload className="h-5 w-5 mb-1" />
+                    <span className="text-[10px] font-medium">Add Image</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+              </label>
+            </div>
+            <p className="text-[10px] text-stone-500">First image will be used as the primary cover image. Supported formats: JPG, PNG, WEBP.</p>
           </div>
         </div>
 

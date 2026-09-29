@@ -452,7 +452,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
          shippingAddressId: addressId,
          paymentMethod: input.paymentMethod,
          items: input.items.map(item => ({
-            productVariantId: item.id, // item.id is variant ID in cart
+            productVariantId: item.productId, // Use productId which comes from the cart product.id
             quantity: item.quantity
          }))
       };

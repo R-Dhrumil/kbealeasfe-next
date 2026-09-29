@@ -214,6 +214,13 @@ export function ProductsAdminClient({
                           <Eye className="h-3.5 w-3.5" />
                           <span>View Live</span>
                         </Link>
+                        <Link
+                          href={`/admin/products/${p.id}`}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-stone-50 text-stone-700 text-xs"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          <span>Edit</span>
+                        </Link>
                         <button
                           type="button"
                           onClick={() => handleDeleteProduct(p.id)}
