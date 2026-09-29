@@ -160,7 +160,12 @@ export default function OrderDetailPage() {
             <div key={item.id} className="p-5 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative h-16 w-16 rounded-xl bg-stone-100 overflow-hidden shrink-0">
-                  <Image src={item.image} alt={item.productName} fill className="object-cover" />
+                  <Image
+                    src={item.image && item.image.trim() !== "" ? item.image : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+                    alt={item.productName}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#A87E28]">

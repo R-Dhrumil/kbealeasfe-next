@@ -62,8 +62,8 @@ export default async function AdminOrderDetailPage({
                 order.status === "Delivered"
                   ? "success"
                   : order.status === "Confirmed"
-                  ? "brand"
-                  : "default"
+                    ? "brand"
+                    : "default"
               }
             >
               {order.status}
@@ -92,7 +92,12 @@ export default async function AdminOrderDetailPage({
             <div key={item.id} className="p-4 flex items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-3">
                 <div className="relative h-14 w-14 rounded-xl bg-stone-100 overflow-hidden shrink-0">
-                  <Image src={item.image} alt="" fill className="object-cover" />
+                  <Image
+                    src={item.image && item.image.trim() !== "" ? item.image : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+                    alt=""
+                    fill
+                    className="object-cover"
+                  />
                 </div>
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#A87E28]">
@@ -115,58 +120,58 @@ export default async function AdminOrderDetailPage({
           ))}
         </div>
 
-        {/* Customer & Settlement */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-3xl border border-stone-200/80 p-5 space-y-3 shadow-2xs text-xs">
-            <h3 className="font-serif text-sm font-bold text-[#143425] pb-2 border-b border-stone-100">
-              Customer Details
-            </h3>
-            <p className="font-bold text-stone-900">{order.customerName}</p>
-            <p className="text-stone-600">{order.customerEmail}</p>
-            <p className="text-stone-600 font-mono">{order.customerPhone}</p>
-            <div className="pt-2 border-t border-stone-100">
-              <p className="text-[11px] font-semibold text-stone-400 uppercase">
-                Shipping Destination
-              </p>
-              <p className="text-stone-700 mt-1 leading-relaxed">
-                {order.shippingAddress.addressLine1}
-                <br />
-                {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.postalCode}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-stone-200/80 p-5 space-y-2.5 shadow-2xs text-xs text-stone-600">
-            <h3 className="font-serif text-sm font-bold text-[#143425] pb-2 border-b border-stone-100">
-              Financial Summary
-            </h3>
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span className="font-mono">{formatPrice(order.subtotal)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping Fee</span>
-              <span className="font-mono text-emerald-700">
-                {order.shippingFee === 0 ? "Free" : formatPrice(order.shippingFee)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>GST (5%)</span>
-              <span className="font-mono">{formatPrice(order.tax)}</span>
-            </div>
-            {order.discount > 0 && (
-              <div className="flex justify-between text-emerald-700">
-                <span>Discount</span>
-                <span className="font-mono">-{formatPrice(order.discount)}</span>
-              </div>
-            )}
-            <div className="pt-2 border-t border-stone-200 flex justify-between font-bold text-stone-900">
-              <span>Total Settled</span>
-              <span className="font-mono text-[#143425]">{formatPrice(order.total)}</span>
-            </div>
-          </div>
-        </div>
+        {/* Customer & Settlement */ }
+  <div className="lg:col-span-4 space-y-6">
+    <div className="bg-white rounded-3xl border border-stone-200/80 p-5 space-y-3 shadow-2xs text-xs">
+      <h3 className="font-serif text-sm font-bold text-[#143425] pb-2 border-b border-stone-100">
+        Customer Details
+      </h3>
+      <p className="font-bold text-stone-900">{order.customerName}</p>
+      <p className="text-stone-600">{order.customerEmail}</p>
+      <p className="text-stone-600 font-mono">{order.customerPhone}</p>
+      <div className="pt-2 border-t border-stone-100">
+        <p className="text-[11px] font-semibold text-stone-400 uppercase">
+          Shipping Destination
+        </p>
+        <p className="text-stone-700 mt-1 leading-relaxed">
+          {order.shippingAddress.addressLine1}
+          <br />
+          {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.postalCode}
+        </p>
       </div>
     </div>
+
+    <div className="bg-white rounded-3xl border border-stone-200/80 p-5 space-y-2.5 shadow-2xs text-xs text-stone-600">
+      <h3 className="font-serif text-sm font-bold text-[#143425] pb-2 border-b border-stone-100">
+        Financial Summary
+      </h3>
+      <div className="flex justify-between">
+        <span>Subtotal</span>
+        <span className="font-mono">{formatPrice(order.subtotal)}</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Shipping Fee</span>
+        <span className="font-mono text-emerald-700">
+          {order.shippingFee === 0 ? "Free" : formatPrice(order.shippingFee)}
+        </span>
+      </div>
+      <div className="flex justify-between">
+        <span>GST (5%)</span>
+        <span className="font-mono">{formatPrice(order.tax)}</span>
+      </div>
+      {order.discount > 0 && (
+        <div className="flex justify-between text-emerald-700">
+          <span>Discount</span>
+          <span className="font-mono">-{formatPrice(order.discount)}</span>
+        </div>
+      )}
+      <div className="pt-2 border-t border-stone-200 flex justify-between font-bold text-stone-900">
+        <span>Total Settled</span>
+        <span className="font-mono text-[#143425]">{formatPrice(order.total)}</span>
+      </div>
+    </div>
+  </div>
+      </div >
+    </div >
   );
 }
