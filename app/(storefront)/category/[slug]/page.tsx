@@ -1,7 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { getCategoryBySlug, getCategories } from "@/data/categories";
 import { getProducts } from "@/data/products";
@@ -58,10 +58,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       {/* Category Hero Banner */}
       <div className="relative bg-[#143425] text-white py-16 md:py-24 overflow-hidden">
         <div className="absolute inset-0 opacity-20">
-          <Image
+          <SafeImage
             src={category.image}
             alt={category.name}
             fill
+            priority
             className="object-cover"
           />
         </div>

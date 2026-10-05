@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Category } from "@/types/category";
@@ -20,7 +20,7 @@ export function CategoryCard({ category, className }: CategoryCardProps) {
       )}
     >
       {/* Background Image with Dark Vignette */}
-      <Image
+      <SafeImage
         src={category.image}
         alt={category.name}
         fill

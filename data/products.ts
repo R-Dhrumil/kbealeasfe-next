@@ -469,8 +469,8 @@ function mapBackendProductToFrontend(dto: any): Product {
     mrp: dto.costPrice || (dto.basePrice ? dto.basePrice * 1.2 : 0),
     sku: dto.sku || "",
     images: dto.images 
-      ? dto.images.map((img: any) => img.imageUrl) 
-      : (dto.primaryImageUrl ? [dto.primaryImageUrl] : []),
+      ? dto.images.map((img: any) => img.imageUrl.startsWith("/") ? `http://localhost:5153${img.imageUrl}` : img.imageUrl) 
+      : (dto.primaryImageUrl ? [dto.primaryImageUrl.startsWith("/") ? `http://localhost:5153${dto.primaryImageUrl}` : dto.primaryImageUrl] : []),
     inStock: dto.inStock !== undefined ? dto.inStock : (dto.totalAvailableQuantity > 0),
     stockCount: dto.totalAvailableQuantity || 0,
     isBestSeller: dto.isBestseller,
@@ -485,44 +485,49 @@ function mapBackendProductToFrontend(dto: any): Product {
 export async function getProducts(): Promise<Product[]> {
   try {
     const data = await fetchApi("/catalog/products?pageSize=100");
-    return data?.items ? data.items.map(mapBackendProductToFrontend) : PRODUCTS;
+    return data?.items ? data.items.map(mapBackendProductToFrontend) : [];
   } catch (e) {
-    return PRODUCTS;
+    console.error("Failed to fetch products from backend:", e);
+    return [];
   }
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
   try {
     const p = await fetchApi(`/catalog/products/${slug}`);
-    return p ? mapBackendProductToFrontend(p) : PRODUCTS.find((p) => p.slug === slug);
+    return p ? mapBackendProductToFrontend(p) : undefined;
   } catch (e) {
-    return PRODUCTS.find((p) => p.slug === slug);
+    console.error(`Failed to fetch product by slug ${slug}:`, e);
+    return undefined;
   }
 }
 
 export async function getProductsByCategory(categoryId: string): Promise<Product[]> {
   try {
     const data = await fetchApi(`/catalog/products?categoryId=${categoryId}&pageSize=100`);
-    return data?.items ? data.items.map(mapBackendProductToFrontend) : PRODUCTS.filter((p) => p.categoryId === categoryId);
+    return data?.items ? data.items.map(mapBackendProductToFrontend) : [];
   } catch (e) {
-    return PRODUCTS.filter((p) => p.categoryId === categoryId);
+    console.error(`Failed to fetch products by category ${categoryId}:`, e);
+    return [];
   }
 }
 
 export async function getProductsByBrand(brandId: string): Promise<Product[]> {
   try {
     const data = await fetchApi(`/catalog/products?brandId=${brandId}&pageSize=100`);
-    return data?.items ? data.items.map(mapBackendProductToFrontend) : PRODUCTS.filter((p) => p.brandId === brandId);
+    return data?.items ? data.items.map(mapBackendProductToFrontend) : [];
   } catch (e) {
-    return PRODUCTS.filter((p) => p.brandId === brandId);
+    console.error(`Failed to fetch products by brand ${brandId}:`, e);
+    return [];
   }
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
   try {
     const data = await fetchApi(`/catalog/featured`);
-    return data ? data.map(mapBackendProductToFrontend) : PRODUCTS.filter((p) => p.isFeatured || p.isBestSeller);
+    return data ? data.map(mapBackendProductToFrontend) : [];
   } catch (e) {
-    return PRODUCTS.filter((p) => p.isFeatured || p.isBestSeller);
+    console.error("Failed to fetch featured products:", e);
+    return [];
   }
 }

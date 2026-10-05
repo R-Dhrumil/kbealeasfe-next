@@ -48,24 +48,108 @@ export const CATEGORIES: Category[] = [
   },
 ];
 
+const DEFAULT_CATEGORY_METADATA: Record<string, { image: string; tagline: string }> = {
+  "tea": {
+    image: "/assets/HeroSlider_images/vrinda_tea.png",
+    tagline: "Authentic Taste in Seconds",
+  },
+  "tea-premixes": {
+    image: "/assets/HeroSlider_images/vrinda_tea.png",
+    tagline: "Authentic Taste in Seconds",
+  },
+  "iced-tea": {
+    image: "/assets/HeroSlider_images/ice_tea.png",
+    tagline: "Crisp, Botanical & Refreshing",
+  },
+  "iced-teas": {
+    image: "/assets/HeroSlider_images/ice_tea.png",
+    tagline: "Crisp, Botanical & Refreshing",
+  },
+  "coffee": {
+    image: "/assets/HeroSlider_images/Gemini_Generated_Image_ikp642ikp642ikp6.png",
+    tagline: "Bold Aromas & Slow Roasts",
+  },
+  "artisan-coffee": {
+    image: "/assets/HeroSlider_images/Gemini_Generated_Image_ikp642ikp642ikp6.png",
+    tagline: "Bold Aromas & Slow Roasts",
+  },
+  "chocolate": {
+    image: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=800&q=80",
+    tagline: "Velvety, Rich & Decadent Indulgence",
+  },
+  "chocolate-drinks": {
+    image: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=800&q=80",
+    tagline: "Velvety, Rich & Decadent Indulgence",
+  },
+};
+
+const SLUG_ALIASES: Record<string, string> = {
+  "tea-premixes": "tea",
+  "tea": "tea-premixes",
+  "iced-teas": "iced-tea",
+  "iced-tea": "iced-teas",
+  "artisan-coffee": "coffee",
+  "coffee": "artisan-coffee",
+  "chocolate-drinks": "chocolate",
+  "chocolate": "chocolate-drinks",
+  "plant-based-specialties": "chocolate-drinks",
+};
+
+function mapBackendCategoryToFrontend(dto: any): Category {
+  const normalizedSlug = dto.slug?.toLowerCase()?.trim() || "";
+  const meta = DEFAULT_CATEGORY_METADATA[normalizedSlug] ||
+    DEFAULT_CATEGORY_METADATA[SLUG_ALIASES[normalizedSlug]] || {
+      image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80",
+      tagline: "Pure Beverage Excellence",
+    };
+
+  return {
+    id: dto.id ? String(dto.id) : normalizedSlug,
+    slug: dto.slug || "",
+    name: dto.name || "",
+    tagline: dto.tagline || meta.tagline,
+    description: dto.description || "",
+    image: dto.imageUrl || dto.image || meta.image,
+    productCount: typeof dto.productCount === "number" ? dto.productCount : 0,
+    featured: dto.isFeatured ?? true,
+    order: dto.displayOrder ?? dto.order ?? 1,
+  };
+}
+
 export async function getCategories(): Promise<Category[]> {
   try {
     const data = await fetchApi("/catalog/categories");
-    return Array.isArray(data) ? data : CATEGORIES;
+    if (Array.isArray(data) && data.length > 0) {
+      // Filter out root placeholder container if present
+      const items = data.filter((c: any) => c.slug !== "all-premixes");
+      return items.map(mapBackendCategoryToFrontend);
+    }
   } catch (e) {
-    return CATEGORIES;
+    console.error("Failed to fetch categories:", e);
   }
+  return CATEGORIES;
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | undefined> {
+  const normalizedSlug = slug.toLowerCase().trim();
+  const alias = SLUG_ALIASES[normalizedSlug];
+
   try {
-    const cat = await fetchApi(`/catalog/categories/${slug}`);
-    if (cat && !cat.message) return cat;
+    let cat = await fetchApi(`/catalog/categories/${normalizedSlug}`);
+    if (!cat || cat.message) {
+      if (alias) {
+        cat = await fetchApi(`/catalog/categories/${alias}`);
+      }
+    }
+    if (cat && !cat.message) {
+      return mapBackendCategoryToFrontend(cat);
+    }
   } catch (e) {
-    // fallback
+    console.error(`Failed to fetch category by slug ${slug}:`, e);
   }
-  if (slug === "plant-based-specialties" || slug === "chocolate") {
-    return CATEGORIES.find((c) => c.slug === "chocolate-drinks");
-  }
-  return CATEGORIES.find((c) => c.slug === slug);
+
+  return (
+    CATEGORIES.find((c) => c.slug === normalizedSlug || c.slug === alias) ||
+    undefined
+  );
 }

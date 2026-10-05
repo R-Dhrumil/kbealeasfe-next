@@ -55,9 +55,10 @@ export const BRANDS: Brand[] = [
 export async function getBrands(): Promise<Brand[]> {
   try {
     const data = await fetchApi("/catalog/brands");
-    return Array.isArray(data) ? data : BRANDS;
+    return Array.isArray(data) ? data : [];
   } catch (e) {
-    return BRANDS;
+    console.error("Failed to fetch brands:", e);
+    return [];
   }
 }
 
@@ -66,10 +67,7 @@ export async function getBrandBySlug(slug: string): Promise<Brand | undefined> {
     const brand = await fetchApi(`/catalog/brands/${slug}`);
     if (brand && !brand.message) return brand;
   } catch (e) {
-    // fallback
+    console.error(`Failed to fetch brand by slug ${slug}:`, e);
   }
-  if (slug === "coco-joy") {
-    return BRANDS.find((b) => b.slug === "cocojoy");
-  }
-  return BRANDS.find((b) => b.slug === slug);
+  return undefined;
 }
