@@ -1,195 +1,130 @@
-import { Order } from "@/types/order";
+import { Order, OrderStatus } from "@/types/order";
+import { fetchApi } from "@/lib/api";
 
-export const ORDERS: Order[] = [
-  {
-    id: "ord-8924",
-    orderNumber: "KB-8924",
-    customerName: "Aarav Sharma",
-    customerEmail: "aarav.sharma@example.com",
-    customerPhone: "+91 98201 44521",
-    createdAt: "2026-09-20T10:45:00Z",
-    status: "Confirmed",
-    paymentStatus: "Paid",
-    paymentMethod: "UPI",
-    shippingAddress: {
-      fullName: "Aarav Sharma",
-      email: "aarav.sharma@example.com",
-      phone: "+91 98201 44521",
-      addressLine1: "Flat 402, Nilgiri Heights, Baner Road",
-      city: "Pune",
-      state: "Maharashtra",
-      postalCode: "411045",
-      country: "India",
-    },
-    items: [
-      {
-        id: "item-1",
-        productId: "prod-vrinda-cardamom",
-        productName: "Royal Cardamom Tea Premix",
-        brandName: "Vrinda",
-        image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80",
-        unitPrice: 440,
-        quantity: 2,
-        lineTotal: 880,
-        sku: "VRN-ELA-1KG",
-      },
-      {
-        id: "item-2",
-        productId: "prod-sangam-guava-chilly",
-        productName: "Spiced Guava Chilly Iced Tea",
-        brandName: "Sangam",
-        image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=800&q=80",
-        unitPrice: 320,
-        quantity: 1,
-        lineTotal: 320,
-        sku: "SNG-GVA-500G",
-      },
-    ],
-    subtotal: 1200,
-    shippingFee: 0,
-    discount: 100,
-    tax: 55,
-    total: 1155,
-    trackingNumber: "DEL-84912903",
-    carrier: "Delhivery Express",
-    notes: "Please leave package with security gate if unavailable.",
-  },
-  {
-    id: "ord-8923",
-    orderNumber: "KB-8923",
-    customerName: "Priyanka Nair",
-    customerEmail: "priyanka.nair@example.com",
-    customerPhone: "+91 97412 88310",
-    createdAt: "2026-09-19T16:20:00Z",
-    status: "Delivered",
-    paymentStatus: "Paid",
-    paymentMethod: "Credit/Debit Card",
-    shippingAddress: {
-      fullName: "Priyanka Nair",
-      email: "priyanka.nair@example.com",
-      phone: "+91 97412 88310",
-      addressLine1: "Villa 12, Palm Meadows, Whitefield",
-      city: "Bengaluru",
-      state: "Karnataka",
-      postalCode: "560066",
-      country: "India",
-    },
-    items: [
-      {
-        id: "item-3",
-        productId: "prod-urban-mysore-gold",
-        productName: "Mysore Gold Roast Premix",
-        brandName: "Urban Roast",
-        image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80",
-        unitPrice: 490,
-        quantity: 1,
-        lineTotal: 490,
-        sku: "URB-MYS-1KG",
-      },
-      {
-        id: "item-4",
-        productId: "prod-cocojoy-classic-hot-chocolate",
-        productName: "Classic Hot Chocolate Premix",
-        brandName: "CocoJoy",
-        image: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=800&q=80",
-        unitPrice: 440,
-        quantity: 2,
-        lineTotal: 880,
-        sku: "CJ-HC-500G",
-      },
-    ],
-    subtotal: 1270,
-    shippingFee: 0,
-    discount: 50,
-    tax: 61,
-    total: 1281,
-    trackingNumber: "BLR-904128",
-    carrier: "BlueDart",
-  },
-  {
-    id: "ord-8922",
-    orderNumber: "KB-8922",
-    customerName: "Vikram Mehta",
-    customerEmail: "vikram.mehta@example.com",
-    customerPhone: "+91 98110 56712",
-    createdAt: "2026-09-19T11:05:00Z",
-    status: "Processing",
-    paymentStatus: "Paid",
-    paymentMethod: "UPI",
-    shippingAddress: {
-      fullName: "Vikram Mehta",
-      email: "vikram.mehta@example.com",
-      phone: "+91 98110 56712",
-      addressLine1: "B-204, Greater Kailash 1",
-      city: "New Delhi",
-      state: "Delhi",
-      postalCode: "110048",
-      country: "India",
-    },
-    items: [
-      {
-        id: "item-5",
-        productId: "prod-vrinda-masala",
-        productName: "Authentic Masala Chai Premix",
-        brandName: "Vrinda",
-        image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?auto=format&fit=crop&w=800&q=80",
-        unitPrice: 430,
-        quantity: 3,
-        lineTotal: 1290,
-        sku: "VRN-MAS-1KG",
-      },
-    ],
-    subtotal: 1290,
-    shippingFee: 0,
-    discount: 0,
-    tax: 64,
-    total: 1354,
-  },
-  {
-    id: "ord-8921",
-    orderNumber: "KB-8921",
-    customerName: "Sneha Kulkarni",
-    customerEmail: "sneha.k@example.com",
-    customerPhone: "+91 94220 19834",
-    createdAt: "2026-09-18T19:30:00Z",
-    status: "Pending",
-    paymentStatus: "Pending",
-    paymentMethod: "Cash on Delivery",
-    shippingAddress: {
-      fullName: "Sneha Kulkarni",
-      email: "sneha.k@example.com",
-      phone: "+91 94220 19834",
-      addressLine1: "15, Tilak Road, Sadashiv Peth",
-      city: "Pune",
-      state: "Maharashtra",
-      postalCode: "411030",
-      country: "India",
-    },
-    items: [
-      {
-        id: "item-6",
-        productId: "prod-sangam-lemon",
-        productName: "Classic Lemon Zest Iced Tea",
-        brandName: "Sangam",
-        image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80",
-        unitPrice: 290,
-        quantity: 1,
-        lineTotal: 290,
-        sku: "SNG-LMN-500G",
-      },
-    ],
-    subtotal: 290,
-    shippingFee: 50,
-    discount: 0,
-    tax: 17,
-    total: 357,
-  },
-];
+/**
+ * In-memory orders cache.
+ * Hardcoded mock orders have been removed to ensure dynamic handling.
+ */
+export const ORDERS: Order[] = [];
 
-export function getOrders(): Order[] {
-  return ORDERS;
+export interface CreateOrderPayload {
+  shippingAddressId: string;
+  paymentMethod: string;
+  couponCode?: string;
+  items: Array<{
+    productVariantId: string;
+    quantity: number;
+  }>;
 }
 
-export function getOrderById(id: string): Order | undefined {
-  return ORDERS.find((o) => o.id === id || o.orderNumber === id);
+/**
+ * Fetch orders for the current customer account.
+ */
+export async function getCustomerOrders(): Promise<Order[]> {
+  try {
+    const data = await fetchApi("/account/orders");
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("Failed to fetch customer orders:", error);
+    return [];
+  }
+}
+
+/**
+ * Fetch all orders for admin management.
+ */
+export async function getAdminOrders(): Promise<Order[]> {
+  try {
+    const data = await fetchApi("/admin/orders");
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("Failed to fetch admin orders:", error);
+    return [];
+  }
+}
+
+/**
+ * Dynamic getter for orders.
+ * @param scope "account" for customer orders, "admin" for all orders.
+ */
+export async function getOrders(scope: "account" | "admin" = "account"): Promise<Order[]> {
+  if (scope === "admin") {
+    return getAdminOrders();
+  }
+  return getCustomerOrders();
+}
+
+/**
+ * Fetch a single order by ID or order number dynamically.
+ * @param id Order ID (GUID) or order number (e.g. ORD-20260920-1234 or KB-8924)
+ * @param scope "account" or "admin"
+ */
+export async function getOrderById(
+  id: string,
+  scope: "account" | "admin" = "account"
+): Promise<Order | undefined> {
+  const cleanId = id?.trim();
+  if (!cleanId) return undefined;
+
+  // 1. Try direct API endpoint if ID is a valid GUID/UUID
+  try {
+    const directOrder = await fetchApi(`/orders/${cleanId}`);
+    if (directOrder && directOrder.id) {
+      return directOrder as Order;
+    }
+  } catch {
+    // Continue to list search if direct lookup fails (e.g. when searching by orderNumber)
+  }
+
+  // 2. Fetch list based on scope and search by ID or order number
+  try {
+    const ordersList = scope === "admin" ? await getAdminOrders() : await getCustomerOrders();
+    const normalizedTarget = cleanId.toLowerCase().replace(/^#/, "");
+
+    const matched = ordersList.find((o) => {
+      const oId = (o.id || "").toLowerCase();
+      const oNum = (o.orderNumber || "").toLowerCase().replace(/^#/, "");
+      return oId === normalizedTarget || oNum === normalizedTarget;
+    });
+
+    if (matched) return matched;
+  } catch (error) {
+    console.error(`Failed to find order ${id}:`, error);
+  }
+
+  // 3. Fallback to in-memory cache if any
+  return ORDERS.find(
+    (o) =>
+      o.id.toLowerCase() === cleanId.toLowerCase() ||
+      o.orderNumber.toLowerCase() === cleanId.toLowerCase()
+  );
+}
+
+/**
+ * Create/place a new order dynamically.
+ */
+export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
+  return await fetchApi("/orders", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Update the status of an existing order (Admin fulfillment).
+ */
+export async function updateOrderStatus(
+  orderId: string,
+  status: OrderStatus
+): Promise<Order | null> {
+  try {
+    const updated = await fetchApi(`/admin/orders/${orderId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+    return updated as Order;
+  } catch (error) {
+    console.warn("Failed to update order status via API:", error);
+    return null;
+  }
 }

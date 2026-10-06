@@ -1,20 +1,66 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, CheckCircle2, Clock, Truck, Package, ShieldCheck, HelpCircle } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
-import { getOrderById as getSeedOrderById } from "@/data/orders";
+import { getOrderById as fetchOrderById } from "@/data/orders";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Order } from "@/types/order";
 
 export default function OrderDetailPage() {
   const params = useParams();
   const rawId = params?.id as string | undefined;
-  const { getOrderById, isLoaded } = useCustomer();
+  const { getOrderById: getContextOrderById, isLoaded } = useCustomer();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadOrder() {
+      if (!rawId) {
+        setLoading(false);
+        return;
+      }
+
+      // 1. Try local customer context first
+      const contextOrder = getContextOrderById(rawId);
+      if (contextOrder) {
+        if (isMounted) {
+          setOrder(contextOrder);
+          setLoading(false);
+        }
+        return;
+      }
+
+      // 2. Fetch dynamically from API
+      try {
+        const remoteOrder = await fetchOrderById(rawId, "account");
+        if (isMounted) {
+          setOrder(remoteOrder || null);
+        }
+      } catch (err) {
+        console.error("Failed to load order dynamically:", err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    if (isLoaded) {
+      loadOrder();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [rawId, isLoaded, getContextOrderById]);
 
   if (!rawId) {
     return (
@@ -24,17 +70,15 @@ export default function OrderDetailPage() {
     );
   }
 
-  // Look up in live CustomerContext (includes localStorage), fallback to static seeds
-  const order = getOrderById(rawId) || getSeedOrderById(rawId);
+  if (loading || !isLoaded) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center text-xs text-stone-400">
+        Loading order details...
+      </div>
+    );
+  }
 
   if (!order) {
-    if (!isLoaded) {
-      return (
-        <div className="max-w-4xl mx-auto px-4 py-20 text-center text-xs text-stone-400">
-          Loading order details...
-        </div>
-      );
-    }
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-5">
         <Package className="h-14 w-14 text-stone-300 mx-auto" />

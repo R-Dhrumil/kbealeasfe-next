@@ -17,20 +17,27 @@ import { SalesTrendChart, CategoryShareChart } from "@/components/admin/ChartMoc
 import { fetchApi } from "@/lib/api";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
-import { ORDERS } from "@/data/orders";
+import { Order } from "@/types/order";
 import { INVENTORY } from "@/data/inventory";
 
 export default function AdminDashboardPage() {
   const [report, setReport] = useState<any>(null);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await fetchApi("/admin/reports");
-        setReport(data);
+        const [reportData, ordersData] = await Promise.allSettled([
+          fetchApi("/admin/reports"),
+          fetchApi("/admin/orders"),
+        ]);
+        if (reportData.status === "fulfilled") setReport(reportData.value);
+        if (ordersData.status === "fulfilled" && Array.isArray(ordersData.value)) {
+          setRecentOrders(ordersData.value.slice(0, 4));
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Dashboard data load failed:", err);
       } finally {
         setLoading(false);
       }
@@ -44,23 +51,21 @@ export default function AdminDashboardPage() {
     (i: any) => i.status === "Low Stock" || i.status === "Out of Stock"
   );
   
-  const recentOrders = ORDERS.slice(0, 4);
-  
   return (
     <div className="space-y-8">
-      {/* Top Banner indicating Mock Mode */}
-      <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900">
+      {/* Top Banner */}
+      <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-emerald-950">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-[#A87E28] shrink-0" />
+          <Sparkles className="h-4 w-4 text-emerald-700 shrink-0" />
           <span>
-            <strong>UI Mock Data Mode:</strong> All metrics, graphs, and order records are populated from local centralized datasets for frontend architectural evaluation.
+            <strong>Live Operations Hub:</strong> Real-time sales metrics, customer orders, and warehouse fulfillment records.
           </span>
         </div>
         <Link
-          href="/admin/products"
-          className="font-bold underline text-amber-950 hover:text-amber-800 shrink-0"
+          href="/admin/orders"
+          className="font-bold underline text-emerald-900 hover:text-emerald-700 shrink-0"
         >
-          Manage Product Catalog →
+          View All Orders →
         </Link>
       </div>
 
@@ -182,7 +187,10 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="divide-y divide-stone-100 text-xs">
-            {recentOrders.map((order) => (
+            {recentOrders.length === 0 ? (
+              <p className="py-6 text-center text-stone-400">No orders recorded yet.</p>
+            ) : (
+              recentOrders.map((order) => (
               <div
                 key={order.id}
                 className="py-3 flex items-center justify-between gap-3"
@@ -218,7 +226,7 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </div>
 

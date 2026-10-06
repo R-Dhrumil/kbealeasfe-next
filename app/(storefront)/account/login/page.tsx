@@ -119,27 +119,6 @@ function LoginFormContent() {
 
   return (
     <div className="max-w-lg mx-auto bg-white rounded-3xl border border-stone-200/80 p-6 sm:p-8 shadow-2xs space-y-6">
-      {/* 1-Click Demo Shortcut */}
-      <div className="p-4 rounded-2xl bg-[#E8F2EC]/80 border border-[#143425]/15 flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold text-[#143425]">
-            Quick Test Account
-          </p>
-          <p className="text-[11px] text-stone-600">
-            Sign in as Aarav Sharma (with pre-saved order history & address)
-          </p>
-        </div>
-        <Button
-          type="button"
-          size="sm"
-          variant="primary"
-          onClick={handleDemoLogin}
-          disabled={isLoading}
-          className="shrink-0 text-xs"
-        >
-          1-Click Demo
-        </Button>
-      </div>
 
       {/* Mode Tabs */}
       <div className="flex border-b border-stone-200">

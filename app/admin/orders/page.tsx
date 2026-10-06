@@ -1,6 +1,5 @@
 import React from "react";
 import { Metadata } from "next";
-import { getOrders } from "@/data/orders";
 import { OrdersAdminClient } from "./OrdersAdminClient";
 
 export const metadata: Metadata = {

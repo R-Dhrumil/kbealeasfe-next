@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Order, OrderItem, ShippingAddress, PaymentMethod } from "@/types/order";
-import { ORDERS as SEED_ORDERS } from "@/data/orders";
 import { fetchApi } from "@/lib/api";
 
 export interface CustomerAddress {
@@ -103,7 +102,7 @@ const DEFAULT_DEMO_CUSTOMER: CustomerProfile = {
 export function CustomerProvider({ children }: { children: React.ReactNode }) {
   const [customer, setCustomer] = useState<CustomerProfile | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [orders, setOrders] = useState<Order[]>(SEED_ORDERS);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load state from localStorage on mount
@@ -152,7 +151,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
               // Load Orders
               try {
                 const fetchedOrders = await fetchApi("/account/orders");
-                if (Array.isArray(fetchedOrders) && fetchedOrders.length > 0) {
+                if (Array.isArray(fetchedOrders)) {
                   setOrders(fetchedOrders);
                 }
               } catch (err) {
@@ -308,6 +307,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
       console.error("Logout error", err);
     }
     localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(ORDERS_STORAGE_KEY);
+    setOrders([]);
     syncCustomer(null, false);
   };
 
