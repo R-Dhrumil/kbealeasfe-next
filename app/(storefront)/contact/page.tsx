@@ -43,11 +43,14 @@ export default function ContactPage() {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-[#C89B3C] shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold text-stone-900">Headquarters & Manufacturing</p>
+                  {/* <p className="font-bold text-stone-900">Headquarters & Manufacturing</p> */}
                   <p className="mt-0.5 leading-relaxed">
-                    KB Beverage Ltd.<br />
-                    Plot 18, Phase II, Industrial Estate,<br />
-                    Pune, Maharashtra, India - 411019
+                    202,Sai Pancham Flat,
+                    Gajanand Society.
+                    B/S - Riddhi Avenue Appartment,
+                    Near Arihant Super Market,
+                    Manjalpur Naka, Manjalpur,
+                    Vadodara- 390011
                   </p>
                 </div>
               </div>
@@ -55,16 +58,9 @@ export default function ContactPage() {
               <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-[#C89B3C] shrink-0" />
                 <div>
-                  <p className="font-bold text-stone-900">Customer Helpline</p>
-                  <p className="font-mono mt-0.5">+91 (020) 2580-4900</p>
-                </div>
-              </div>
+                  <p className="font-mono mt-0.5">+91 96240 91000</p>
+                  <p className="font-mono mt-0.5">+91 85111 16618 </p>
 
-              <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-[#C89B3C] shrink-0" />
-                <div>
-                  <p className="font-bold text-stone-900">Direct Email</p>
-                  <p className="font-mono mt-0.5">care@kbbeverage.com</p>
                 </div>
               </div>
             </div>
@@ -122,11 +118,10 @@ export default function ContactPage() {
                       key={t.id}
                       type="button"
                       onClick={() => setInquiryType(t.id as any)}
-                      className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all ${
-                        inquiryType === t.id
-                          ? "border-[#143425] bg-[#143425] text-white shadow-2xs"
-                          : "border-stone-200 bg-stone-50 hover:bg-white text-stone-700"
-                      }`}
+                      className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all ${inquiryType === t.id
+                        ? "border-[#143425] bg-[#143425] text-white shadow-2xs"
+                        : "border-stone-200 bg-stone-50 hover:bg-white text-stone-700"
+                        }`}
                     >
                       {t.label}
                     </button>
@@ -144,7 +139,7 @@ export default function ContactPage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Dhrumil Rana"
+                    placeholder="e.g. Jane Doe"
                     className="w-full h-11 px-3.5 rounded-lg border border-stone-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#143425]/20 focus:border-[#143425]"
                   />
                 </div>

@@ -89,11 +89,7 @@ export function Footer() {
                   About Heritage
                 </Link>
               </li>
-              <li>
-                <Link href="/brands" className="hover:text-white transition-colors">
-                  Brand Architecture
-                </Link>
-              </li>
+
               <li>
                 <Link href="/account/orders" className="hover:text-white transition-colors">
                   Track Your Order
@@ -120,16 +116,22 @@ export function Footer() {
             <div className="space-y-3 text-xs text-stone-300">
               <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-[#C89B3C] shrink-0 mt-0.5" />
-                <span>KB Beverage Ltd., Industrial Park, Maharashtra, India</span>
+                <span>202,Sai Pancham Flat,
+                  Gajanand Society.
+                  B/S - Riddhi Avenue Appartment,
+                  Near Arihant Super Market,
+                  Manjalpur Naka, Manjalpur,
+                  Vadodara- 390011</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-[#C89B3C] shrink-0" />
-                <span>+91 (020) 2580-4900</span>
+                <div className="flex flex-col">
+
+                  <span>+91 96240 91000</span>
+                  <span>+91 85111 16618</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-[#C89B3C] shrink-0" />
-                <span>care@kbbeverage.com</span>
-              </div>
+
 
               <div className="pt-2">
                 <Link
@@ -142,23 +144,10 @@ export function Footer() {
             </div>
           </div>
         </div>
-
-        {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
-          <p>© {new Date().getFullYear()} KB Beverage. All rights reserved.</p>
-
-          <div className="flex items-center gap-6">
-            <Link href="/about" className="hover:text-stone-200 transition-colors">
-              About Heritage
-            </Link>
-            <Link href="/contact" className="hover:text-stone-200 transition-colors">
-              Support
-            </Link>
-            <Link href="/admin" className="text-[#C89B3C] hover:underline">
-              Admin Portal
-            </Link>
+          {/* Bottom Bar */}
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
+            <p>© {new Date().getFullYear()} KB Beverage. All rights reserved.</p>
           </div>
-        </div>
       </div>
     </footer>
   );
