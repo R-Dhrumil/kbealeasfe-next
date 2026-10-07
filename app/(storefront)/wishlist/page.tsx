@@ -1,18 +1,35 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Heart, ArrowRight } from "lucide-react";
+import { Heart, ArrowRight, Loader2 } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
-import { PRODUCTS } from "@/data/products";
+import { getProducts } from "@/data/products";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { Button } from "@/components/ui/Button";
+import { Product } from "@/types/product";
 
 export default function WishlistPage() {
   const { wishlistIds } = useWishlist();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const wishlistedProducts = PRODUCTS.filter((p) =>
-    wishlistIds.includes(p.id)
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (e) {
+        console.error("Failed to load wishlist products:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
+
+  const wishlistedProducts = products.filter((p) =>
+    wishlistIds.includes(p.id) || wishlistIds.includes(p.slug)
   );
 
   return (
@@ -33,7 +50,12 @@ export default function WishlistPage() {
         </Link>
       </div>
 
-      {wishlistedProducts.length === 0 ? (
+      {loading ? (
+        <div className="p-16 text-center text-stone-500 text-sm">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-[#143425]" />
+          Loading saved products...
+        </div>
+      ) : wishlistedProducts.length === 0 ? (
         <div className="bg-white rounded-3xl border border-stone-200/80 p-14 text-center space-y-4 max-w-lg mx-auto shadow-2xs">
           <div className="h-16 w-16 mx-auto rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
             <Heart className="h-8 w-8" />
