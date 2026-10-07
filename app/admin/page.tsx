@@ -11,6 +11,7 @@ import {
   ArrowRight,
   TrendingUp,
   Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
 import { SalesTrendChart, CategoryShareChart } from "@/components/admin/ChartMock";
@@ -18,23 +19,37 @@ import { fetchApi } from "@/lib/api";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
 import { Order } from "@/types/order";
-import { INVENTORY } from "@/data/inventory";
 
 export default function AdminDashboardPage() {
   const [report, setReport] = useState<any>(null);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [lowStockItems, setLowStockItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const [reportData, ordersData] = await Promise.allSettled([
+        const [reportData, ordersData, inventoryData] = await Promise.allSettled([
           fetchApi("/admin/reports"),
           fetchApi("/admin/orders"),
+          fetchApi("/inventory?pageSize=50"),
         ]);
         if (reportData.status === "fulfilled") setReport(reportData.value);
         if (ordersData.status === "fulfilled" && Array.isArray(ordersData.value)) {
           setRecentOrders(ordersData.value.slice(0, 4));
+        }
+        if (inventoryData.status === "fulfilled" && inventoryData.value?.items) {
+          const alerts = inventoryData.value.items
+            .filter((i: any) => i.isLowStock || i.isOutOfStock)
+            .map((i: any) => ({
+              id: i.id,
+              productName: i.productName,
+              sku: i.variantSKU,
+              warehouseLocation: i.warehouseLocation || "Main Warehouse",
+              currentStock: i.availableQuantity,
+              safetyStock: i.lowStockThreshold,
+            }));
+          setLowStockItems(alerts);
         }
       } catch (err) {
         console.error("Dashboard data load failed:", err);
@@ -46,10 +61,6 @@ export default function AdminDashboardPage() {
   }, []);
 
   if (loading) return <div className="p-8 text-center text-stone-500">Loading dashboard...</div>;
-
-  const lowStockItems: any[] = INVENTORY.filter(
-    (i: any) => i.status === "Low Stock" || i.status === "Out of Stock"
-  );
   
   return (
     <div className="space-y-8">
@@ -250,30 +261,37 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="divide-y divide-stone-100 text-xs">
-            {lowStockItems.map((inv) => (
-              <div
-                key={inv.id}
-                className="py-3 flex items-center justify-between gap-3"
-              >
-                <div>
-                  <p className="font-medium text-stone-900 line-clamp-1">
-                    {inv.productName}
-                  </p>
-                  <p className="text-stone-400 font-mono text-[10px] mt-0.5">
-                    SKU: {inv.sku} • {inv.warehouseLocation}
-                  </p>
-                </div>
-
-                <div className="text-right shrink-0">
-                  <span className="font-mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                    {inv.currentStock} left
-                  </span>
-                  <p className="text-[10px] text-stone-400 mt-1">
-                    Threshold: {inv.safetyStock}
-                  </p>
-                </div>
+            {lowStockItems.length === 0 ? (
+              <div className="py-6 text-center text-stone-500">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 mx-auto mb-1.5" />
+                <span>All warehouse SKUs are currently healthy.</span>
               </div>
-            ))}
+            ) : (
+              lowStockItems.map((inv) => (
+                <div
+                  key={inv.id}
+                  className="py-3 flex items-center justify-between gap-3"
+                >
+                  <div>
+                    <p className="font-medium text-stone-900 line-clamp-1">
+                      {inv.productName}
+                    </p>
+                    <p className="text-stone-400 font-mono text-[10px] mt-0.5">
+                      SKU: {inv.sku} • {inv.warehouseLocation}
+                    </p>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <span className="font-mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      {inv.currentStock} left
+                    </span>
+                    <p className="text-[10px] text-stone-400 mt-1">
+                      Threshold: {inv.safetyStock}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

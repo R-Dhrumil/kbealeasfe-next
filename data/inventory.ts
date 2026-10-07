@@ -1,112 +1,104 @@
-import { InventoryItem } from "@/types/inventory";
+import { InventoryItem, LowStockAlert } from "@/types/inventory";
+import { fetchApi } from "@/lib/api";
 
-export const INVENTORY: InventoryItem[] = [
-  {
-    id: "inv-1",
-    sku: "VRN-ELA-1KG",
-    productName: "Royal Cardamom Tea Premix",
-    brandName: "Vrinda",
-    categoryName: "Tea Premixes",
-    currentStock: 142,
-    safetyStock: 30,
-    incomingStock: 100,
-    warehouseLocation: "Bin A-12, Pune Central",
-    status: "In Stock",
-    lastRestocked: "2026-09-10",
-  },
-  {
-    id: "inv-2",
-    sku: "VRN-MAS-1KG",
-    productName: "Authentic Masala Chai Premix",
-    brandName: "Vrinda",
-    categoryName: "Tea Premixes",
-    currentStock: 88,
-    safetyStock: 25,
-    incomingStock: 50,
-    warehouseLocation: "Bin A-14, Pune Central",
-    status: "In Stock",
-    lastRestocked: "2026-09-12",
-  },
-  {
-    id: "inv-3",
-    sku: "VRN-GIN-1KG",
-    productName: "Zesty Adrak Ginger Tea Premix",
-    brandName: "Vrinda",
-    categoryName: "Tea Premixes",
-    currentStock: 65,
-    safetyStock: 20,
-    incomingStock: 0,
-    warehouseLocation: "Bin A-15, Pune Central",
-    status: "In Stock",
-    lastRestocked: "2026-08-28",
-  },
-  {
-    id: "inv-4",
-    sku: "SNG-GVA-500G",
-    productName: "Spiced Guava Chilly Iced Tea",
-    brandName: "Sangam",
-    categoryName: "Iced Teas",
-    currentStock: 110,
-    safetyStock: 30,
-    incomingStock: 80,
-    warehouseLocation: "Bin B-02, Mumbai Hub",
-    status: "In Stock",
-    lastRestocked: "2026-09-15",
-  },
-  {
-    id: "inv-5",
-    sku: "SNG-LMN-500G",
-    productName: "Classic Lemon Zest Iced Tea",
-    brandName: "Sangam",
-    categoryName: "Iced Teas",
-    currentStock: 95,
-    safetyStock: 25,
-    incomingStock: 0,
-    warehouseLocation: "Bin B-04, Mumbai Hub",
-    status: "In Stock",
-    lastRestocked: "2026-09-08",
-  },
-  {
-    id: "inv-6",
-    sku: "URB-MYS-1KG",
-    productName: "Mysore Gold Roast Premix",
-    brandName: "Urban Roast",
-    categoryName: "Artisan Coffee",
-    currentStock: 18,
-    safetyStock: 25,
-    incomingStock: 150,
-    warehouseLocation: "Bin C-01, Bengaluru Cold-Dry",
-    status: "Low Stock",
-    lastRestocked: "2026-08-14",
-  },
-  {
-    id: "inv-7",
-    sku: "URB-HZL-500G",
-    productName: "Hazelnut Velvet Latte Premix",
-    brandName: "Urban Roast",
-    categoryName: "Artisan Coffee",
-    currentStock: 12,
-    safetyStock: 20,
-    incomingStock: 60,
-    warehouseLocation: "Bin C-03, Bengaluru Cold-Dry",
-    status: "Low Stock",
-    lastRestocked: "2026-08-20",
-  },
-  {
-    id: "inv-8",
-    sku: "CJ-HC-500G",
-    productName: "Classic Hot Chocolate Premix",
-    brandName: "CocoJoy",
-    categoryName: "Chocolate Drinks",
-    currentStock: 88,
-    safetyStock: 30,
-    incomingStock: 100,
-    warehouseLocation: "Bin D-05, Pune Confectionery",
-    status: "In Stock",
-    lastRestocked: "2026-09-14",
-  },
-];
+/**
+ * Hardcoded mock inventory has been replaced with live dynamic backend data.
+ * Maintained as an empty array export for backward compatibility.
+ */
+export const INVENTORY: InventoryItem[] = [];
 
-export function getInventory(): InventoryItem[] {
-  return INVENTORY;
+export function mapBackendInventoryToFrontend(dto: any): InventoryItem {
+  return {
+    id: dto.id,
+    variantId: dto.productVariantId,
+    productId: dto.productId,
+    productName: dto.productName || "Unnamed Product",
+    productSlug: dto.productSlug || "",
+    variantName: dto.variantName || "",
+    sku: dto.variantSKU || dto.sku || "N/A",
+    brandName: dto.brandName || "KB Beverage",
+    categoryName: dto.categoryName || "Beverage",
+    currentStock: dto.availableQuantity ?? dto.quantityInStock ?? 0,
+    availableStock: dto.availableQuantity ?? 0,
+    reservedStock: dto.reservedQuantity ?? 0,
+    safetyStock: dto.lowStockThreshold ?? 25,
+    incomingStock: 0,
+    warehouseLocation: dto.warehouseLocation || "Main Warehouse",
+    status: dto.isOutOfStock || ((dto.availableQuantity ?? dto.quantityInStock ?? 0) <= 0)
+      ? "Out of Stock"
+      : ((dto.isLowStock || (dto.availableQuantity ?? 0) <= (dto.lowStockThreshold ?? 25)) ? "Low Stock" : "In Stock"),
+    lastRestocked: dto.lastRestockedAt ? new Date(dto.lastRestockedAt).toISOString().split("T")[0] : "Recently",
+  };
+}
+
+export async function getInventory(params: {
+  pageNumber?: number;
+  pageSize?: number;
+  lowStockOnly?: boolean;
+  search?: string;
+} = {}): Promise<{ items: InventoryItem[]; totalCount: number; totalPages: number }> {
+  try {
+    const query = new URLSearchParams();
+    if (params.pageNumber) query.append("pageNumber", String(params.pageNumber));
+    if (params.pageSize) query.append("pageSize", String(params.pageSize));
+    if (params.lowStockOnly !== undefined) query.append("lowStockOnly", String(params.lowStockOnly));
+    if (params.search) query.append("search", params.search);
+
+    const queryString = query.toString() ? `?${query.toString()}` : "?pageSize=100";
+    const data = await fetchApi(`/inventory${queryString}`);
+
+    if (data && Array.isArray(data.items)) {
+      return {
+        items: data.items.map(mapBackendInventoryToFrontend),
+        totalCount: data.totalCount || data.items.length,
+        totalPages: data.totalPages || 1,
+      };
+    }
+    return { items: [], totalCount: 0, totalPages: 1 };
+  } catch (error) {
+    console.error("Failed to fetch inventory from backend:", error);
+    return { items: [], totalCount: 0, totalPages: 1 };
+  }
+}
+
+export async function getLowStockAlerts(): Promise<LowStockAlert[]> {
+  try {
+    const data = await fetchApi("/inventory/alerts");
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("Failed to fetch low stock alerts:", error);
+    return [];
+  }
+}
+
+export async function adjustStock(variantId: string, amount: number, reason: string = "Restocked from Admin"): Promise<InventoryItem | null> {
+  try {
+    const res = await fetchApi(`/inventory/${variantId}/adjust`, {
+      method: "PUT",
+      body: JSON.stringify({
+        adjustmentAmount: amount,
+        reason,
+      }),
+    });
+    return res ? mapBackendInventoryToFrontend(res) : null;
+  } catch (error) {
+    console.error(`Failed to adjust stock for variant ${variantId}:`, error);
+    throw error;
+  }
+}
+
+export async function updateThreshold(variantId: string, lowStockThreshold: number, reorderPoint: number = 0): Promise<InventoryItem | null> {
+  try {
+    const res = await fetchApi(`/inventory/${variantId}/threshold`, {
+      method: "PUT",
+      body: JSON.stringify({
+        lowStockThreshold,
+        reorderPoint,
+      }),
+    });
+    return res ? mapBackendInventoryToFrontend(res) : null;
+  } catch (error) {
+    console.error(`Failed to update threshold for variant ${variantId}:`, error);
+    throw error;
+  }
 }

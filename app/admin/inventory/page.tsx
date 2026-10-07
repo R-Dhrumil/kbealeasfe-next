@@ -1,43 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
-import { INVENTORY } from "@/data/inventory";
+import React, { useState, useEffect } from "react";
+import { getInventory, adjustStock } from "@/data/inventory";
+import { InventoryItem } from "@/types/inventory";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Search, AlertTriangle, CheckCircle2, RotateCw } from "lucide-react";
-import { fetchApi } from "@/lib/api";
+import { Search, AlertTriangle, CheckCircle2, RotateCw, Loader2, Plus } from "lucide-react";
 
 export default function AdminInventoryPage() {
-  const [items, setItems] = useState<any[]>(INVENTORY);
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [restockingId, setRestockingId] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    async function loadInventory() {
-      try {
-        const data = await fetchApi("/inventory?pageSize=100");
-        if (data && data.items && Array.isArray(data.items)) {
-          // Map backend InventoryDto to the frontend's expected format
-          const mappedItems = data.items.map((i: any) => ({
-            id: i.id, // using inventory Id for list mapping
-            variantId: i.productVariantId,
-            productId: i.productId,
-            productName: i.productName,
-            sku: i.variantSKU,
-            brandName: i.brandName,
-            categoryName: i.categoryName,
-            warehouseLocation: i.warehouseLocation || "Main Warehouse",
-            currentStock: i.availableQuantity,
-            bufferThreshold: i.lowStockThreshold,
-            status: i.isOutOfStock ? "Out of Stock" : (i.isLowStock ? "Low Stock" : "In Stock"),
-          }));
-          setItems(mappedItems);
-        }
-      } catch (err) {
-        console.error("Failed to load inventory", err);
-      }
+  const loadData = async () => {
+    try {
+      const data = await getInventory({ pageSize: 100 });
+      setItems(data.items);
+    } catch (err) {
+      console.error("Failed to load inventory:", err);
+    } finally {
+      setLoading(false);
     }
-    loadInventory();
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
   const filteredItems = items.filter((item) => {
@@ -50,41 +39,23 @@ export default function AdminInventoryPage() {
     return matchSearch && matchStatus;
   });
 
-  const handleRestock = async (variantId: string) => {
-    // If it's a mock string ID from INVENTORY, just do local state update
-    if (!variantId || variantId.startsWith("prod-")) {
-      setItems((prev) =>
-        prev.map((i) =>
-          i.id === variantId ? { ...i, currentStock: i.currentStock + 50, status: "In Stock" } : i
-        )
-      );
-      return;
-    }
-
+  const handleRestock = async (variantId?: string, amount: number = 50) => {
+    if (!variantId) return;
+    setRestockingId(variantId);
     try {
-      const res = await fetchApi(`/inventory/${variantId}/adjust`, {
-        method: "PUT",
-        body: JSON.stringify({
-          adjustmentAmount: 50,
-          reason: "Quick Restock from Admin Dashboard"
-        }),
-      });
-      if (res && res.id) {
+      const updated = await adjustStock(variantId, amount, "Quick Restock from Admin Dashboard");
+      if (updated) {
         setItems((prev) =>
-          prev.map((i) =>
-            i.variantId === variantId
-              ? {
-                  ...i,
-                  currentStock: res.availableQuantity,
-                  status: res.isOutOfStock ? "Out of Stock" : (res.isLowStock ? "Low Stock" : "In Stock"),
-                }
-              : i
-          )
+          prev.map((i) => (i.variantId === variantId ? updated : i))
         );
+      } else {
+        await loadData();
       }
     } catch (err) {
-      console.error("Failed to restock", err);
+      console.error("Failed to restock:", err);
       alert("Failed to restock inventory.");
+    } finally {
+      setRestockingId(null);
     }
   };
 
@@ -186,66 +157,82 @@ export default function AdminInventoryPage() {
             </thead>
 
             <tbody className="divide-y divide-stone-100">
-              {filteredItems.map((item) => (
-                <tr
-                  key={item.id}
-                  className={`hover:bg-stone-50/60 transition-colors ${
-                    item.status === "Low Stock" ? "bg-amber-50/30" : ""
-                  }`}
-                >
-                  <td className="py-3.5 px-4 font-mono font-bold text-[#143425]">
-                    {item.sku}
-                  </td>
-
-                  <td className="py-3.5 px-4">
-                    <p className="font-semibold text-stone-900">{item.productName}</p>
-                    <p className="text-[11px] text-[#A87E28] font-bold uppercase">
-                      {item.brandName} • {item.categoryName}
-                    </p>
-                  </td>
-
-                  <td className="py-3.5 px-4 font-mono text-stone-500">
-                    {item.warehouseLocation}
-                  </td>
-
-                  <td className="py-3.5 px-4 font-mono font-bold">
-                    <span
-                      className={
-                        item.currentStock < item.safetyStock
-                          ? "text-amber-700"
-                          : "text-stone-900"
-                      }
-                    >
-                      {item.currentStock} units
-                    </span>
-                  </td>
-
-                  <td className="py-3.5 px-4 font-mono text-stone-500">
-                    {item.safetyStock} min
-                  </td>
-
-                  <td className="py-3.5 px-4">
-                    {item.status === "In Stock" ? (
-                      <Badge variant="success">Healthy</Badge>
-                    ) : item.status === "Low Stock" ? (
-                      <Badge variant="warning">Low Stock</Badge>
-                    ) : (
-                      <Badge variant="danger">Depleted</Badge>
-                    )}
-                  </td>
-
-                  <td className="py-3.5 px-4 text-right">
-                    <button
-                      type="button"
-                      onClick={() => handleRestock(item.variantId || item.id)}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-[#143425] hover:text-[#C89B3C] bg-stone-100 hover:bg-stone-200 px-2.5 py-1 rounded-md transition-colors"
-                    >
-                      <RotateCw className="h-3 w-3" />
-                      <span>+50 Units</span>
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-stone-500">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-[#143425]" />
+                    <span>Loading warehouse inventory...</span>
                   </td>
                 </tr>
-              ))}
+              ) : filteredItems.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-stone-500">
+                    No inventory records match the current filter.
+                  </td>
+                </tr>
+              ) : (
+                filteredItems.map((item) => (
+                  <tr
+                    key={item.id}
+                    className={`hover:bg-stone-50/60 transition-colors ${
+                      item.status === "Low Stock" ? "bg-amber-50/30" : ""
+                    }`}
+                  >
+                    <td className="py-3.5 px-4 font-mono font-bold text-[#143425]">
+                      {item.sku}
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <p className="font-semibold text-stone-900">{item.productName}</p>
+                      <p className="text-[11px] text-[#A87E28] font-bold uppercase">
+                        {item.brandName} • {item.categoryName}
+                      </p>
+                    </td>
+
+                    <td className="py-3.5 px-4 font-mono text-stone-500">
+                      {item.warehouseLocation}
+                    </td>
+
+                    <td className="py-3.5 px-4 font-mono font-bold">
+                      <span
+                        className={
+                          item.currentStock < item.safetyStock
+                            ? "text-amber-700"
+                            : "text-stone-900"
+                        }
+                      >
+                        {item.currentStock} units
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 font-mono text-stone-500">
+                      {item.safetyStock} min
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      {item.status === "In Stock" ? (
+                        <Badge variant="success">Healthy</Badge>
+                      ) : item.status === "Low Stock" ? (
+                        <Badge variant="warning">Low Stock</Badge>
+                      ) : (
+                        <Badge variant="danger">Depleted</Badge>
+                      )}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        type="button"
+                        disabled={restockingId === (item.variantId || item.id)}
+                        onClick={() => handleRestock(item.variantId || item.id)}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#143425] hover:text-[#C89B3C] bg-stone-100 hover:bg-stone-200 px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
+                      >
+                        <RotateCw className={`h-3 w-3 ${restockingId === (item.variantId || item.id) ? "animate-spin" : ""}`} />
+                        <span>+50 Units</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
