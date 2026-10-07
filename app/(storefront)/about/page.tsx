@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, ShieldCheck, CheckCircle2, Leaf, HeartHandshake, ArrowRight } from "lucide-react";
-import { BRANDS } from "@/data/brands";
+import { BRANDS, getBrands } from "@/data/brands";
 import { BRAND_PILLARS } from "@/data/homepage";
 import { Button } from "@/components/ui/Button";
 
@@ -12,7 +12,9 @@ export const metadata: Metadata = {
   description: "Learn about KB Beverage's commitment to pure tea leaves, natural spices, and state-of-the-art aroma-locking technology.",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const brands = await getBrands();
+  const displayBrands = brands.length > 0 ? brands : BRANDS;
   return (
     <div className="space-y-20 md:space-y-28 pb-20">
       {/* Hero Banner */}
@@ -106,7 +108,7 @@ export default function AboutPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {BRANDS.map((brand) => (
+          {displayBrands.map((brand) => (
             <div
               key={brand.id}
               className="p-8 rounded-3xl bg-white border border-stone-200/80 shadow-2xs flex gap-6 items-start"

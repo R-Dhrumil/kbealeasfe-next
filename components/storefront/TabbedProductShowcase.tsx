@@ -1,29 +1,71 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { ProductCard } from "@/components/storefront/ProductCard";
-import { PRODUCTS } from "@/data/products";
-import { CATEGORIES } from "@/data/categories";
+import { PRODUCTS, getProducts } from "@/data/products";
+import { CATEGORIES, getCategories } from "@/data/categories";
+import { Product } from "@/types/product";
+import { Category } from "@/types/category";
 
-export function TabbedProductShowcase() {
+interface TabbedProductShowcaseProps {
+  initialCategories?: Category[];
+  initialProducts?: Product[];
+}
+
+export function TabbedProductShowcase({
+  initialCategories,
+  initialProducts,
+}: TabbedProductShowcaseProps = {}) {
+  const [categories, setCategories] = useState<Category[]>(
+    initialCategories && initialCategories.length > 0 ? initialCategories : CATEGORIES
+  );
+  const [products, setProducts] = useState<Product[]>(
+    initialProducts && initialProducts.length > 0 ? initialProducts : PRODUCTS
+  );
   const [activeTab, setActiveTab] = useState<string>("all");
+
+  useEffect(() => {
+    if (!initialCategories || initialCategories.length === 0) {
+      getCategories().then((cats) => {
+        if (cats && cats.length > 0) setCategories(cats);
+      });
+    }
+    if (!initialProducts || initialProducts.length === 0) {
+      getProducts().then((prods) => {
+        if (prods && prods.length > 0) setProducts(prods);
+      });
+    }
+  }, [initialCategories, initialProducts]);
 
   const tabs = useMemo(
     () => [
       { id: "all", name: "All Beverages" },
-      ...CATEGORIES.map((c) => ({ id: c.id, name: c.name })),
+      ...categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name })),
     ],
-    []
+    [categories]
+  );
+
+  const selectedCategory = useMemo(
+    () => categories.find((c) => c.id === activeTab || c.slug === activeTab),
+    [categories, activeTab]
   );
 
   const filteredProducts = useMemo(() => {
     if (activeTab === "all") {
-      return PRODUCTS.slice(0, 8);
+      return products.slice(0, 8);
     }
-    return PRODUCTS.filter((p) => p.categoryId === activeTab).slice(0, 8);
-  }, [activeTab]);
+    return products
+      .filter((p) => {
+        if (p.categoryId === activeTab) return true;
+        if (selectedCategory && (p.categoryId === selectedCategory.slug || p.categoryName === selectedCategory.name)) {
+          return true;
+        }
+        return false;
+      })
+      .slice(0, 8);
+  }, [activeTab, products, selectedCategory]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-16">

@@ -1,17 +1,35 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { CATEGORIES } from "@/data/categories";
+import { CATEGORIES, getCategories } from "@/data/categories";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Edit2, Eye, Sparkles, CheckCircle2 } from "lucide-react";
+import { Edit2, Eye, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState(CATEGORIES);
+  const [isLoading, setIsLoading] = useState(false);
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
   const [editTagline, setEditTagline] = useState("");
+
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        const data = await getCategories();
+        if (data && data.length > 0) {
+          setCategories(data);
+        }
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const handleStartEdit = (id: string, currentTagline: string) => {
     setEditingCatId(id);

@@ -1,7 +1,8 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BRANDS } from "@/data/brands";
+import { Brand } from "@/types/brand";
+import { getBrands, BRANDS } from "@/data/brands";
 
 const CERTIFICATIONS = [
   { name: "100% Natural", img: "/assets/badges/badge-natural.png" },
@@ -11,7 +12,15 @@ const CERTIFICATIONS = [
   { name: "Fast Dispatch", img: "/assets/badges/badge-shipping.png" },
 ];
 
-export function BrandCarousel() {
+interface BrandCarouselProps {
+  initialBrands?: Brand[];
+}
+
+export async function BrandCarousel({ initialBrands }: BrandCarouselProps = {}) {
+  const brands = initialBrands && initialBrands.length > 0 
+    ? initialBrands 
+    : (await getBrands().catch(() => BRANDS)) || BRANDS;
+
   return (
     <section className="bg-[#FAF7F2] py-14 border-y border-[#E8DED1]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,10 +35,10 @@ export function BrandCarousel() {
 
         {/* Brand Line Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {BRANDS.map((brand) => (
+          {brands.map((brand) => (
             <Link
               key={brand.id}
-              href={`/shop?brand=${brand.id}`}
+              href={`/brands/${brand.slug || brand.id}`}
               className="p-5 rounded-2xl bg-white border border-[#E8DED1]/70 hover:border-[#C89B3C] shadow-2xs hover:shadow-sm transition-all text-center group"
             >
               <h4 className="font-serif text-lg font-bold text-[#143425] group-hover:text-[#A87E28] transition-colors">

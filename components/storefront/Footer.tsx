@@ -2,10 +2,12 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Sparkles, ArrowUpRight, Mail, Phone, MapPin } from "lucide-react";
-import { CATEGORIES } from "@/data/categories";
-import { BRANDS } from "@/data/brands";
+import { getBrands, BRANDS } from "@/data/brands";
 
-export function Footer() {
+export async function Footer() {
+  const brands = await getBrands().catch(() => BRANDS);
+  const displayBrands = brands && brands.length > 0 ? brands : BRANDS;
+
   return (
     <footer className="bg-[#143425] text-[#F9F6F0] pt-16 pb-12 border-t border-[#1C4834]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,26 +49,13 @@ export function Footer() {
               Brand Collections
             </h3>
             <ul className="space-y-2.5 text-sm text-stone-300">
-              <li>
-                <Link href="/brands/vrinda" className="hover:text-white transition-colors">
-                  Vrinda <span className="text-xs text-stone-400">• Tea Premixes</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/brands/sangam" className="hover:text-white transition-colors">
-                  Sangam <span className="text-xs text-stone-400">• Botanical Iced Teas</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/brands/urban-roast" className="hover:text-white transition-colors">
-                  Urban Roast <span className="text-xs text-stone-400">• Artisan Coffee</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/brands/cocojoy" className="hover:text-white transition-colors">
-                  CocoJoy <span className="text-xs text-stone-400">• Chocolate Drinks</span>
-                </Link>
-              </li>
+              {displayBrands.map((brand) => (
+                <li key={brand.id}>
+                  <Link href={`/brands/${brand.slug || brand.id}`} className="hover:text-white transition-colors">
+                    {brand.name}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <Link
                   href="/shop"

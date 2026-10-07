@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Upload, CheckCircle2, Plus, Trash2 } from "lucide-react";
-import { CATEGORIES as MOCK_CATEGORIES } from "@/data/categories";
-import { BRANDS as MOCK_BRANDS } from "@/data/brands";
+import { getCategories } from "@/data/categories";
+import { getBrands } from "@/data/brands";
 import { Button } from "@/components/ui/Button";
 import { fetchApi } from "@/lib/api";
 import { Brand } from "@/types/brand";
@@ -19,8 +19,8 @@ export default function EditProductPage() {
 
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
-  const [brandId, setBrandId] = useState("brand-vrinda");
-  const [categoryId, setCategoryId] = useState("cat-tea-premixes");
+  const [brandId, setBrandId] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("450");
   const [mrp, setMrp] = useState("520");
   const [stock, setStock] = useState("100");
@@ -38,15 +38,15 @@ export default function EditProductPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   
-  const [brands, setBrands] = useState<Brand[]>(MOCK_BRANDS);
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   React.useEffect(() => {
     async function loadData() {
       try {
         const [brandsData, catsData, productData] = await Promise.all([
-          fetchApi("/catalog/brands"),
-          fetchApi("/catalog/categories"),
+          getBrands(),
+          getCategories(),
           fetchApi(`/catalog/products/${productId}`)
         ]);
         if (Array.isArray(brandsData)) setBrands(brandsData);

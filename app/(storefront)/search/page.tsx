@@ -1,19 +1,35 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Search as SearchIcon, X, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { PRODUCTS } from "@/data/products";
-import { CATEGORIES } from "@/data/categories";
+import { PRODUCTS, getProducts } from "@/data/products";
+import { CATEGORIES, getCategories } from "@/data/categories";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { Product } from "@/types/product";
+import { Category } from "@/types/category";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
+  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
+
+  useEffect(() => {
+    async function loadData() {
+      const [prods, cats] = await Promise.all([
+        getProducts().catch(() => PRODUCTS),
+        getCategories().catch(() => CATEGORIES),
+      ]);
+      if (prods && prods.length > 0) setProducts(prods);
+      if (cats && cats.length > 0) setCategories(cats);
+    }
+    loadData();
+  }, []);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
-    return PRODUCTS.filter(
+    return products.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
         p.brandName.toLowerCase().includes(q) ||
@@ -22,7 +38,7 @@ export default function SearchPage() {
         (p.flavorNotes || []).some((f) => f.toLowerCase().includes(q)) ||
         (p.details?.ingredients || []).some((ing) => ing.toLowerCase().includes(q))
     );
-  }, [query]);
+  }, [query, products]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 space-y-10">
@@ -112,7 +128,7 @@ export default function SearchPage() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <Link
                 key={cat.id}
                 href={`/category/${cat.slug}`}
