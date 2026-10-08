@@ -22,6 +22,7 @@ export function mapBackendInventoryToFrontend(dto: any): InventoryItem {
     availableStock: dto.availableQuantity ?? 0,
     reservedStock: dto.reservedQuantity ?? 0,
     safetyStock: dto.lowStockThreshold ?? 25,
+    reorderPoint: dto.reorderPoint ?? 0,
     incomingStock: 0,
     warehouseLocation: dto.warehouseLocation || "Main Warehouse",
     status: dto.isOutOfStock || ((dto.availableQuantity ?? dto.quantityInStock ?? 0) <= 0)
@@ -41,8 +42,8 @@ export async function getInventory(params: {
     const query = new URLSearchParams();
     if (params.pageNumber) query.append("pageNumber", String(params.pageNumber));
     if (params.pageSize) query.append("pageSize", String(params.pageSize));
-    if (params.lowStockOnly !== undefined) query.append("lowStockOnly", String(params.lowStockOnly));
-    if (params.search) query.append("search", params.search);
+    if (params.lowStockOnly) query.append("lowStockOnly", "true");
+    if (params.search && params.search.trim()) query.append("search", params.search.trim());
 
     const queryString = query.toString() ? `?${query.toString()}` : "?pageSize=100";
     const data = await fetchApi(`/inventory${queryString}`);
@@ -71,14 +72,24 @@ export async function getLowStockAlerts(): Promise<LowStockAlert[]> {
   }
 }
 
-export async function adjustStock(variantId: string, amount: number, reason: string = "Restocked from Admin"): Promise<InventoryItem | null> {
+export async function adjustStock(
+  variantId: string,
+  amount: number,
+  reason: string = "Restocked from Admin",
+  warehouseLocation?: string
+): Promise<InventoryItem | null> {
   try {
+    const payload: Record<string, any> = {
+      adjustmentAmount: amount,
+      reason,
+    };
+    if (warehouseLocation) {
+      payload.warehouseLocation = warehouseLocation;
+    }
+
     const res = await fetchApi(`/inventory/${variantId}/adjust`, {
       method: "PUT",
-      body: JSON.stringify({
-        adjustmentAmount: amount,
-        reason,
-      }),
+      body: JSON.stringify(payload),
     });
     return res ? mapBackendInventoryToFrontend(res) : null;
   } catch (error) {

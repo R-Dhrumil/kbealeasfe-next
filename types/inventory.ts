@@ -12,6 +12,7 @@ export interface InventoryItem {
   availableStock?: number;
   reservedStock?: number;
   safetyStock: number;
+  reorderPoint?: number;
   incomingStock: number;
   warehouseLocation: string;
   status: "In Stock" | "Low Stock" | "Out of Stock";

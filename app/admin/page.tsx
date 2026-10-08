@@ -16,6 +16,7 @@ import {
 import { StatCard } from "@/components/admin/StatCard";
 import { SalesTrendChart, CategoryShareChart } from "@/components/admin/ChartMock";
 import { fetchApi } from "@/lib/api";
+import { getLowStockAlerts } from "@/data/inventory";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
 import { Order } from "@/types/order";
@@ -29,27 +30,17 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [reportData, ordersData, inventoryData] = await Promise.allSettled([
+        const [reportData, ordersData, alertsData] = await Promise.allSettled([
           fetchApi("/admin/reports"),
           fetchApi("/admin/orders"),
-          fetchApi("/inventory?pageSize=50"),
+          getLowStockAlerts(),
         ]);
         if (reportData.status === "fulfilled") setReport(reportData.value);
         if (ordersData.status === "fulfilled" && Array.isArray(ordersData.value)) {
           setRecentOrders(ordersData.value.slice(0, 4));
         }
-        if (inventoryData.status === "fulfilled" && inventoryData.value?.items) {
-          const alerts = inventoryData.value.items
-            .filter((i: any) => i.isLowStock || i.isOutOfStock)
-            .map((i: any) => ({
-              id: i.id,
-              productName: i.productName,
-              sku: i.variantSKU,
-              warehouseLocation: i.warehouseLocation || "Main Warehouse",
-              currentStock: i.availableQuantity,
-              safetyStock: i.lowStockThreshold,
-            }));
-          setLowStockItems(alerts);
+        if (alertsData.status === "fulfilled" && Array.isArray(alertsData.value)) {
+          setLowStockItems(alertsData.value);
         }
       } catch (err) {
         console.error("Dashboard data load failed:", err);
@@ -269,7 +260,7 @@ export default function AdminDashboardPage() {
             ) : (
               lowStockItems.map((inv) => (
                 <div
-                  key={inv.id}
+                  key={inv.inventoryId || inv.id}
                   className="py-3 flex items-center justify-between gap-3"
                 >
                   <div>
@@ -277,16 +268,16 @@ export default function AdminDashboardPage() {
                       {inv.productName}
                     </p>
                     <p className="text-stone-400 font-mono text-[10px] mt-0.5">
-                      SKU: {inv.sku} • {inv.warehouseLocation}
+                      SKU: {inv.variantSKU || inv.sku}
                     </p>
                   </div>
 
                   <div className="text-right shrink-0">
                     <span className="font-mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                      {inv.currentStock} left
+                      {inv.availableQuantity ?? inv.currentStock} left
                     </span>
                     <p className="text-[10px] text-stone-400 mt-1">
-                      Threshold: {inv.safetyStock}
+                      Threshold: {inv.lowStockThreshold ?? inv.safetyStock}
                     </p>
                   </div>
                 </div>
