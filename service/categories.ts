@@ -15,6 +15,42 @@ const SLUG_ALIASES: Record<string, string> = {
   "plant-based-specialties": "chocolate-drinks",
 };
 
+const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
+  "tea": "/assets/HeroSlider_images/vrinda_tea.png",
+  "tea-premixes": "/assets/HeroSlider_images/vrinda_tea.png",
+  "iced-tea": "/assets/HeroSlider_images/ice_tea.png",
+  "iced-teas": "/assets/HeroSlider_images/ice_tea.png",
+  "coffee": "/assets/banners/banner-coffee.png",
+  "artisan-coffee": "/assets/banners/banner-coffee.png",
+  "chocolate": "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=1200&q=80",
+  "chocolate-drinks": "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=1200&q=80",
+};
+
+function isValidImageUrl(url: unknown): boolean {
+  if (typeof url !== "string") return false;
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  return (
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:image/") ||
+    trimmed.startsWith("blob:")
+  );
+}
+
+function resolveCategoryImage(dto: any, normalizedSlug: string): string {
+  if (isValidImageUrl(dto.imageUrl)) return dto.imageUrl;
+  if (isValidImageUrl(dto.image)) return dto.image;
+  
+  const mapped =
+    DEFAULT_CATEGORY_IMAGES[normalizedSlug] ||
+    DEFAULT_CATEGORY_IMAGES[SLUG_ALIASES[normalizedSlug] || ""];
+  if (mapped) return mapped;
+
+  return "/assets/banners/promo-composite.png";
+}
+
 function mapBackendCategoryToFrontend(dto: any): Category {
   const normalizedSlug = dto.slug?.toLowerCase()?.trim() || "";
 
@@ -22,9 +58,10 @@ function mapBackendCategoryToFrontend(dto: any): Category {
     id: dto.id ? String(dto.id) : normalizedSlug,
     slug: dto.slug || "",
     name: dto.name || "",
-    tagline: dto.tagline || "",
+    tagline: dto.tagline || dto.description || "",
     description: dto.description || "",
-    image: dto.imageUrl || dto.image || dto.icon || "",
+    image: resolveCategoryImage(dto, normalizedSlug),
+    icon: dto.icon || "",
     productCount: typeof dto.productCount === "number" ? dto.productCount : 0,
     featured: dto.isFeatured ?? dto.isActive ?? true,
     order: dto.displayOrder ?? dto.order ?? 1,
@@ -66,4 +103,3 @@ export async function getCategoryBySlug(slug: string): Promise<Category | undefi
     return undefined;
   }
 }
-

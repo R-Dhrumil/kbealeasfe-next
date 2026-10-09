@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { getCategories } from "@/service/categories";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -85,7 +85,7 @@ export default function AdminCategoriesPage() {
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
                       <div className="relative h-12 w-12 rounded-xl bg-stone-100 overflow-hidden shrink-0">
-                        <Image src={cat.image} alt="" fill className="object-cover" />
+                        <SafeImage src={cat.image} alt={cat.name} fill className="object-cover" />
                       </div>
                       <div>
                         <p className="font-bold text-stone-900 text-sm">
