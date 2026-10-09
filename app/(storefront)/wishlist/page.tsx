@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Heart, ArrowRight, Loader2 } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
-import { getProducts } from "@/data/products";
+import { getProducts } from "@/service/products";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { Button } from "@/components/ui/Button";
 import { Product } from "@/types/product";

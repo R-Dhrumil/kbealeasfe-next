@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, CheckCircle2, Clock, Truck, Package, ShieldCheck, HelpCircle } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
-import { getOrderById as fetchOrderById } from "@/data/orders";
+import { getOrderById as fetchOrderById } from "@/service/orders";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";

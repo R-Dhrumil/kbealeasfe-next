@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { HERO_CONTENT } from "@/data/homepage";
+import { HERO_CONTENT } from "@/service/homepage";
 import { Button } from "@/components/ui/Button";
 import { CheckCircle2, Sparkles, Layers, Sliders, LayoutTemplate } from "lucide-react";
 import { fetchApi } from "@/lib/api";

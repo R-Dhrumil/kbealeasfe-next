@@ -17,7 +17,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCustomer } from "@/context/CustomerContext";
-import { BRAND_COLLECTIONS } from "@/data/collections";
+import { BRAND_COLLECTIONS } from "@/service/collections";
 
 export function Header() {
   const { openCart, summary } = useCart();

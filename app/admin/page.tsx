@@ -16,7 +16,7 @@ import {
 import { StatCard } from "@/components/admin/StatCard";
 import { SalesTrendChart, CategoryShareChart } from "@/components/admin/ChartMock";
 import { fetchApi } from "@/lib/api";
-import { getLowStockAlerts } from "@/data/inventory";
+import { getLowStockAlerts } from "@/service/inventory";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
 import { Order } from "@/types/order";

@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { CATEGORIES, getCategories } from "@/data/categories";
+import { getCategories } from "@/service/categories";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Edit2, Eye, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { Category } from "@/types/category";
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState(CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
   const [editTagline, setEditTagline] = useState("");

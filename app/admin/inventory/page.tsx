@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getInventory, adjustStock, updateThreshold } from "@/data/inventory";
+import { getInventory, adjustStock, updateThreshold } from "@/service/inventory";
 import { InventoryItem } from "@/types/inventory";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";

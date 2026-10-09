@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { getBrands } from "@/data/brands";
+import { getBrands } from "@/service/brands";
 import { BrandCard } from "@/components/storefront/BrandCard";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 

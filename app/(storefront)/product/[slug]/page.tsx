@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { getProductBySlug, getProducts, getProductsByCategory } from "@/data/products";
+import { getProductBySlug, getProducts, getProductsByCategory } from "@/service/products";
 import { ProductDetailClient } from "./ProductDetailClient";
 
 interface ProductPageProps {

@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Upload, CheckCircle2, Plus, Trash2 } from "lucide-react";
-import { getCategories } from "@/data/categories";
-import { getBrands } from "@/data/brands";
+import { getCategories } from "@/service/categories";
+import { getBrands } from "@/service/brands";
 import { Button } from "@/components/ui/Button";
 import { fetchApi } from "@/lib/api";
 import { Brand } from "@/types/brand";

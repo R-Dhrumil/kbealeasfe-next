@@ -2,11 +2,10 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Sparkles, ArrowUpRight, Mail, Phone, MapPin } from "lucide-react";
-import { getBrands, BRANDS } from "@/data/brands";
+import { getBrands } from "@/service/brands";
 
 export async function Footer() {
-  const brands = await getBrands().catch(() => BRANDS);
-  const displayBrands = brands && brands.length > 0 ? brands : BRANDS;
+  const displayBrands = await getBrands().catch(() => []);
 
   return (
     <footer className="bg-[#143425] text-[#F9F6F0] pt-16 pb-12 border-t border-[#1C4834]">

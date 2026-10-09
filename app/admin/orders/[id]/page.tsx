@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Printer, Package, AlertCircle } from "lucide-react";
-import { getOrderById } from "@/data/orders";
+import { getOrderById } from "@/service/orders";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";

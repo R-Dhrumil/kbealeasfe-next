@@ -3,8 +3,8 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
-import { getCategoryBySlug, getCategories } from "@/data/categories";
-import { getProducts } from "@/data/products";
+import { getCategoryBySlug, getCategories } from "@/service/categories";
+import { getProducts } from "@/service/products";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { ArrowLeft, Sparkles } from "lucide-react";
 

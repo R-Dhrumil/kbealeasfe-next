@@ -3,8 +3,8 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, ShieldCheck, CheckCircle2, Leaf, HeartHandshake, ArrowRight } from "lucide-react";
-import { BRANDS, getBrands } from "@/data/brands";
-import { BRAND_PILLARS } from "@/data/homepage";
+import { getBrands } from "@/service/brands";
+import { BRAND_PILLARS } from "@/service/homepage";
 import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
@@ -13,8 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const brands = await getBrands();
-  const displayBrands = brands.length > 0 ? brands : BRANDS;
+  const displayBrands = await getBrands();
   return (
     <div className="space-y-20 md:space-y-28 pb-20">
       {/* Hero Banner */}

@@ -2,8 +2,8 @@ import React from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getBrandBySlug, getBrands } from "@/data/brands";
-import { getProductsByBrand } from "@/data/products";
+import { getBrandBySlug, getBrands } from "@/service/brands";
+import { getProductsByBrand } from "@/service/products";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { ArrowLeft, Sparkles } from "lucide-react";
 

@@ -92,12 +92,7 @@ export async function getOrderById(
     console.error(`Failed to find order ${id}:`, error);
   }
 
-  // 3. Fallback to in-memory cache if any
-  return ORDERS.find(
-    (o) =>
-      o.id.toLowerCase() === cleanId.toLowerCase() ||
-      o.orderNumber.toLowerCase() === cleanId.toLowerCase()
-  );
+  return undefined;
 }
 
 /**

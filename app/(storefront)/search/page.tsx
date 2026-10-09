@@ -3,25 +3,25 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Search as SearchIcon, X, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { PRODUCTS, getProducts } from "@/data/products";
-import { CATEGORIES, getCategories } from "@/data/categories";
+import { getProducts } from "@/service/products";
+import { getCategories } from "@/service/categories";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { Product } from "@/types/product";
 import { Category } from "@/types/category";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
-  const [products, setProducts] = useState<Product[]>(PRODUCTS);
-  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     async function loadData() {
       const [prods, cats] = await Promise.all([
-        getProducts().catch(() => PRODUCTS),
-        getCategories().catch(() => CATEGORIES),
+        getProducts().catch(() => []),
+        getCategories().catch(() => []),
       ]);
-      if (prods && prods.length > 0) setProducts(prods);
-      if (cats && cats.length > 0) setCategories(cats);
+      if (prods) setProducts(prods);
+      if (cats) setCategories(cats);
     }
     loadData();
   }, []);

@@ -4,8 +4,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { ProductCard } from "@/components/storefront/ProductCard";
-import { PRODUCTS, getProducts } from "@/data/products";
-import { CATEGORIES, getCategories } from "@/data/categories";
+import { PRODUCTS, getProducts } from "@/service/products";
+import { CATEGORIES, getCategories } from "@/service/categories";
 import { Product } from "@/types/product";
 import { Category } from "@/types/category";
 

@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Brand } from "@/types/brand";
-import { getBrands, BRANDS } from "@/data/brands";
+import { getBrands } from "@/service/brands";
 
 const CERTIFICATIONS = [
   { name: "100% Natural", img: "/assets/badges/badge-natural.png" },
@@ -19,7 +19,7 @@ interface BrandCarouselProps {
 export async function BrandCarousel({ initialBrands }: BrandCarouselProps = {}) {
   const brands = initialBrands && initialBrands.length > 0 
     ? initialBrands 
-    : (await getBrands().catch(() => BRANDS)) || BRANDS;
+    : (await getBrands().catch(() => [])) || [];
 
   return (
     <section className="bg-[#FAF7F2] py-14 border-y border-[#E8DED1]">

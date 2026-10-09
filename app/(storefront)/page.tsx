@@ -7,9 +7,9 @@ import { HeritageStory } from "@/components/storefront/HeritageStory";
 import { BrandCarousel } from "@/components/storefront/BrandCarousel";
 import { ClienteleShowcase } from "@/components/storefront/ClienteleShowcase";
 
-import { getBrands } from "@/data/brands";
-import { getCategories } from "@/data/categories";
-import { getProducts } from "@/data/products";
+import { getBrands } from "@/service/brands";
+import { getCategories } from "@/service/categories";
+import { getProducts } from "@/service/products";
 
 export default async function HomePage() {
   const [brands, categories, products] = await Promise.all([

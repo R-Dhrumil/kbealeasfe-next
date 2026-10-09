@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BRAND_COLLECTIONS } from "@/data/collections";
+import { BRAND_COLLECTIONS } from "@/service/collections";
 import { X, RotateCcw } from "lucide-react";
 
 export interface FilterState {
