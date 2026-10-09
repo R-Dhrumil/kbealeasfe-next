@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -32,6 +32,8 @@ import {
   Loader2,
   Star,
   FileText,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { fetchApi } from "@/lib/api";
 import { getBrands } from "@/service/brands";
@@ -77,6 +79,91 @@ const TABS: TabDefinition[] = [
   { id: "orders", label: "Orders", icon: ShoppingBag },
 ];
 
+function NumberStepper({
+  value,
+  onChange,
+  min,
+  max,
+  step = 1,
+  className = "",
+}: {
+  value: string | number;
+  onChange: (val: string) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  className?: string;
+}) {
+  const handleIncrement = () => {
+    const num = Number(value) || 0;
+    const next = num + step;
+    if (max !== undefined && next > max) return;
+    onChange(String(next));
+  };
+
+  const handleDecrement = () => {
+    const num = Number(value) || 0;
+    const next = num - step;
+    if (min !== undefined && next < min) return;
+    onChange(String(next));
+  };
+
+  return (
+    <div className={`relative flex items-center ${className || "w-full max-w-md"}`}>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-9 pl-3 pr-8 rounded-md border border-stone-300 bg-white text-xs text-stone-900 focus:outline-none focus:ring-1 focus:ring-[#143425] focus:border-[#143425] hover:border-stone-400 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+      <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center border-l border-stone-200 pl-1 pr-0.5">
+        <button
+          type="button"
+          onClick={handleIncrement}
+          className="h-3.5 w-4 flex items-center justify-center text-stone-400 hover:text-stone-700 transition-colors"
+          tabIndex={-1}
+        >
+          <ChevronUp className="w-3 h-3 stroke-[2]" />
+        </button>
+        <button
+          type="button"
+          onClick={handleDecrement}
+          className="h-3.5 w-4 flex items-center justify-center text-stone-400 hover:text-stone-700 transition-colors"
+          tabIndex={-1}
+        >
+          <ChevronDown className="w-3 h-3 stroke-[2]" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ToggleSwitch({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
+        checked ? "bg-[#143425]" : "bg-stone-300"
+      }`}
+    >
+      <span
+        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform ${
+          checked ? "translate-x-5" : "translate-x-1"
+        }`}
+      />
+    </button>
+  );
+}
+
 interface ProductEditorProps {
   productId?: string;
 }
@@ -111,16 +198,41 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const [createdAtDate, setCreatedAtDate] = useState<string>("");
   const [updatedAtDate, setUpdatedAtDate] = useState<string>("");
 
-  // 2. INVENTORY STATE
-  const [stock, setStock] = useState("100");
-  const [reservedStock, setReservedStock] = useState("0");
-  const [lowStockThreshold, setLowStockThreshold] = useState("25");
-  const [reorderPoint, setReorderPoint] = useState("40");
+  // 2. INVENTORY STATE (SmartStore Inventory Matrix)
+  const [manageInventoryMethod, setManageInventoryMethod] = useState<
+    "Don't track inventory" | "Track inventory" | "Track inventory by product attributes"
+  >("Track inventory");
+  const [isInventoryMethodDropdownOpen, setIsInventoryMethodDropdownOpen] = useState(false);
+  const inventoryMethodRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (inventoryMethodRef.current && !inventoryMethodRef.current.contains(event.target as Node)) {
+        setIsInventoryMethodDropdownOpen(false);
+      }
+    }
+    if (isInventoryMethodDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isInventoryMethodDropdownOpen]);
+
+  const [stock, setStock] = useState("10000");
+  const [displayStockAvailability, setDisplayStockAvailability] = useState(false);
+  const [minStockQuantity, setMinStockQuantity] = useState("0");
+  const [lowStockActivity, setLowStockActivity] = useState<"Nothing" | "Disable buy button" | "Unpublish product">("Nothing");
+  const [notifyAdminForQuantityBelow, setNotifyAdminForQuantityBelow] = useState("1");
+  const [backorders, setBackorders] = useState<"No backorders" | "Allow qty below 0" | "Allow qty below 0 and notify customer">("No backorders");
+  const [allowBackInStockSubscriptions, setAllowBackInStockSubscriptions] = useState(false);
+
+  // Cart quantity controls
   const [minCartQty, setMinCartQty] = useState("1");
-  const [maxCartQty, setMaxCartQty] = useState("50");
+  const [maxCartQty, setMaxCartQty] = useState("10000");
+  const [quantityStep, setQuantityStep] = useState("0");
+  const [customQuantities, setCustomQuantities] = useState("");
+  const [hideQuantitySelection, setHideQuantitySelection] = useState(false);
+  const [quantityPerMainProduct, setQuantityPerMainProduct] = useState("0");
   const [warehouseLocation, setWarehouseLocation] = useState("Facility A - Main Dry Storage");
-  const [stockAdjustAmount, setStockAdjustAmount] = useState("");
-  const [stockAdjustReason, setStockAdjustReason] = useState("Restocked from production batch");
 
   // 3. PRICE STATE
   const [basePrice, setBasePrice] = useState("450");
@@ -302,10 +414,19 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                 if (meta.promoBadgeText) setPromoBadgeText(meta.promoBadgeText);
                 if (meta.bannerHighlight) setBannerHighlight(meta.bannerHighlight);
                 if (meta.taxRate) setTaxRate(meta.taxRate);
-                if (meta.lowStockThreshold) setLowStockThreshold(String(meta.lowStockThreshold));
-                if (meta.reorderPoint) setReorderPoint(String(meta.reorderPoint));
-                if (meta.minCartQty) setMinCartQty(String(meta.minCartQty));
-                if (meta.maxCartQty) setMaxCartQty(String(meta.maxCartQty));
+                if (meta.manageInventoryMethod) setManageInventoryMethod(meta.manageInventoryMethod);
+                if (meta.displayStockAvailability !== undefined) setDisplayStockAvailability(meta.displayStockAvailability);
+                if (meta.minStockQuantity !== undefined) setMinStockQuantity(String(meta.minStockQuantity));
+                if (meta.lowStockActivity) setLowStockActivity(meta.lowStockActivity);
+                if (meta.notifyAdminForQuantityBelow !== undefined) setNotifyAdminForQuantityBelow(String(meta.notifyAdminForQuantityBelow));
+                if (meta.backorders) setBackorders(meta.backorders);
+                if (meta.allowBackInStockSubscriptions !== undefined) setAllowBackInStockSubscriptions(meta.allowBackInStockSubscriptions);
+                if (meta.minCartQty !== undefined) setMinCartQty(String(meta.minCartQty));
+                if (meta.maxCartQty !== undefined) setMaxCartQty(String(meta.maxCartQty));
+                if (meta.quantityStep !== undefined) setQuantityStep(String(meta.quantityStep));
+                if (meta.customQuantities !== undefined) setCustomQuantities(meta.customQuantities);
+                if (meta.hideQuantitySelection !== undefined) setHideQuantitySelection(meta.hideQuantitySelection);
+                if (meta.quantityPerMainProduct !== undefined) setQuantityPerMainProduct(String(meta.quantityPerMainProduct));
                 if (meta.warehouseLocation) setWarehouseLocation(meta.warehouseLocation);
                 if (Array.isArray(meta.downloads)) setDownloads(meta.downloads);
               } catch {
@@ -471,10 +592,19 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       promoBadgeText,
       bannerHighlight,
       taxRate,
-      lowStockThreshold: Number(lowStockThreshold) || 25,
-      reorderPoint: Number(reorderPoint) || 40,
+      manageInventoryMethod,
+      displayStockAvailability,
+      minStockQuantity: Number(minStockQuantity) || 0,
+      lowStockActivity,
+      notifyAdminForQuantityBelow: Number(notifyAdminForQuantityBelow) || 1,
+      backorders,
+      allowBackInStockSubscriptions,
       minCartQty: Number(minCartQty) || 1,
-      maxCartQty: Number(maxCartQty) || 50,
+      maxCartQty: Number(maxCartQty) || 10000,
+      quantityStep: Number(quantityStep) || 0,
+      customQuantities,
+      hideQuantitySelection,
+      quantityPerMainProduct: Number(quantityPerMainProduct) || 0,
       warehouseLocation,
       downloads,
     });
@@ -511,7 +641,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         flavor: v.flavor || "Natural",
         price: v.price || parsedBasePrice,
         initialStock: v.availableQuantity || 50,
-        lowStockThreshold: Number(lowStockThreshold) || 10,
+        lowStockThreshold: Number(notifyAdminForQuantityBelow) || 10,
         isActive: v.isActive,
       })),
     };
@@ -1026,170 +1156,287 @@ export function ProductEditor({ productId }: ProductEditorProps) {
           {/* TAB 2: INVENTORY                                             */}
           {/* ============================================================ */}
           {activeTab === "inventory" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
-                <div className="md:col-span-3">
-                  <span className="text-xs font-semibold text-stone-700">Stock Status</span>
-                </div>
-                <div className="md:col-span-9">
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono ${
-                      Number(stock) > Number(lowStockThreshold)
-                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                        : Number(stock) > 0
-                        ? "bg-amber-50 text-amber-800 border border-amber-200"
-                        : "bg-rose-50 text-rose-800 border border-rose-200"
-                    }`}
-                  >
-                    <span
-                      className={`h-2 w-2 rounded-full ${
-                        Number(stock) > Number(lowStockThreshold)
-                          ? "bg-emerald-600"
-                          : Number(stock) > 0
-                          ? "bg-amber-600"
-                          : "bg-rose-600"
-                      }`}
-                    />
-                    {Number(stock) > Number(lowStockThreshold)
-                      ? "Healthy Stock Level"
-                      : Number(stock) > 0
-                      ? "Low Stock Alert"
-                      : "Out of Stock"}
-                  </span>
-                </div>
-              </div>
+            <div className="space-y-8">
 
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
-                <div className="md:col-span-3">
-                  <span className="text-xs font-semibold text-stone-700">Available Quantity in Stock</span>
+              {/* ─── SECTION 1 : Stock Quantity ─────────────────────────── */}
+              <section>
+                {/* Section Header */}
+                <div className="mb-4 pb-2 border-b border-stone-200">
+                  <h3 className="text-sm font-semibold text-stone-600 tracking-tight">Stock quantity</h3>
                 </div>
-                <div className="md:col-span-9">
-                  <input
-                    type="number"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    className="w-36 h-9 px-3 rounded-lg border border-stone-300 font-mono text-xs font-bold text-stone-900"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
-                <div className="md:col-span-3">
-                  <span className="text-xs font-semibold text-stone-700">Reserved Units (Pending Orders)</span>
-                </div>
-                <div className="md:col-span-9 font-mono text-xs text-stone-500 font-medium">
-                  {reservedStock} units
-                </div>
-              </div>
+                <div className="space-y-0">
 
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
-                <div className="md:col-span-3">
-                  <span className="text-xs font-semibold text-stone-700">Low Stock Threshold</span>
-                  <p className="text-[11px] text-stone-400">Triggers admin alert</p>
-                </div>
-                <div className="md:col-span-9">
-                  <input
-                    type="number"
-                    value={lowStockThreshold}
-                    onChange={(e) => setLowStockThreshold(e.target.value)}
-                    className="w-36 h-9 px-3 rounded-lg border border-stone-300 font-mono text-xs text-stone-900"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
-                <div className="md:col-span-3">
-                  <span className="text-xs font-semibold text-stone-700">Reorder Point</span>
-                  <p className="text-[11px] text-stone-400">Restock prompt quantity</p>
-                </div>
-                <div className="md:col-span-9">
-                  <input
-                    type="number"
-                    value={reorderPoint}
-                    onChange={(e) => setReorderPoint(e.target.value)}
-                    className="w-36 h-9 px-3 rounded-lg border border-stone-300 font-mono text-xs text-stone-900"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
-                <div className="md:col-span-3">
-                  <span className="text-xs font-semibold text-stone-700">Min & Max Cart Quantity</span>
-                </div>
-                <div className="md:col-span-9 flex items-center gap-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] text-stone-400">Min:</span>
-                    <input
-                      type="number"
-                      value={minCartQty}
-                      onChange={(e) => setMinCartQty(e.target.value)}
-                      className="w-20 h-9 px-2.5 rounded-lg border border-stone-300 font-mono text-xs"
-                    />
+                  {/* ── Row: Manage inventory method ── */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                    <div className="md:col-span-4">
+                      <span className="text-xs font-semibold text-stone-700">Manage inventory method</span>
+                    </div>
+                    <div className="md:col-span-8">
+                      <div ref={inventoryMethodRef} className="relative w-full max-w-md">
+                        <button
+                          type="button"
+                          id="inventory-method-btn"
+                          onClick={() => setIsInventoryMethodDropdownOpen(!isInventoryMethodDropdownOpen)}
+                          className="w-full h-9 px-3 pr-9 rounded-md border border-stone-300 bg-white text-xs text-stone-900 flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-[#143425] focus:border-[#143425] hover:border-stone-400 transition-colors"
+                        >
+                          <span className="truncate">{manageInventoryMethod}</span>
+                          <ChevronDown
+                            className={`absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 transition-transform pointer-events-none ${
+                              isInventoryMethodDropdownOpen ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+                        {isInventoryMethodDropdownOpen && (
+                          <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-xl py-1 overflow-hidden">
+                            {(
+                              [
+                                "Don't track inventory",
+                                "Track inventory",
+                                "Track inventory by product attributes",
+                              ] as const
+                            ).map((opt) => (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => {
+                                  setManageInventoryMethod(opt);
+                                  setIsInventoryMethodDropdownOpen(false);
+                                }}
+                                className={`w-full px-3 py-2.5 text-left text-xs flex items-center gap-2.5 transition-colors ${
+                                  manageInventoryMethod === opt
+                                    ? "bg-[#143425]/5 text-stone-900 font-semibold"
+                                    : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                                }`}
+                              >
+                                <span className={`w-3.5 h-3.5 flex items-center justify-center shrink-0 ${
+                                  manageInventoryMethod === opt ? "text-[#143425]" : ""
+                                }`}>
+                                  {manageInventoryMethod === opt && (
+                                    <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                                  )}
+                                </span>
+                                <span>{opt}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] text-stone-400">Max:</span>
-                    <input
-                      type="number"
-                      value={maxCartQty}
-                      onChange={(e) => setMaxCartQty(e.target.value)}
-                      className="w-20 h-9 px-2.5 rounded-lg border border-stone-300 font-mono text-xs"
-                    />
+
+                  {/* ── Conditional: "Track inventory" fields ── */}
+                  {manageInventoryMethod === "Track inventory" && (
+                    <>
+                      {/* Stock quantity */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                        <div className="md:col-span-4">
+                          <span className="text-xs font-semibold text-stone-700">Stock quantity</span>
+                        </div>
+                        <div className="md:col-span-8 flex items-center gap-3">
+                          <NumberStepper value={stock} onChange={setStock} min={0} className="w-full max-w-md" />
+                        </div>
+                      </div>
+
+                      {/* Display stock availability */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                        <div className="md:col-span-4">
+                          <span className="text-xs font-semibold text-stone-700">Display stock availability</span>
+                        </div>
+                        <div className="md:col-span-8 flex items-center gap-3">
+                          <ToggleSwitch checked={displayStockAvailability} onChange={setDisplayStockAvailability} />
+                        </div>
+                      </div>
+
+                      {/* Minimum stock quantity */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                        <div className="md:col-span-4">
+                          <span className="text-xs font-semibold text-stone-700">Minimum stock quantity</span>
+                        </div>
+                        <div className="md:col-span-8">
+                          <NumberStepper value={minStockQuantity} onChange={setMinStockQuantity} min={0} className="w-full max-w-md" />
+                        </div>
+                      </div>
+
+                      {/* Low stock activity */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                        <div className="md:col-span-4">
+                          <span className="text-xs font-semibold text-stone-700">Low stock activity</span>
+                        </div>
+                        <div className="md:col-span-8">
+                          <div className="relative w-full max-w-md">
+                            <select
+                              value={lowStockActivity}
+                              onChange={(e) => setLowStockActivity(e.target.value as any)}
+                              className="w-full h-9 px-3 pr-8 rounded-md border border-stone-300 bg-white text-xs text-stone-900 appearance-none focus:outline-none focus:ring-1 focus:ring-[#143425] focus:border-[#143425] hover:border-stone-400 transition-colors"
+                            >
+                              <option value="Nothing">Nothing</option>
+                              <option value="Disable buy button">Disable buy button</option>
+                              <option value="Unpublish product">Unpublish product</option>
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Notify admin for quantity below */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                        <div className="md:col-span-4">
+                          <span className="text-xs font-semibold text-stone-700">Notify admin for quantity below</span>
+                        </div>
+                        <div className="md:col-span-8">
+                          <NumberStepper value={notifyAdminForQuantityBelow} onChange={setNotifyAdminForQuantityBelow} min={0} className="w-full max-w-md" />
+                        </div>
+                      </div>
+
+                      {/* Backorders */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                        <div className="md:col-span-4">
+                          <span className="text-xs font-semibold text-stone-700">Backorders</span>
+                        </div>
+                        <div className="md:col-span-8">
+                          <div className="relative w-full max-w-md">
+                            <select
+                              value={backorders}
+                              onChange={(e) => setBackorders(e.target.value as any)}
+                              className="w-full h-9 px-3 pr-8 rounded-md border border-stone-300 bg-white text-xs text-stone-900 appearance-none focus:outline-none focus:ring-1 focus:ring-[#143425] focus:border-[#143425] hover:border-stone-400 transition-colors"
+                            >
+                              <option value="No backorders">No backorders</option>
+                              <option value="Allow qty below 0">Allow qty below 0</option>
+                              <option value="Allow qty below 0 and notify customer">Allow qty below 0 and notify customer</option>
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Allow back in stock subscriptions */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 items-center">
+                        <div className="md:col-span-4">
+                          <span className="text-xs font-semibold text-stone-700">Allow back in stock subscriptions</span>
+                        </div>
+                        <div className="md:col-span-8 flex items-center gap-3">
+                          <ToggleSwitch checked={allowBackInStockSubscriptions} onChange={setAllowBackInStockSubscriptions} />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* ── Conditional: "Track inventory by product attributes" ── */}
+                  {manageInventoryMethod === "Track inventory by product attributes" && (
+                    <>
+                      {/* Display stock availability */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                        <div className="md:col-span-4">
+                          <span className="text-xs font-semibold text-stone-700">Display stock availability</span>
+                        </div>
+                        <div className="md:col-span-8 flex items-center gap-3">
+                          <ToggleSwitch checked={displayStockAvailability} onChange={setDisplayStockAvailability} />
+                        </div>
+                      </div>
+
+                      {/* Info callout */}
+                      <div className="mt-4 p-4 bg-[#143425]/5 rounded-lg border border-[#143425]/15 flex items-start gap-3 max-w-xl">
+                        <AlertTriangle className="w-4 h-4 text-[#143425] mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-xs font-semibold text-stone-800">Per-variant stock management</p>
+                          <p className="text-[11px] text-stone-500 mt-0.5 leading-relaxed">
+                            Stock levels for this product are tracked individually for each attribute variant (Size, Flavour, etc.).
+                            Go to the{" "}
+                            <button
+                              type="button"
+                              onClick={() => setActiveTab("attributes")}
+                              className="text-[#143425] font-bold underline underline-offset-2 hover:text-[#C89B3C] transition-colors"
+                            >
+                              Attributes tab
+                            </button>
+                            {" "}to set stock per variant.
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                </div>
+              </section>
+
+              {/* ─── SECTION 2 : Cart Quantity ──────────────────────────── */}
+              <section>
+                {/* Section Header */}
+                <div className="mb-4 pb-2 border-b border-stone-200">
+                  <h3 className="text-sm font-semibold text-stone-600 tracking-tight">Cart quantity</h3>
+                </div>
+
+                <div className="space-y-0">
+
+                  {/* Minimum cart quantity */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                    <div className="md:col-span-4">
+                      <span className="text-xs font-semibold text-stone-700">Minimum cart quantity</span>
+                    </div>
+                    <div className="md:col-span-8">
+                      <NumberStepper value={minCartQty} onChange={setMinCartQty} min={1} className="w-full max-w-md" />
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
-                <div className="md:col-span-3">
-                  <span className="text-xs font-semibold text-stone-700">Warehouse Location</span>
-                </div>
-                <div className="md:col-span-9">
-                  <input
-                    type="text"
-                    value={warehouseLocation}
-                    onChange={(e) => setWarehouseLocation(e.target.value)}
-                    className="w-full max-w-md h-9 px-3 rounded-lg border border-stone-300 text-xs"
-                  />
-                </div>
-              </div>
+                  {/* Maximum cart quantity */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                    <div className="md:col-span-4">
+                      <span className="text-xs font-semibold text-stone-700">Maximum cart quantity</span>
+                    </div>
+                    <div className="md:col-span-8">
+                      <NumberStepper value={maxCartQty} onChange={setMaxCartQty} min={1} className="w-full max-w-md" />
+                    </div>
+                  </div>
 
-              {/* Quick Adjust Tool */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 items-start">
-                <div className="md:col-span-3 pt-2">
-                  <span className="text-xs font-semibold text-stone-700">Stock Adjustment Tool</span>
-                  <p className="text-[11px] text-stone-400">Restock or discard units</p>
+                  {/* Quantity step */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                    <div className="md:col-span-4">
+                      <span className="text-xs font-semibold text-stone-700">Quantity step</span>
+                    </div>
+                    <div className="md:col-span-8">
+                      <NumberStepper value={quantityStep} onChange={setQuantityStep} min={0} className="w-full max-w-md" />
+                    </div>
+                  </div>
+
+                  {/* Custom quantities */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                    <div className="md:col-span-4">
+                      <span className="text-xs font-semibold text-stone-700">Custom quantities</span>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input
+                        type="text"
+                        value={customQuantities}
+                        onChange={(e) => setCustomQuantities(e.target.value)}
+                        className="w-full max-w-md h-9 px-3 rounded-md border border-stone-300 text-xs text-stone-900 bg-white focus:outline-none focus:ring-1 focus:ring-[#143425] focus:border-[#143425] hover:border-stone-400 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Hide quantity selection on product pages */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 border-b border-stone-100 items-center">
+                    <div className="md:col-span-4">
+                      <span className="text-xs font-semibold text-stone-700">Hide quantity selection on product pages</span>
+                    </div>
+                    <div className="md:col-span-8 flex items-center gap-3">
+                      <ToggleSwitch checked={hideQuantitySelection} onChange={setHideQuantitySelection} />
+                    </div>
+                  </div>
+
+                  {/* Quantity per main product */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-6 py-3.5 items-center">
+                    <div className="md:col-span-4">
+                      <span className="text-xs font-semibold text-stone-700">Quantity per main product</span>
+                    </div>
+                    <div className="md:col-span-8">
+                      <NumberStepper value={quantityPerMainProduct} onChange={setQuantityPerMainProduct} min={0} className="w-full max-w-md" />
+                    </div>
+                  </div>
+
                 </div>
-                <div className="md:col-span-9 bg-stone-50 p-3.5 rounded-xl border border-stone-200 flex flex-col sm:flex-row gap-2.5">
-                  <input
-                    type="number"
-                    placeholder="+/- Units (e.g. +50)"
-                    value={stockAdjustAmount}
-                    onChange={(e) => setStockAdjustAmount(e.target.value)}
-                    className="w-36 h-9 px-3 rounded-lg border border-stone-300 text-xs font-mono bg-white"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Reason (e.g. Production Restock)"
-                    value={stockAdjustReason}
-                    onChange={(e) => setStockAdjustReason(e.target.value)}
-                    className="flex-1 h-9 px-3 rounded-lg border border-stone-300 text-xs bg-white"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const delta = Number(stockAdjustAmount);
-                      if (!isNaN(delta) && delta !== 0) {
-                        setStock(String(Math.max(0, Number(stock) + delta)));
-                        setStockAdjustAmount("");
-                        setSaveSuccessMsg(`Stock updated (${delta > 0 ? "+" : ""}${delta} units).`);
-                        setTimeout(() => setSaveSuccessMsg(""), 3000);
-                      }
-                    }}
-                    className="px-3.5 h-9 rounded-lg bg-[#143425] hover:bg-[#1C4834] text-white text-xs font-bold shrink-0"
-                  >
-                    Adjust
-                  </button>
-                </div>
-              </div>
+              </section>
+
             </div>
           )}
 
