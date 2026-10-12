@@ -293,6 +293,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const [newVariantSku, setNewVariantSku] = useState("");
   const [newVariantSize, setNewVariantSize] = useState("");
   const [newVariantPrice, setNewVariantPrice] = useState("450");
+  const [newVariantStock, setNewVariantStock] = useState("50");
   const [showAddVariantModal, setShowAddVariantModal] = useState(false);
 
   // 9. SPECIFICATION ATTRIBUTES STATE
@@ -610,6 +611,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
     const parsedBasePrice = parseFloat(basePrice) || 0;
     const parsedCostPrice = parseFloat(mrp) || parsedBasePrice * 1.2;
+    const parsedStock = Math.max(0, Number(stock) || 0);
+    const parsedThreshold = Math.max(1, Number(notifyAdminForQuantityBelow) || 10);
 
     const payload: any = {
       name: name.trim(),
@@ -622,6 +625,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       basePrice: parsedBasePrice,
       costPrice: parsedCostPrice,
       sku: sku.trim(),
+      stock: parsedStock,
+      lowStockThreshold: parsedThreshold,
+      warehouseLocation: warehouseLocation || "Vadodara Central Depot",
       isFeatured,
       isBestseller,
       isActive: isPublished,
@@ -633,16 +639,25 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         isPrimary: img.isPrimary,
         displayOrder: idx,
       })),
-      variants: variants.map((v) => ({
-        variantSKU: v.variantSKU,
-        variantName: v.variantName,
+      variants: variants.length > 0 ? variants.map((v) => ({
+        variantSKU: v.variantSKU || (sku.trim() ? `${sku.trim()}-${v.size || "VAR"}` : "VAR-STD"),
+        variantName: v.variantName || "Standard Pack",
         size: v.size || "Standard",
         flavor: v.flavor || "Natural",
         price: v.price || parsedBasePrice,
-        initialStock: v.availableQuantity || 50,
-        lowStockThreshold: Number(notifyAdminForQuantityBelow) || 10,
+        initialStock: variants.length === 1 ? parsedStock : (v.availableQuantity !== undefined ? v.availableQuantity : parsedStock),
+        lowStockThreshold: parsedThreshold,
         isActive: v.isActive,
-      })),
+      })) : [{
+        variantSKU: sku.trim() ? `${sku.trim()}-STD` : "VAR-STD",
+        variantName: "Standard Pack",
+        size: "Standard",
+        flavor: "Natural",
+        price: parsedBasePrice,
+        initialStock: parsedStock,
+        lowStockThreshold: parsedThreshold,
+        isActive: isPublished,
+      }],
     };
 
     try {
@@ -1880,7 +1895,18 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                         <td className="py-2.5 px-3">{v.size || "Standard"}</td>
                         <td className="py-2.5 px-3">{v.flavor || "Natural"}</td>
                         <td className="py-2.5 px-3 font-mono font-bold">{formatPrice(v.price)}</td>
-                        <td className="py-2.5 px-3 font-mono">{v.availableQuantity || 50}</td>
+                        <td className="py-2.5 px-3 font-mono">
+                          <input
+                            type="number"
+                            min="0"
+                            value={v.availableQuantity ?? 50}
+                            onChange={(e) => {
+                              const val = Math.max(0, Number(e.target.value) || 0);
+                              setVariants(variants.map((item, i) => i === idx ? { ...item, availableQuantity: val } : item));
+                            }}
+                            className="w-20 h-7 px-2 border border-stone-200 rounded text-xs bg-white text-stone-800 focus:outline-none focus:ring-1 focus:ring-[#143425]"
+                          />
+                        </td>
                         <td className="py-2.5 px-3 text-right">
                           <button
                             type="button"
@@ -1899,7 +1925,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
               {showAddVariantModal && (
                 <div className="p-4 rounded-xl border border-stone-300 bg-stone-50 space-y-3">
                   <h4 className="text-xs font-bold text-stone-900">New Variant Formulation</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
                     <input
                       type="text"
                       placeholder="Variant Name (e.g. 250g Pouch)"
@@ -1928,6 +1954,13 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                       onChange={(e) => setNewVariantPrice(e.target.value)}
                       className="h-8 px-2.5 rounded border border-stone-300 text-xs bg-white font-mono"
                     />
+                    <input
+                      type="number"
+                      placeholder="Stock"
+                      value={newVariantStock}
+                      onChange={(e) => setNewVariantStock(e.target.value)}
+                      className="h-8 px-2.5 rounded border border-stone-300 text-xs bg-white font-mono"
+                    />
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
                     <button
@@ -1949,13 +1982,14 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                             size: newVariantSize || "Standard",
                             flavor: "Natural",
                             price: Number(newVariantPrice) || Number(basePrice) || 450,
-                            availableQuantity: 50,
+                            availableQuantity: Math.max(0, Number(newVariantStock) || 50),
                             isActive: true,
                           },
                         ]);
                         setNewVariantName("");
                         setNewVariantSku("");
                         setNewVariantSize("");
+                        setNewVariantStock("50");
                         setShowAddVariantModal(false);
                       }}
                       className="px-3 h-7 rounded bg-[#143425] text-white text-xs font-bold"
