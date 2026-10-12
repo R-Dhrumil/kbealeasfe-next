@@ -70,7 +70,6 @@ const TABS: TabDefinition[] = [
   { id: "price", label: "Price", icon: IndianRupee },
   { id: "pictures", label: "Pictures", icon: ImageIcon },
   { id: "categories", label: "Category mappings", icon: FolderTree },
-  { id: "manufacturers", label: "Manufacturer mappings", icon: Building2 },
   { id: "promotion", label: "Promotion", icon: Megaphone },
   { id: "attributes", label: "Attributes", icon: Sliders },
   { id: "specifications", label: "Specification attributes", icon: ListChecks },
@@ -1739,63 +1738,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
           {/* ============================================================ */}
           {/* TAB 6: MANUFACTURER MAPPINGS (BRAND)                         */}
           {/* ============================================================ */}
-          {activeTab === "manufacturers" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
-                <div className="md:col-span-3">
-                  <span className="text-xs font-semibold text-stone-700">Brand Manufacturer *</span>
-                </div>
-                <div className="md:col-span-9">
-                  <select
-                    value={brandId}
-                    onChange={(e) => setBrandId(e.target.value)}
-                    className="w-full max-w-md h-9 px-3 rounded-lg border border-stone-300 bg-white text-xs text-stone-800"
-                  >
-                    <option value="">-- Select Brand Manufacturer --</option>
-                    {brands.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} ({b.slug})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {activeBrand && (
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 items-start">
-                  <div className="md:col-span-3 pt-2">
-                    <span className="text-xs font-semibold text-stone-700">Brand Identity</span>
-                  </div>
-                  <div className="md:col-span-9 max-w-md">
-                    <div
-                      className="p-4 rounded-xl border text-white space-y-2"
-                      style={{ backgroundColor: activeBrand.accentColor || "#143425" }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="h-7 w-7 rounded bg-white/20 flex items-center justify-center font-bold text-xs text-[#C89B3C]">
-                            {activeBrand.logo}
-                          </div>
-                          <div>
-                            <h4 className="text-xs font-bold">{activeBrand.name}</h4>
-                            <p className="text-[11px] text-white/80">{activeBrand.tagline}</p>
-                          </div>
-                        </div>
-                        <Link
-                          href={`/brands/${activeBrand.slug}`}
-                          target="_blank"
-                          className="text-[10px] bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded transition-colors inline-flex items-center gap-1"
-                        >
-                          <span>View Page</span>
-                          <ExternalLink className="h-2.5 w-2.5" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+        
 
           {/* ============================================================ */}
           {/* TAB 7: PROMOTION                                             */}
