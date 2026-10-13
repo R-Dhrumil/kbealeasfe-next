@@ -269,26 +269,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     price: number;
     availableQuantity?: number;
     isActive: boolean;
-  }>>([
-    {
-      variantSKU: "VR-CHAI-500G",
-      variantName: "500g Pouch (Standard)",
-      size: "500g",
-      flavor: "Classic Masala",
-      price: 450,
-      availableQuantity: 80,
-      isActive: true,
-    },
-    {
-      variantSKU: "VR-CHAI-1KG",
-      variantName: "1kg Master Tin (Family Pack)",
-      size: "1kg",
-      flavor: "Classic Masala",
-      price: 850,
-      availableQuantity: 20,
-      isActive: true,
-    },
-  ]);
+  }>>([]);
   const [newVariantName, setNewVariantName] = useState("");
   const [newVariantSku, setNewVariantSku] = useState("");
   const [newVariantSize, setNewVariantSize] = useState("");
@@ -1888,36 +1869,44 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
-                    {variants.map((v, idx) => (
-                      <tr key={idx} className="hover:bg-stone-50/50">
-                        <td className="py-2.5 px-3 font-semibold text-stone-900">{v.variantName}</td>
-                        <td className="py-2.5 px-3 font-mono text-stone-500">{v.variantSKU}</td>
-                        <td className="py-2.5 px-3">{v.size || "Standard"}</td>
-                        <td className="py-2.5 px-3">{v.flavor || "Natural"}</td>
-                        <td className="py-2.5 px-3 font-mono font-bold">{formatPrice(v.price)}</td>
-                        <td className="py-2.5 px-3 font-mono">
-                          <input
-                            type="number"
-                            min="0"
-                            value={v.availableQuantity ?? 50}
-                            onChange={(e) => {
-                              const val = Math.max(0, Number(e.target.value) || 0);
-                              setVariants(variants.map((item, i) => i === idx ? { ...item, availableQuantity: val } : item));
-                            }}
-                            className="w-20 h-7 px-2 border border-stone-200 rounded text-xs bg-white text-stone-800 focus:outline-none focus:ring-1 focus:ring-[#143425]"
-                          />
-                        </td>
-                        <td className="py-2.5 px-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => setVariants(variants.filter((_, i) => i !== idx))}
-                            className="text-stone-400 hover:text-rose-600 p-1"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                    {variants.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-6 px-3 text-center text-stone-500 italic">
+                          No custom variants added. A default standard pack will be automatically created using the product's SKU, price, and stock.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      variants.map((v, idx) => (
+                        <tr key={idx} className="hover:bg-stone-50/50">
+                          <td className="py-2.5 px-3 font-semibold text-stone-900">{v.variantName}</td>
+                          <td className="py-2.5 px-3 font-mono text-stone-500">{v.variantSKU}</td>
+                          <td className="py-2.5 px-3">{v.size || "Standard"}</td>
+                          <td className="py-2.5 px-3">{v.flavor || "Natural"}</td>
+                          <td className="py-2.5 px-3 font-mono font-bold">{formatPrice(v.price)}</td>
+                          <td className="py-2.5 px-3 font-mono">
+                            <input
+                              type="number"
+                              min="0"
+                              value={v.availableQuantity ?? 50}
+                              onChange={(e) => {
+                                const val = Math.max(0, Number(e.target.value) || 0);
+                                setVariants(variants.map((item, i) => i === idx ? { ...item, availableQuantity: val } : item));
+                              }}
+                              className="w-20 h-7 px-2 border border-stone-200 rounded text-xs bg-white text-stone-800 focus:outline-none focus:ring-1 focus:ring-[#143425]"
+                            />
+                          </td>
+                          <td className="py-2.5 px-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => setVariants(variants.filter((_, i) => i !== idx))}
+                              className="text-stone-400 hover:text-rose-600 p-1"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
