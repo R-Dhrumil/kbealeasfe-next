@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { ArrowLeft, ArrowRight, Package, Truck, ExternalLink } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
 import { formatPrice, formatDate } from "@/lib/formatters";
@@ -148,8 +149,8 @@ export default function OrdersPage() {
                     className="flex items-center gap-3 p-3 rounded-2xl bg-stone-50/60 border border-stone-100"
                   >
                     <div className="relative h-14 w-14 rounded-xl bg-stone-100 overflow-hidden shrink-0">
-                      <Image
-                        src={item.image && item.image.trim() !== "" ? item.image : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+                      <SafeImage
+                        src={item.image}
                         alt={item.productName}
                         fill
                         className="object-cover"

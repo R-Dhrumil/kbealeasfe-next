@@ -19,6 +19,7 @@ export interface FilterPanelProps {
   onReset: () => void;
   isMobileDrawer?: boolean;
   onCloseMobile?: () => void;
+  collectionCounts?: Record<string, number>;
 }
 
 export function FilterPanel({
@@ -27,6 +28,7 @@ export function FilterPanel({
   onReset,
   isMobileDrawer = false,
   onCloseMobile,
+  collectionCounts,
 }: FilterPanelProps) {
   // Active collection ID: checks direct collection, or matches legacy category/brand
   const activeCollection =
@@ -108,25 +110,26 @@ export function FilterPanel({
         </button>
       )}
 
-      {/* Unified Brand Collections Filter */}
+      {/* Unified Brands Filter */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-semibold uppercase tracking-wider text-[#143425]">
-            Brand Collections
+            Brands
           </h4>
-          <span className="text-[10px] text-stone-400 font-medium">4 Lines</span>
+          <span className="text-[10px] text-[#A87E28] font-medium">4 Lines</span>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {BRAND_COLLECTIONS.map((col) => {
             const isChecked = activeCollection === col.id;
+            const count = collectionCounts?.[col.id] ?? col.productCount;
             return (
               <label
                 key={col.id}
-                className={`flex items-center justify-between p-2 rounded-xl border text-sm cursor-pointer select-none transition-all ${
+                className={`flex items-center justify-between p-2.5 rounded-xl border text-sm cursor-pointer select-none transition-all ${
                   isChecked
                     ? "bg-[#143425]/5 border-[#143425]/30 shadow-2xs"
-                    : "border-transparent hover:bg-stone-50"
+                    : "border-transparent hover:bg-[#FAF7F2]"
                 }`}
               >
                 <span className="flex items-center gap-2.5 text-stone-700">
@@ -140,13 +143,13 @@ export function FilterPanel({
                     <span className="font-semibold text-stone-900 block leading-tight">
                       {col.brandName}
                     </span>
-                    <span className="text-[11px] text-stone-500 block leading-tight">
+                    <span className="text-[11px] text-[#A87E28] block leading-tight mt-0.5">
                       {col.categoryName}
                     </span>
                   </div>
                 </span>
-                <span className="text-xs font-mono text-stone-400 px-1.5 py-0.5 rounded-md bg-stone-100">
-                  {col.productCount}
+                <span className="text-[10px] font-mono text-stone-500 px-2 py-0.5 rounded-full bg-stone-100">
+                  {count}
                 </span>
               </label>
             );

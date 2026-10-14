@@ -147,7 +147,7 @@ export default function CartPage() {
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#143425] hover:text-[#C89B3C] pt-2"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            <span>Continue Shopping Collections</span>
+            <span>Continue Shopping Brands</span>
           </Link>
         </div>
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -89,7 +90,7 @@ export default function CheckoutPage() {
       productId: item.product.variantId || item.product.id,
       productName: item.product.name,
       brandName: item.product.brandName || "KB Beverage",
-      image: item.product.images?.[0] || "/images/brands/vrinda.jpg",
+      image: item.product.images?.[0] || "/assets/HeroSlider_images/vrinda_tea.png",
       unitPrice: item.product.price,
       quantity: item.quantity,
       lineTotal: item.product.price * item.quantity,
@@ -494,8 +495,8 @@ export default function CheckoutPage() {
                   <div key={item.product.id} className="py-2.5 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2.5">
                       <div className="relative h-12 w-12 rounded-lg bg-stone-100 overflow-hidden shrink-0">
-                        <Image
-                          src={(item.product.images && item.product.images[0]) ? item.product.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+                        <SafeImage
+                          src={item.product.images?.[0]}
                           alt=""
                           fill
                           className="object-cover"

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import {
   Search,
@@ -141,7 +142,7 @@ export function ProductsAdminClient({
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
                       <div className="relative h-12 w-12 rounded-xl bg-stone-100 overflow-hidden shrink-0">
-                        <Image src={(p.images && p.images[0]) ? p.images[0] : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"} alt="" fill className="object-cover" />
+                        <SafeImage src={p.images?.[0]} alt="" fill className="object-cover" />
                       </div>
                       <div>
                         <p className="font-semibold text-stone-900 line-clamp-1">

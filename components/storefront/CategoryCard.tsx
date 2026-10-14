@@ -45,7 +45,7 @@ export function CategoryCard({ category, className }: CategoryCardProps) {
         </p>
 
         <div className="pt-2 flex items-center gap-1.5 text-xs font-medium text-white group-hover:text-[#C89B3C] transition-colors">
-          <span>Explore Collection</span>
+          <span>Explore Category</span>
           <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
         </div>
       </div>

@@ -124,7 +124,7 @@ export default function SearchPage() {
         /* Explore Four Categories if no search query entered yet */
         <div className="pt-8 border-t border-[#E8DED1] space-y-6">
           <h2 className="text-xl font-serif font-bold text-[#143425] text-center">
-            Or Browse The 4 Primary Collections
+            Or Browse The 4 Signature Brands
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -136,7 +136,7 @@ export default function SearchPage() {
               >
                 <div>
                   <span className="text-[10px] uppercase tracking-wider text-[#A87E28] font-bold">
-                    Collection
+                    Brand
                   </span>
                   <h3 className="font-serif text-lg font-bold text-stone-900 group-hover:text-[#143425] mt-1">
                     {cat.name}

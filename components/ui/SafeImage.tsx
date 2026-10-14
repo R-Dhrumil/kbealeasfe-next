@@ -10,17 +10,32 @@ interface SafeImageProps extends Omit<ImageProps, "src"> {
 
 const DEFAULT_FALLBACK = "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80";
 
-function isValidUrlOrPath(url: unknown): boolean {
-  if (typeof url !== "string") return false;
-  const trimmed = url.trim();
-  if (!trimmed) return false;
-  return (
-    trimmed.startsWith("/") ||
-    trimmed.startsWith("http://") ||
-    trimmed.startsWith("https://") ||
-    trimmed.startsWith("data:image/") ||
-    trimmed.startsWith("blob:")
-  );
+function sanitizeImageSrc(url: unknown): string | null {
+  if (typeof url !== "string") return null;
+  let trimmed = url.trim();
+  if (!trimmed) return null;
+
+  // If pointing to backend assets directory on localhost, use local Next.js /assets/ directly
+  if (trimmed.includes("localhost:5153/assets/")) {
+    trimmed = trimmed.replace(/^https?:\/\/localhost:5153/, "");
+  }
+
+  // If it's a backend upload, ensure it has the host if needed
+  if (trimmed.startsWith("/uploads/")) {
+    trimmed = `http://localhost:5153${trimmed}`;
+  }
+
+  // Ensure spaces in path are URL encoded for Next.js Image component
+  if (trimmed.startsWith("/") || trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    try {
+      // Avoid double encoding if already encoded
+      return encodeURI(decodeURI(trimmed));
+    } catch {
+      return trimmed;
+    }
+  }
+
+  return trimmed;
 }
 
 export function SafeImage({ src, fallbackSrc = DEFAULT_FALLBACK, alt, ...props }: SafeImageProps) {
@@ -30,8 +45,8 @@ export function SafeImage({ src, fallbackSrc = DEFAULT_FALLBACK, alt, ...props }
     setError(false);
   }, [src]);
 
-  const hasValidSrc = isValidUrlOrPath(src);
-  const finalSrc = !hasValidSrc || error ? fallbackSrc : (src as string);
+  const sanitized = sanitizeImageSrc(src);
+  const finalSrc = !sanitized || error ? fallbackSrc : sanitized;
 
   return (
     <Image

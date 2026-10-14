@@ -145,7 +145,7 @@ export function ClienteleShowcase() {
         <div className="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E8DED1] text-center">
           <p className="text-2xl sm:text-3xl font-serif font-bold text-[#143425]">4 Lines</p>
           <p className="text-xs text-stone-600 font-medium mt-1">Tea, Iced Tea, Coffee, Cocoa</p>
-          <span className="text-[10px] text-stone-400 block mt-0.5">Unified Collections</span>
+          <span className="text-[10px] text-stone-400 block mt-0.5">Dedicated Brands</span>
         </div>
 
         <div className="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E8DED1] text-center">

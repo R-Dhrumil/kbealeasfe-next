@@ -13,17 +13,23 @@ import { cn } from "@/lib/utils";
 export interface ProductCardProps {
   product: Product;
   className?: string;
+  viewMode?: "grid" | "list";
 }
 
-export function ProductCard({ product, className }: ProductCardProps) {
+export function ProductCard({ product, className, viewMode = "grid" }: ProductCardProps) {
   const { addItem } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const isWishlisted = isInWishlist(product.id);
 
+  const isList = viewMode === "list";
+
   return (
     <div
       className={cn(
-        "group relative flex flex-col rounded-2xl bg-white border border-stone-200/80 p-3.5 sm:p-4 hover:border-stone-300 hover:shadow-md transition-all duration-300 overflow-hidden",
+        "group relative flex rounded-2xl bg-white border border-stone-200/80 hover:border-stone-300 hover:shadow-md transition-all duration-300 overflow-hidden",
+        isList
+          ? "flex-col sm:flex-row p-4 sm:p-5 gap-5 items-stretch sm:items-center"
+          : "flex-col p-3.5 sm:p-4",
         className
       )}
     >
@@ -69,7 +75,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
       {/* Image container with secondary hover image */}
       <Link
         href={`/product/${product.slug}`}
-        className="relative aspect-square w-full rounded-xl bg-[#F7F4EE] overflow-hidden flex items-center justify-center mb-3.5"
+        className={cn(
+          "relative rounded-xl bg-[#F7F4EE] overflow-hidden flex items-center justify-center shrink-0",
+          isList
+            ? "w-full sm:w-44 h-44 aspect-square mb-0"
+            : "aspect-square w-full mb-3.5"
+        )}
       >
         <SafeImage
           src={(product.images && product.images[0]) ? product.images[0] : null}
@@ -93,46 +104,51 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </Link>
 
       {/* Product Information */}
-      <div className="flex flex-col flex-1">
-        <div className="flex items-center justify-between text-xs text-stone-500 mb-1">
-          <span className="font-semibold uppercase tracking-wider text-[#A87E28] text-[11px]">
-            {product.brandName}
-          </span>
-          <div className="flex items-center gap-1 text-stone-600">
-            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-            <span className="font-medium text-xs">{product.rating}</span>
-            <span className="text-[11px] text-stone-400">
-              ({product.reviewCount})
+      <div className={cn("flex flex-col flex-1", isList && "justify-between")}>
+        <div>
+          <div className="flex items-center justify-between text-xs text-stone-500 mb-1">
+            <span className="font-semibold uppercase tracking-wider text-[#A87E28] text-[11px]">
+              {product.brandName}
             </span>
+            <div className="flex items-center gap-1 text-stone-600">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <span className="font-medium text-xs">{product.rating}</span>
+              <span className="text-[11px] text-stone-400">
+                ({product.reviewCount})
+              </span>
+            </div>
+          </div>
+
+          <Link
+            href={`/product/${product.slug}`}
+            className={cn(
+              "font-medium text-stone-900 group-hover:text-[#143425] transition-colors",
+              isList ? "text-base sm:text-lg line-clamp-1" : "text-sm sm:text-base line-clamp-1"
+            )}
+          >
+            {product.name}
+          </Link>
+
+          <p className={cn("text-xs text-stone-500 mt-0.5", isList ? "line-clamp-2 sm:line-clamp-3" : "line-clamp-1")}>
+            {product.description || product.tagline}
+          </p>
+
+          {/* Flavor Notes Pills */}
+          <div className="flex flex-wrap gap-1 mt-2.5 mb-3">
+            {(product.flavorNotes || []).slice(0, isList ? 4 : 2).map((note, idx) => (
+              <span
+                key={idx}
+                className="text-[10px] bg-[#F2ECE1] text-[#6E4D38] px-1.5 py-0.5 rounded font-medium"
+              >
+                {note}
+              </span>
+            ))}
           </div>
         </div>
 
-        <Link
-          href={`/product/${product.slug}`}
-          className="font-medium text-sm sm:text-base text-stone-900 group-hover:text-[#143425] line-clamp-1 transition-colors"
-        >
-          {product.name}
-        </Link>
-
-        <p className="text-xs text-stone-500 mt-0.5 line-clamp-1">
-          {product.tagline}
-        </p>
-
-        {/* Flavor Notes Pills */}
-        <div className="flex flex-wrap gap-1 mt-2.5 mb-3">
-          {(product.flavorNotes || []).slice(0, 2).map((note, idx) => (
-            <span
-              key={idx}
-              className="text-[10px] bg-[#F2ECE1] text-[#6E4D38] px-1.5 py-0.5 rounded font-medium"
-            >
-              {note}
-            </span>
-          ))}
-        </div>
-
         {/* Price and Add to Cart Action */}
-        <div className="mt-auto pt-2.5 border-t border-stone-100 flex items-center justify-between">
-          <PriceDisplay price={product.price} mrp={product.mrp} size="sm" />
+        <div className={cn("pt-2.5 border-t border-stone-100 flex items-center justify-between", !isList && "mt-auto")}>
+          <PriceDisplay price={product.price} mrp={product.mrp} size={isList ? "md" : "sm"} />
 
           <button
             type="button"
@@ -142,10 +158,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
               addItem(product);
             }}
             aria-label={`Add ${product.name} to cart`}
-            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[#143425] hover:bg-[#1C4834] text-white text-xs font-medium transition-all shadow-2xs active:scale-95"
+            className="inline-flex items-center gap-1.5 h-8 sm:h-9 px-3.5 rounded-lg bg-[#143425] hover:bg-[#1C4834] text-white text-xs font-medium transition-all shadow-2xs active:scale-95"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
-            <span>Add</span>
+            <span>Add to Cart</span>
           </button>
         </div>
       </div>

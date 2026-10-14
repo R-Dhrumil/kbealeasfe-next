@@ -43,10 +43,20 @@ export function OrdersAdminClient() {
     return matchStatus && matchSearch;
   });
 
-  const handleUpdateStatus = (orderId: string, newStatus: OrderStatus) => {
+  const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
     );
+
+    try {
+      await fetchApi(`/admin/orders/${orderId}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch (err: any) {
+      console.error("Failed to persist order status:", err);
+      alert(err?.message || "Failed to update order status on server.");
+    }
   };
 
   return (

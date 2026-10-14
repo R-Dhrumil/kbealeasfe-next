@@ -18,13 +18,14 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCustomer } from "@/context/CustomerContext";
 import { BRAND_COLLECTIONS } from "@/service/collections";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 export function Header() {
   const { openCart, summary } = useCart();
   const { wishlistCount } = useWishlist();
   const { customer, isLoggedIn, logout, orders } = useCustomer();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [brandsOpen, setBrandsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
 
   return (
@@ -72,66 +73,90 @@ export function Header() {
               Shop All
             </Link>
 
-            {/* Unified Collections Dropdown */}
+            {/* Unified Brands Dropdown */}
             <div
               className="relative group py-2"
-              onMouseEnter={() => setCollectionsOpen(true)}
-              onMouseLeave={() => setCollectionsOpen(false)}
+              onMouseEnter={() => setBrandsOpen(true)}
+              onMouseLeave={() => setBrandsOpen(false)}
             >
               <button
                 type="button"
+                onClick={() => setBrandsOpen(!brandsOpen)}
                 className="flex items-center gap-1 hover:text-[#143425] transition-colors"
               >
-                <span>Collections</span>
+                <span>Brands</span>
                 <ChevronDown className="h-3.5 w-3.5 text-stone-400 group-hover:rotate-180 transition-transform duration-200" />
               </button>
 
-              {collectionsOpen && (
-                <div className="absolute top-full -left-4 w-80 bg-white rounded-2xl shadow-xl border border-stone-100 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-stone-400 border-b border-stone-100">
-                    Our 4 Dedicated Collections
-                  </div>
-                  <div className="pt-1.5 space-y-1">
-                    {BRAND_COLLECTIONS.map((col) => (
-                      <Link
-                        key={col.id}
-                        href={`/brands/${col.brandSlug}`}
-                        onClick={() => setCollectionsOpen(false)}
-                        className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#F9F6F0] transition-colors group/item"
-                      >
-                        <div>
-                          <p className="text-sm font-semibold text-stone-900 group-hover/item:text-[#143425]">
-                            {col.brandName}{" "}
-                            <span className="text-xs font-normal text-stone-500">
-                              • {col.categoryName}
-                            </span>
-                          </p>
-                          <p className="text-[11px] text-stone-400 line-clamp-1">
-                            {col.tagline}
-                          </p>
-                        </div>
-                        <span className="text-[11px] font-mono text-stone-400">
-                          {col.productCount}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-
-                  <div className="mt-2 pt-2 border-t border-stone-100 px-3 py-1 flex items-center justify-between">
+              {brandsOpen && (
+                <div className="absolute top-full -left-4 w-96 bg-white rounded-3xl shadow-2xl border border-[#E8DED1] p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#A87E28] border-b border-[#F2ECE1] flex items-center justify-between">
+                    <span>Our 4 Dedicated Brands</span>
                     <Link
                       href="/brands"
-                      onClick={() => setCollectionsOpen(false)}
+                      onClick={() => setBrandsOpen(false)}
+                      className="text-[#143425] hover:text-[#C89B3C] font-bold text-[10px] transition-colors"
+                    >
+                      All Brands &rarr;
+                    </Link>
+                  </div>
+
+                  <div className="pt-2 space-y-1">
+                    {BRAND_COLLECTIONS.map((col) => {
+                      const logoSrc = `/brands/${col.id === "cocojoy" ? "coco-joy" : col.id}-logo.png`;
+                      return (
+                        <Link
+                          key={col.id}
+                          href={`/brands/${col.brandSlug}`}
+                          onClick={() => setBrandsOpen(false)}
+                          className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FAF7F2] transition-colors group/item"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="relative h-10 w-10 rounded-xl bg-white border border-[#E8DED1] p-1.5 flex items-center justify-center shrink-0 shadow-2xs group-hover/item:border-stone-300">
+                              <SafeImage
+                                src={logoSrc}
+                                alt={col.brandName}
+                                fill
+                                className="object-contain p-0.5"
+                                fallbackSrc="/assets/HeroSlider_images/vrinda_tea.png"
+                              />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-stone-900 group-hover/item:text-[#143425] leading-tight">
+                                {col.brandName}{" "}
+                                <span className="text-[11px] font-normal text-[#A87E28]">
+                                  • {col.categoryName}
+                                </span>
+                              </p>
+                              <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
+                                {col.tagline}
+                              </p>
+                            </div>
+                          </div>
+
+                          <span className="text-[10px] font-mono font-medium text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full shrink-0">
+                            {col.productCount}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-2 pt-2.5 border-t border-[#F2ECE1] px-3 py-1 flex items-center justify-between">
+                    <Link
+                      href="/brands"
+                      onClick={() => setBrandsOpen(false)}
                       className="text-xs font-semibold text-[#143425] hover:text-[#C89B3C] inline-flex items-center gap-1 transition-colors"
                     >
-                      <span>Brand Heritage</span>
+                      <span>Explore Brands Portfolio</span>
                       <ArrowRight className="h-3 w-3" />
                     </Link>
                     <Link
                       href="/shop"
-                      onClick={() => setCollectionsOpen(false)}
-                      className="text-xs text-stone-500 hover:text-stone-900"
+                      onClick={() => setBrandsOpen(false)}
+                      className="text-xs text-stone-500 hover:text-stone-900 font-medium"
                     >
-                      View All
+                      Shop All
                     </Link>
                   </div>
                 </div>
@@ -350,9 +375,18 @@ export function Header() {
                 </Link>
 
                 <div className="pt-2 border-t border-[#E8DED1]">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-2">
-                    Brand Collections
-                  </p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
+                      Our Brands
+                    </p>
+                    <Link
+                      href="/brands"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-[11px] font-semibold text-[#143425] hover:underline"
+                    >
+                      View All &rarr;
+                    </Link>
+                  </div>
                   <div className="space-y-2 pl-2">
                     {BRAND_COLLECTIONS.map((col) => (
                       <Link

@@ -15,8 +15,10 @@ export interface Product {
   name: string;
   brandId: string;
   brandName: string;
+  brandSlug?: string;
   categoryId: string;
   categoryName: string;
+  categorySlug?: string;
   tagline: string;
   description: string;
   details: ProductDetail;

@@ -37,7 +37,7 @@ export default function WishlistPage() {
       <div className="flex items-center justify-between pb-6 border-b border-stone-200">
         <div>
           <span className="text-xs font-semibold uppercase tracking-widest text-[#A87E28]">
-            Saved Collections
+            Saved Items
           </span>
           <h1 className="text-3xl font-serif font-bold text-[#143425] mt-1">
             My Wishlist ({wishlistedProducts.length})

@@ -114,7 +114,7 @@ export function ProductDetailClient({
           {/* Brand Tag & Title */}
           <div>
             <Link
-              href={`/brands/${product.brandId.replace("brand-", "")}`}
+              href={`/brands/${product.brandSlug || product.brandId.replace("brand-", "")}`}
               className="inline-flex items-center gap-1 text-xs uppercase tracking-widest font-bold text-[#A87E28] hover:underline mb-1.5"
             >
               <span>{product.brandName}</span>

@@ -42,10 +42,10 @@ export async function Footer() {
             </div>
           </div>
 
-          {/* Brand Collections Column */}
+          {/* Brands Column */}
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-widest text-[#C89B3C] mb-4">
-              Brand Collections
+              Our Brands
             </h3>
             <ul className="space-y-2.5 text-sm text-stone-300">
               {displayBrands.map((brand) => (

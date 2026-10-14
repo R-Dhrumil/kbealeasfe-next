@@ -81,7 +81,7 @@ export function PromoBanners() {
                   href="/shop?category=cat-tea-premixes"
                   className="h-11 sm:h-12 px-6 sm:px-7 rounded-xl bg-[#143425] hover:bg-[#1C4834] text-white text-xs sm:text-sm font-semibold tracking-wide uppercase transition-all shadow-sm hover:shadow inline-flex items-center gap-2.5 group/btn"
                 >
-                  <span>Shop Collection</span>
+                  <span>Shop Brand</span>
                   <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                 </Link>
                 <span className="text-xs text-stone-500 font-medium">

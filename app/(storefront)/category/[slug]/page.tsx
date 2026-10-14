@@ -47,11 +47,25 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   const allProducts = await getProducts();
-  const categoryProducts = allProducts.filter(
-    (p) =>
+  const cSlug = category.slug.toLowerCase().replace(/[\s-]+/g, "");
+  const cName = category.name.toLowerCase().replace(/[\s-]+/g, "");
+
+  const categoryProducts = allProducts.filter((p) => {
+    const pCName = (p.categoryName || "").toLowerCase().replace(/[\s-]+/g, "");
+    const pCSlug = (p.categorySlug || "").toLowerCase().replace(/[\s-]+/g, "");
+
+    return (
       p.categoryId === category.id ||
-      p.categoryName.toLowerCase().replace(/\s+/g, "-") === category.slug
-  );
+      pCName.includes(cSlug) ||
+      cSlug.includes(pCName) ||
+      pCSlug.includes(cSlug) ||
+      pCName.includes(cName) ||
+      (cSlug.includes("chocolate") && (pCName.includes("chocolate") || p.brandName.toLowerCase().includes("coco"))) ||
+      (cSlug.includes("tea") && pCName.includes("tea") && !pCName.includes("iced") && !cSlug.includes("iced")) ||
+      (cSlug.includes("iced") && pCName.includes("iced")) ||
+      (cSlug.includes("coffee") && pCName.includes("coffee"))
+    );
+  });
 
   return (
     <div className="space-y-12 pb-20">
@@ -69,16 +83,16 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
-            href="/shop"
+            href="/brands"
             className="inline-flex items-center gap-1.5 text-xs text-[#C89B3C] hover:underline mb-4 group"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
-            <span>Back to All Collections</span>
+            <span>Back to All Brands</span>
           </Link>
 
           <div className="max-w-2xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs text-[#C89B3C] font-semibold tracking-wider uppercase">
-              <Sparkles className="h-3 w-3" /> Core Collection
+              <Sparkles className="h-3 w-3" /> Signature Category
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-serif font-normal tracking-tight text-white">

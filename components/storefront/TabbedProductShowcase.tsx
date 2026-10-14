@@ -74,7 +74,7 @@ export function TabbedProductShowcase({
         <div>
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#A87E28] mb-2">
             <Sparkles className="h-3.5 w-3.5 text-[#C89B3C]" />
-            <span>Curated Collections</span>
+            <span>Signature Brands</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-serif text-[#143425] tracking-tight">
             Popular & Flagship Brews

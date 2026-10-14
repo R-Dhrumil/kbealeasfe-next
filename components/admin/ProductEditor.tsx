@@ -69,7 +69,7 @@ const TABS: TabDefinition[] = [
   { id: "inventory", label: "Inventory", icon: Package },
   { id: "price", label: "Price", icon: IndianRupee },
   { id: "pictures", label: "Pictures", icon: ImageIcon },
-  { id: "categories", label: "Category mappings", icon: FolderTree },
+  { id: "categories", label: "Brand & Category mappings", icon: FolderTree },
   { id: "promotion", label: "Promotion", icon: Megaphone },
   { id: "attributes", label: "Attributes", icon: Sliders },
   { id: "specifications", label: "Specification attributes", icon: ListChecks },
@@ -543,8 +543,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       return;
     }
     if (!brandId) {
-      setErrorMsg("Please map a Brand/Manufacturer.");
-      setActiveTab("manufacturers");
+      setErrorMsg("Please select a dedicated Brand.");
+      setActiveTab("categories");
       return;
     }
     if (!categoryId) {
@@ -733,7 +733,14 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
           <div className="h-9 w-12 rounded bg-[#FBF5E8] border border-[#E8DED1] flex items-center justify-center overflow-hidden shrink-0">
             {primaryImage ? (
-              <img src={primaryImage} alt={name} className="h-full w-full object-cover" />
+              <img
+                src={encodeURI(primaryImage.replace(/^https?:\/\/localhost:5153\/assets\//, "/assets/"))}
+                alt={name}
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80";
+                }}
+              />
             ) : (
               <span className="text-[10px] font-bold text-[#C89B3C] uppercase tracking-wider font-mono">
                 {sku ? sku.substring(0, 3) : "KB"}
@@ -1004,6 +1011,27 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                     <option value="Artisan roast">Artisan Whole Leaf & Coffee Roast</option>
                     <option value="Botanical Iced Tea">Botanical Iced Tea Blend</option>
                     <option value="Gift Pack">Curated Tasting Gift Box</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Brand Selector */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
+                <div className="md:col-span-3">
+                  <span className="text-xs font-semibold text-stone-700">Dedicated Brand *</span>
+                </div>
+                <div className="md:col-span-9">
+                  <select
+                    value={brandId}
+                    onChange={(e) => setBrandId(e.target.value)}
+                    className="w-full max-w-md h-9 px-3 rounded-lg border border-stone-300 bg-white text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-[#143425]"
+                  >
+                    <option value="">-- Select Dedicated Brand --</option>
+                    {brands.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name} ({b.slug})
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1624,7 +1652,14 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                     }`}
                   >
                     <div className="h-40 w-full rounded-lg bg-stone-100 overflow-hidden relative">
-                      <img src={img.url} alt={img.alt} className="h-full w-full object-cover" />
+                      <img
+                        src={encodeURI(img.url.replace(/^https?:\/\/localhost:5153\/assets\//, "/assets/"))}
+                        alt={img.alt}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80";
+                        }}
+                      />
                       {img.isPrimary && (
                         <span className="absolute top-2 left-2 bg-[#C89B3C] text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
                           <Star className="h-2.5 w-2.5 fill-white" /> Primary
@@ -1720,12 +1755,53 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                 </div>
               )}
 
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
+                <div className="md:col-span-3">
+                  <span className="text-xs font-semibold text-stone-700">Dedicated Brand *</span>
+                </div>
+                <div className="md:col-span-9">
+                  <select
+                    value={brandId}
+                    onChange={(e) => setBrandId(e.target.value)}
+                    className="w-full max-w-md h-9 px-3 rounded-lg border border-stone-300 bg-white text-xs text-stone-800"
+                  >
+                    <option value="">-- Select Dedicated Brand (e.g. Vrinda, Sangam) --</option>
+                    {brands.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name} ({b.slug})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {activeBrand && (
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 border-b border-stone-100 items-center">
+                  <div className="md:col-span-3">
+                    <span className="text-xs font-semibold text-stone-700">Brand Pillar</span>
+                  </div>
+                  <div className="md:col-span-9">
+                    <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 max-w-md flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-stone-200 overflow-hidden shrink-0">
+                        {activeBrand.logoUrl && (
+                          <img src={activeBrand.logoUrl} alt={activeBrand.name} className="h-full w-full object-cover" />
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-stone-900">{activeBrand.name}</h4>
+                        <span className="text-[11px] text-[#A87E28] font-mono">Slug: /{activeBrand.slug}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-4 py-3 items-center">
                 <div className="md:col-span-3">
                   <span className="text-xs font-semibold text-stone-700">Breadcrumb Preview</span>
                 </div>
                 <div className="md:col-span-9 text-xs text-stone-600 font-medium">
-                  Storefront &gt; Catalog &gt; <strong className="text-[#143425]">{activeCategory?.name || "Category"}</strong> &gt; {name || "Product"}
+                  Storefront &gt; {activeBrand?.name || "Brand"} &gt; <strong className="text-[#143425]">{activeCategory?.name || "Category"}</strong> &gt; {name || "Product"}
                 </div>
               </div>
             </div>

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { ArrowLeft, CheckCircle2, Clock, Truck, Package, ShieldCheck, HelpCircle } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
 import { getOrderById as fetchOrderById } from "@/service/orders";
@@ -204,8 +205,8 @@ export default function OrderDetailPage() {
             <div key={item.id} className="p-5 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative h-16 w-16 rounded-xl bg-stone-100 overflow-hidden shrink-0">
-                  <Image
-                    src={item.image && item.image.trim() !== "" ? item.image : "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80"}
+                  <SafeImage
+                    src={item.image}
                     alt={item.productName}
                     fill
                     className="object-cover"

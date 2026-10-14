@@ -22,6 +22,35 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/collection",
+        destination: "/brands",
+        permanent: true,
+      },
+      {
+        source: "/collections",
+        destination: "/brands",
+        permanent: true,
+      },
+      {
+        source: "/collection/:slug",
+        destination: "/brands/:slug",
+        permanent: true,
+      },
+      {
+        source: "/collections/:slug",
+        destination: "/brands/:slug",
+        permanent: true,
+      },
+      {
+        source: "/brands/coco-joy",
+        destination: "/brands/cocojoy",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
