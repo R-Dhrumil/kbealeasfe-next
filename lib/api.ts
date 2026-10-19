@@ -24,11 +24,17 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     let errorMessage = "An error occurred";
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch {
-      // Ignore JSON parse error if response is not JSON
+    if (response.status === 401) {
+      errorMessage = "Session expired or unauthorized. Please log in with your Admin credentials.";
+    } else if (response.status === 403) {
+      errorMessage = "Access denied: Administrator privileges required.";
+    } else {
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        // Ignore JSON parse error if response is not JSON
+      }
     }
     throw new Error(errorMessage);
   }

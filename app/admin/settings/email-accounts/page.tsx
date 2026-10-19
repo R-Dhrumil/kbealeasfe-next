@@ -307,6 +307,14 @@ export default function EmailAccountsPage() {
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
             <span>{error}</span>
+            {error.toLowerCase().includes("log in") && (
+              <a
+                href="/account/login?redirect=/admin/settings/email-accounts"
+                className="underline font-bold text-[#143425] hover:text-[#C89B3C] ml-1"
+              >
+                Sign In Now &rarr;
+              </a>
+            )}
           </div>
           <button onClick={() => setError(null)} className="text-rose-500 hover:text-rose-700">
             <X className="h-4 w-4" />
@@ -343,11 +351,10 @@ export default function EmailAccountsPage() {
           <button
             onClick={handleDeleteSelected}
             disabled={selectedIds.length === 0}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              selectedIds.length > 0
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${selectedIds.length > 0
                 ? "bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100"
                 : "text-stone-400 border border-stone-200 cursor-not-allowed bg-stone-100/60"
-            }`}
+              }`}
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span>Delete selected</span>
@@ -399,9 +406,8 @@ export default function EmailAccountsPage() {
                   return (
                     <tr
                       key={account.id}
-                      className={`hover:bg-sky-50/40 transition-colors ${
-                        isChecked ? "bg-sky-50/60" : ""
-                      }`}
+                      className={`hover:bg-sky-50/40 transition-colors ${isChecked ? "bg-sky-50/60" : ""
+                        }`}
                     >
                       <td className="px-4 py-3.5 text-center" onClick={(e) => e.stopPropagation()}>
                         <input
@@ -458,11 +464,10 @@ export default function EmailAccountsPage() {
                           <button
                             type="button"
                             onClick={(e) => handleToggleMenu(account, e)}
-                            className={`p-1.5 rounded-lg border transition-colors ${
-                              isMenuOpen
+                            className={`p-1.5 rounded-lg border transition-colors ${isMenuOpen
                                 ? "bg-stone-200 border-stone-300 text-stone-900"
                                 : "bg-transparent border-transparent hover:bg-stone-100 text-stone-500 hover:text-stone-900"
-                            }`}
+                              }`}
                             title="Actions"
                           >
                             <MoreHorizontal className="h-4 w-4" />
@@ -770,11 +775,10 @@ export default function EmailAccountsPage() {
 
               {testResult && (
                 <div
-                  className={`p-3.5 rounded-xl border text-xs flex items-start gap-2 ${
-                    testResult.success
+                  className={`p-3.5 rounded-xl border text-xs flex items-start gap-2 ${testResult.success
                       ? "bg-emerald-50 border-emerald-200 text-emerald-800"
                       : "bg-rose-50 border-rose-200 text-rose-800"
-                  }`}
+                    }`}
                 >
                   {testResult.success ? (
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />

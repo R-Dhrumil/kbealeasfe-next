@@ -276,6 +276,14 @@ export default function MessageTemplatesPage() {
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
             <span>{error}</span>
+            {error.toLowerCase().includes("log in") && (
+              <a
+                href="/account/login?redirect=/admin/content/message-templates"
+                className="underline font-bold text-[#143425] hover:text-[#C89B3C] ml-1"
+              >
+                Sign In Now &rarr;
+              </a>
+            )}
           </div>
           <button onClick={() => setError(null)} className="text-rose-500 hover:text-rose-700">
             <X className="h-4 w-4" />
