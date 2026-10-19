@@ -19,6 +19,8 @@ import {
   Settings,
   Store,
   ChevronDown,
+  Mail,
+  MailCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +48,7 @@ const NAV_ITEMS = [
     group: "Marketing & CMS",
     items: [
       { href: "/admin/content", label: "Homepage CMS", icon: FileText },
+      { href: "/admin/content/message-templates", label: "Message Templates", icon: MailCheck },
       { href: "/admin/coupons", label: "Coupons & Discounts", icon: TicketPercent },
       { href: "/admin/reviews", label: "Review Moderation", icon: MessageSquare },
     ],
@@ -55,6 +58,7 @@ const NAV_ITEMS = [
     items: [
       { href: "/admin/reports", label: "Sales Reports", icon: BarChart3 },
       { href: "/admin/settings", label: "Store Settings", icon: Settings },
+      { href: "/admin/settings/email-accounts", label: "Email Accounts", icon: Mail },
     ],
   },
 ];
