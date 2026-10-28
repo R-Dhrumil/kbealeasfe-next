@@ -1,13 +1,15 @@
 "use client";
 
 import React from "react";
-import { Menu, Bell, Search, UserCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, Bell, Search, LogOut } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
 
 export function AdminTopbar({ onOpenSidebar }: { onOpenSidebar: () => void }) {
-  const { customer } = useCustomer();
+  const { customer, logout } = useCustomer();
+  const router = useRouter();
   const displayName = customer?.fullName || "Operations Lead";
-  const displayEmail = customer?.email || "admin@kbbeverage.com";
+  const displayEmail = customer?.email || "admin@kbealeas.com";
   const initials = displayName
     .split(" ")
     .map((n) => n[0])
@@ -64,6 +66,18 @@ export function AdminTopbar({ onOpenSidebar }: { onOpenSidebar: () => void }) {
               {displayEmail}
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              router.push("/account/login?redirect=/admin");
+            }}
+            title="Sign Out"
+            className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors ml-1"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </header>

@@ -25,10 +25,15 @@ function LoginFormContent() {
 
   // If already logged in, show status & option to proceed or switch
   if (isLoggedIn && customer) {
+    const isAdmin = customer.memberTier === "Admin" || customer.role === "Admin";
+    const isAdminTarget = redirectUrl.startsWith("/admin");
+
     return (
       <div className="max-w-md mx-auto bg-white rounded-3xl border border-stone-200/80 p-8 shadow-2xs text-center space-y-6">
-        <div className="h-16 w-16 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700">
-          <CheckCircle2 className="h-8 w-8" />
+        <div className={`h-16 w-16 mx-auto rounded-full flex items-center justify-center ${
+          isAdminTarget && !isAdmin ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
+        }`}>
+          {isAdminTarget && !isAdmin ? <ShieldCheck className="h-8 w-8" /> : <CheckCircle2 className="h-8 w-8" />}
         </div>
         <div>
           <h2 className="font-serif text-2xl font-bold text-[#143425]">
@@ -37,22 +42,31 @@ function LoginFormContent() {
           <p className="text-xs text-stone-500 mt-1">
             You are currently logged in as <strong className="text-stone-800">{customer.fullName}</strong> ({customer.email}).
           </p>
+          {isAdminTarget && !isAdmin && (
+            <p className="text-xs text-amber-700 font-medium mt-2 bg-amber-50 p-2.5 rounded-xl border border-amber-200/60">
+              Note: This account does not have administrator privileges required to access the Operations Portal.
+            </p>
+          )}
         </div>
 
         <div className="space-y-3 pt-2">
-          <Button
-            variant="primary"
-            size="lg"
-            className="w-full gap-2 justify-center"
-            onClick={() => router.push(redirectUrl)}
-          >
-            <span>Proceed to {redirectUrl === "/checkout" ? "Checkout" : "My Account"}</span>
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          {(!isAdminTarget || isAdmin) && (
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-full gap-2 justify-center"
+              onClick={() => router.push(redirectUrl)}
+            >
+              <span>
+                Proceed to {redirectUrl === "/checkout" ? "Checkout" : isAdminTarget ? "Admin Portal" : "My Account"}
+              </span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
 
           <Button
-            variant="outline"
-            size="md"
+            variant={isAdminTarget && !isAdmin ? "primary" : "outline"}
+            size={isAdminTarget && !isAdmin ? "lg" : "md"}
             className="w-full"
             onClick={() => {
               logout();
@@ -60,7 +74,7 @@ function LoginFormContent() {
               setPassword("");
             }}
           >
-            Switch / Sign Out
+            {isAdminTarget && !isAdmin ? "Sign In as Admin" : "Switch / Sign Out"}
           </Button>
         </div>
       </div>
@@ -79,8 +93,13 @@ function LoginFormContent() {
     try {
       const role = await login(email, password);
       if (role === "Admin") {
-        router.push("/admin");
+        router.push(redirectUrl.startsWith("/admin") ? redirectUrl : "/admin");
       } else {
+        if (redirectUrl.startsWith("/admin")) {
+          setError("This account does not have administrator privileges. Please sign in with an Admin account.");
+          setIsLoading(false);
+          return;
+        }
         router.push(redirectUrl);
       }
     } catch {
@@ -119,6 +138,18 @@ function LoginFormContent() {
 
   return (
     <div className="max-w-lg mx-auto bg-white rounded-3xl border border-stone-200/80 p-6 sm:p-8 shadow-2xs space-y-6">
+
+      {redirectUrl.startsWith("/admin") && (
+        <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8DED1] flex items-start gap-3">
+          <ShieldCheck className="h-5 w-5 text-[#A87E28] shrink-0 mt-0.5" />
+          <div className="text-xs">
+            <p className="font-bold text-[#143425]">Admin Operations Login</p>
+            <p className="text-[11px] text-stone-500 mt-0.5 leading-relaxed">
+              Please sign in with administrator credentials (default: <span className="font-mono font-semibold text-[#143425]">admin@kbealeas.com</span>) to access the operations dashboard.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Mode Tabs */}
       <div className="flex border-b border-stone-200">

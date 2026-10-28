@@ -23,6 +23,7 @@ export interface CustomerProfile {
   memberTier: string;
   joinedDate: string;
   addresses: CustomerAddress[];
+  role?: string;
 }
 
 export interface PlaceOrderInput {
@@ -144,7 +145,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
                 phone: meData.phone || "+91 00000 00000",
                 memberTier: meData.role === "Admin" ? "Admin" : "KB Member",
                 joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-                addresses: addresses
+                addresses: addresses,
+                role: meData.role
               });
               setIsLoggedIn(true);
               
@@ -165,9 +167,10 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
                 fullName: meData.fullName,
                 email: meData.email,
                 phone: meData.phone || "",
-                memberTier: "KB Member",
+                memberTier: meData.role === "Admin" ? "Admin" : "KB Member",
                 joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-                addresses: []
+                addresses: [],
+                role: meData.role
               });
               setIsLoggedIn(true);
             }
@@ -233,7 +236,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             phone: meData.phone || "",
             memberTier: meData.role === "Admin" ? "Admin" : "KB Member",
             joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-            addresses: []
+            addresses: [],
+            role: meData.role
           });
           setIsLoggedIn(true);
 
