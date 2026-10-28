@@ -11,7 +11,6 @@ import {
   Trash2,
   FileText,
   Mail,
-  Globe,
   RotateCw,
   X,
   Send,
@@ -21,6 +20,8 @@ import {
   Sparkles,
   ChevronRight,
   ExternalLink,
+  Paperclip,
+  Loader2,
 } from "lucide-react";
 import { fetchApi } from "@/lib/api";
 
@@ -80,6 +81,7 @@ export default function MessageTemplatesPage() {
 
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
 
   // Preview Modal
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -178,6 +180,43 @@ export default function MessageTemplatesPage() {
     } catch (err: any) {
       setError(err?.message || "Failed to delete template.");
     }
+  };
+
+  const handleFileUpload = async (slot: 1 | 2 | 3, file: File) => {
+    if (!file) return;
+    setUploadingSlot(slot);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetchApi("/messagetemplates/upload-attachment", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res && res.relativePath) {
+        const key = `attachment${slot}Path` as "attachment1Path" | "attachment2Path" | "attachment3Path";
+        setFormState((prev) => ({
+          ...prev,
+          [key]: res.relativePath,
+        }));
+        setSuccessMessage(`Attached ${file.name} to Attachment ${slot}`);
+      }
+    } catch (err: any) {
+      setError(err?.message || `Failed to upload attachment for Attachment ${slot}`);
+    } finally {
+      setUploadingSlot(null);
+    }
+  };
+
+  const handleRemoveAttachment = (slot: 1 | 2 | 3) => {
+    const key = `attachment${slot}Path` as "attachment1Path" | "attachment2Path" | "attachment3Path";
+    setFormState((prev) => ({
+      ...prev,
+      [key]: "",
+    }));
   };
 
   const handleCopyTemplate = () => {
@@ -432,8 +471,8 @@ export default function MessageTemplatesPage() {
       {/* ========================================================================= */}
       {currentView === "edit" && editingTemplate && (
         <div className="space-y-6">
-          {/* Smartstore Top Action Bar matching Screenshot 2 */}
-          <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-stone-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {/* Top Action Bar docking beneath AdminTopbar header */}
+          <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-stone-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/* Title with Back Button */}
             <div className="flex items-center gap-3">
               <button
@@ -572,26 +611,6 @@ export default function MessageTemplatesPage() {
                 </div>
               </div>
 
-              {/* Language Flags Bar matching Screenshot 2 */}
-              <div className="pt-2 border-t border-stone-100 flex items-center gap-2">
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-stone-800 text-white font-medium text-xs shadow-2xs"
-                >
-                  <Globe className="h-3.5 w-3.5 text-stone-300" />
-                  <span>Standard</span>
-                </button>
-                <div className="flex items-center gap-1 text-sm pl-2">
-                  <span title="English (United States)">🇺🇸</span>
-                  <span title="German">🇩🇪</span>
-                  <span title="French">🇫🇷</span>
-                  <span title="Spanish">🇪🇸</span>
-                  <span title="Italian">🇮🇹</span>
-                  <span title="Japanese">🇯🇵</span>
-                  <span title="Hindi">🇮🇳</span>
-                </div>
-              </div>
-
               {/* Email Account Dropdown (Crucial Purpose Linkage!) */}
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-8">
                 <label className="w-44 font-semibold text-stone-700 shrink-0">
@@ -675,38 +694,120 @@ export default function MessageTemplatesPage() {
                 </div>
               </div>
 
-              {/* Attachment 1, 2, 3 dropzones matching Screenshot 2 */}
-              {[1, 2, 3].map((num) => (
-                <div
-                  key={num}
-                  className="flex flex-col md:flex-row md:items-start gap-2 md:gap-8 pt-1"
-                >
-                  <label className="w-44 font-semibold text-stone-700 shrink-0 pt-2">
-                    Attachment {num}
-                  </label>
-                  <div className="flex-1 max-w-2xl">
-                    <div className="border border-dashed border-stone-300 rounded-xl p-4 bg-stone-50/60 flex items-center justify-between hover:bg-stone-50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-stone-200/60 flex items-center justify-center text-stone-400">
-                          <FileText className="h-5 w-5" />
+              {/* Attachment 1, 2, 3 functional upload slots */}
+              {([1, 2, 3] as const).map((num) => {
+                const key = `attachment${num}Path` as "attachment1Path" | "attachment2Path" | "attachment3Path";
+                const currentPath = formState[key];
+                const fileName = currentPath ? currentPath.split("/").pop() || currentPath : "";
+                const isUploading = uploadingSlot === num;
+
+                return (
+                  <div
+                    key={num}
+                    className="flex flex-col md:flex-row md:items-start gap-2 md:gap-8 pt-1"
+                  >
+                    <label className="w-44 font-semibold text-stone-700 shrink-0 pt-2 flex items-center gap-1.5">
+                      <Paperclip className="h-3.5 w-3.5 text-stone-400" />
+                      <span>Attachment {num}</span>
+                    </label>
+                    <div className="flex-1 max-w-2xl">
+                      <input
+                        type="file"
+                        id={`attachment-input-${num}`}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg,.zip"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(num, file);
+                          e.target.value = "";
+                        }}
+                      />
+
+                      {currentPath ? (
+                        <div className="flex items-center justify-between p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/90 shadow-2xs">
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <div className="h-9 w-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                              <FileText className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-stone-900 truncate">
+                                {fileName}
+                              </p>
+                              <p className="text-[10px] text-stone-500 font-mono truncate">
+                                {currentPath}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 ml-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const input = document.getElementById(`attachment-input-${num}`) as HTMLInputElement;
+                                input?.click();
+                              }}
+                              className="px-2.5 py-1 rounded-md text-xs font-semibold bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 transition-colors shadow-2xs"
+                            >
+                              Replace
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveAttachment(num)}
+                              className="p-1.5 rounded-md text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              title="Remove attachment"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-stone-700 font-medium text-xs">
-                            To upload files drop them here or click.
-                          </p>
-                          <p className="text-[11px] text-stone-400">PDF, JPG, PNG (Max 5MB)</p>
+                      ) : (
+                        <div
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            const file = e.dataTransfer.files?.[0];
+                            if (file) handleFileUpload(num, file);
+                          }}
+                          onClick={() => {
+                            if (!isUploading) {
+                              const input = document.getElementById(`attachment-input-${num}`) as HTMLInputElement;
+                              input?.click();
+                            }
+                          }}
+                          className={`border border-dashed rounded-xl p-4 flex items-center justify-between transition-all cursor-pointer ${
+                            isUploading
+                              ? "border-amber-400 bg-amber-50/60"
+                              : "border-stone-300 bg-stone-50/60 hover:bg-stone-50 hover:border-[#143425]/40"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-stone-200/60 flex items-center justify-center text-stone-400">
+                              {isUploading ? (
+                                <Loader2 className="h-5 w-5 text-[#C89B3C] animate-spin" />
+                              ) : (
+                                <FileText className="h-5 w-5" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-stone-700 font-medium text-xs">
+                                {isUploading ? "Uploading attachment..." : "To upload files drop them here or click."}
+                              </p>
+                              <p className="text-[11px] text-stone-400">PDF, DOCX, XLSX, TXT, PNG, JPG (Max 15MB)</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            disabled={isUploading}
+                            className="px-3.5 py-2 rounded-lg bg-[#143425] hover:bg-[#1C4834] text-white text-xs font-semibold shadow-2xs transition-colors"
+                          >
+                            Browse media...
+                          </button>
                         </div>
-                      </div>
-                      <button
-                        type="button"
-                        className="px-3.5 py-2 rounded-lg bg-[#143425] hover:bg-[#1C4834] text-white text-xs font-semibold shadow-2xs transition-colors"
-                      >
-                        Browse media...
-                      </button>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Smartstore Dynamic Token Helper Shelf */}

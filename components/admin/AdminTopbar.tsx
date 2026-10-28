@@ -18,7 +18,7 @@ export function AdminTopbar({ onOpenSidebar }: { onOpenSidebar: () => void }) {
     .toUpperCase();
 
   return (
-    <header className="h-16 bg-white border-b border-stone-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+    <header className="h-16 bg-white border-b border-stone-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-40 shadow-xs">
       <div className="flex items-center gap-3">
         <button
           type="button"
