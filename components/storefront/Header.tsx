@@ -50,6 +50,7 @@ export function Header() {
                 src="/kbealeas_logo.jpeg"
                 alt="KB Beverage - Pure Taste, Every Time"
                 fill
+                sizes="(max-width: 640px) 64px, 80px"
                 priority
                 className="object-contain"
               />
@@ -309,6 +310,7 @@ export function Header() {
                       src="/kbealeas_logo.jpeg"
                       alt="KB Beverage Logo"
                       fill
+                      sizes="56px"
                       className="object-contain"
                     />
                   </div>

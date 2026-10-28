@@ -51,6 +51,7 @@ export function FeatureStrip() {
                   src={item.badgeImg}
                   alt={item.title}
                   fill
+                  sizes="48px"
                   className="object-contain p-1"
                 />
               ) : (

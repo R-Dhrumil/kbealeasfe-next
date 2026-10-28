@@ -27,6 +27,7 @@ export function HeritageStory() {
                   src="/assets/badges/badge-origin.png"
                   alt="Single Origin Assam Tea Leaves"
                   fill
+                  sizes="112px"
                   className="object-contain"
                 />
               </div>

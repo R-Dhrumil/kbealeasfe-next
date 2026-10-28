@@ -63,6 +63,7 @@ export async function BrandCarousel({ initialBrands }: BrandCarouselProps = {}) 
                   src={cert.img}
                   alt={cert.name}
                   fill
+                  sizes="40px"
                   className="object-contain"
                 />
               </div>

@@ -19,6 +19,7 @@ export async function Footer() {
                   src="/kbealeas_logo.jpeg"
                   alt="KB Beverage - Pure Taste, Every Time"
                   fill
+                  sizes="64px"
                   className="object-contain"
                 />
               </div>
