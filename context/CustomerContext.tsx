@@ -54,6 +54,8 @@ interface CustomerContextType {
   orders: Order[];
   login: (email: string, password?: string) => Promise<string | boolean>;
   register: (data: { fullName: string; email: string; phone: string; password?: string }) => Promise<boolean>;
+  sendRegistrationOtp: (email: string, fullName?: string) => Promise<{ success: boolean; message: string; debugOtp?: string }>;
+  registerWithOtp: (data: { fullName: string; email: string; phone: string; password?: string; otp: string }) => Promise<boolean>;
   logout: () => void;
   updateProfile: (data: { fullName: string; email: string; phone: string }) => Promise<void>;
   addAddress: (address: Omit<CustomerAddress, "id">) => Promise<void>;
@@ -289,6 +291,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
             fullName: meData.fullName,
             email: meData.email,
             phone: meData.phone || "",
+            role: meData.role || "Customer",
             memberTier: "KB Member",
             joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
             addresses: []
@@ -300,6 +303,66 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
       return false;
     } catch (err) {
       console.error(err);
+      throw err;
+    }
+  };
+
+  const sendRegistrationOtp = async (email: string, fullName?: string) => {
+    try {
+      const res = await fetchApi("/auth/send-otp", {
+        method: "POST",
+        body: JSON.stringify({ email, fullName })
+      });
+      return res || { success: true, message: "Verification code sent to your email." };
+    } catch (err) {
+      console.error("sendRegistrationOtp error", err);
+      throw err;
+    }
+  };
+
+  const registerWithOtp = async (data: {
+    fullName: string;
+    email: string;
+    phone: string;
+    password?: string;
+    otp: string;
+  }): Promise<boolean> => {
+    const password = data.password || "Password@123";
+    try {
+      const res = await fetchApi("/auth/register-with-otp", {
+        method: "POST",
+        body: JSON.stringify({
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+          password: password,
+          confirmPassword: password,
+          otp: data.otp
+        })
+      });
+
+      if (res && res.token) {
+        localStorage.setItem(AUTH_TOKEN_KEY, res.token);
+
+        const meData = await fetchApi("/auth/me");
+        if (meData) {
+          setCustomer({
+            id: meData.id,
+            fullName: meData.fullName,
+            email: meData.email,
+            phone: meData.phone || "",
+            role: meData.role || "Customer",
+            memberTier: "KB Member",
+            joinedDate: new Date(meData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+            addresses: []
+          });
+          setIsLoggedIn(true);
+          return true;
+        }
+      }
+      return false;
+    } catch (err) {
+      console.error("registerWithOtp error", err);
       throw err;
     }
   };
@@ -495,6 +558,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         orders,
         login,
         register,
+        sendRegistrationOtp,
+        registerWithOtp,
         logout,
         updateProfile,
         addAddress,
