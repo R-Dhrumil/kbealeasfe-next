@@ -108,7 +108,35 @@ export default function MessageTemplatesPage() {
         fetchApi("/emailaccounts"),
       ]);
 
-      if (Array.isArray(templatesData)) setTemplates(templatesData);
+      if (Array.isArray(templatesData)) {
+        setTemplates(templatesData);
+
+        // If URL has ?template=, open it directly
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const tId = params.get("template");
+          if (tId) {
+            const found = templatesData.find((t) => t.id === tId || t.name === tId);
+            if (found) {
+              setEditingTemplate(found);
+              setFormState({
+                subject: found.subject,
+                to: found.to || "{{ Customer.FullName }} <{{ Customer.Email }}>",
+                replyTo: found.replyTo || "",
+                bccEmailAddresses: found.bccEmailAddresses || "",
+                isActive: found.isActive,
+                onlySendManually: found.onlySendManually || false,
+                emailAccountId: found.emailAccountId || "",
+                attachment1Path: found.attachment1Path || "",
+                attachment2Path: found.attachment2Path || "",
+                attachment3Path: found.attachment3Path || "",
+                body: found.body,
+              });
+              setCurrentView("edit");
+            }
+          }
+        }
+      }
       if (Array.isArray(accountsData)) setEmailAccounts(accountsData);
     } catch (err: any) {
       setError(err?.message || "Failed to load message templates.");
@@ -117,7 +145,29 @@ export default function MessageTemplatesPage() {
     }
   };
 
-  const handleSelectTemplate = (template: MessageTemplate) => {
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const tId = params.get("template");
+
+      if (!tId) {
+        setCurrentView("list");
+        setEditingTemplate(null);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (templates.length > 0) {
+        const found = templates.find((t) => t.id === tId || t.name === tId);
+        if (found) {
+          handleSelectTemplate(found, false);
+        }
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [templates]);
+
+  const handleSelectTemplate = (template: MessageTemplate, pushState: boolean = true) => {
     setEditingTemplate(template);
     setFormState({
       subject: template.subject,
@@ -133,6 +183,30 @@ export default function MessageTemplatesPage() {
       body: template.body,
     });
     setCurrentView("edit");
+
+    if (pushState && typeof window !== "undefined") {
+      window.history.pushState(
+        { templateId: template.id },
+        "",
+        `/admin/content/message-templates?template=${encodeURIComponent(template.id)}`
+      );
+    }
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  };
+
+  const handleBackToList = () => {
+    setCurrentView("list");
+    setEditingTemplate(null);
+    if (typeof window !== "undefined") {
+      if (window.history.state && window.history.state.templateId) {
+        window.history.back();
+      } else {
+        window.history.pushState(null, "", "/admin/content/message-templates");
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   const handleSave = async (continueEditing: boolean = false) => {
@@ -157,7 +231,7 @@ export default function MessageTemplatesPage() {
       if (continueEditing && updated) {
         setEditingTemplate(updated);
       } else {
-        setCurrentView("list");
+        handleBackToList();
       }
     } catch (err: any) {
       setError(err?.message || "Failed to save template.");
@@ -175,7 +249,7 @@ export default function MessageTemplatesPage() {
         method: "DELETE",
       });
       setSuccessMessage(`Deleted template: ${editingTemplate.name}`);
-      setCurrentView("list");
+      handleBackToList();
       await loadData();
     } catch (err: any) {
       setError(err?.message || "Failed to delete template.");
@@ -476,11 +550,12 @@ export default function MessageTemplatesPage() {
             {/* Title with Back Button */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setCurrentView("list")}
-                title="Back to list"
-                className="h-9 w-9 flex items-center justify-center rounded-lg border border-stone-200 bg-white hover:bg-stone-100 text-stone-700 transition-colors shadow-2xs"
+                type="button"
+                onClick={handleBackToList}
+                title="Back to templates list"
+                className="h-9 w-9 flex items-center justify-center rounded-lg border border-stone-200 bg-white hover:bg-stone-100 text-stone-700 transition-colors shadow-2xs group"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
               </button>
               <div>
                 <h1 className="text-base font-bold text-stone-900 tracking-tight">
