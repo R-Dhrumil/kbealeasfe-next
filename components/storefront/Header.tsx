@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -13,12 +13,14 @@ import {
   ArrowRight,
   User,
   LogOut,
+  Sparkles
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCustomer } from "@/context/CustomerContext";
 import { BRAND_COLLECTIONS } from "@/service/collections";
 import { SafeImage } from "@/components/ui/SafeImage";
+import { getBanners, BannerItem } from "@/service/banners";
 
 export function Header() {
   const { openCart, summary } = useCart();
@@ -27,9 +29,46 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [brandsOpen, setBrandsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState<BannerItem | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    getBanners("AnnouncementBar", true).then((items) => {
+      if (isMounted && items && items.length > 0) {
+        setAnnouncement(items[0]);
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
 
   return (
     <>
+      {/* Top Announcement Bar */}
+      {announcement && announcement.isActive && (
+        <div
+          className="text-xs py-2 px-4 text-center font-medium transition-all duration-300 relative z-50 border-b border-black/10"
+          style={{
+            backgroundColor: announcement.themeColor || "#143425",
+            color: announcement.themeColor === "#FAF7F2" ? "#143425" : "#ffffff"
+          }}
+        >
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-[#C89B3C] shrink-0" />
+              <span>{announcement.title}</span>
+            </span>
+            {announcement.linkUrl && announcement.linkUrl !== "#" && (
+              <Link
+                href={announcement.linkUrl}
+                className="underline font-semibold hover:opacity-85 transition-opacity ml-1"
+              >
+                {announcement.subtitle || "Shop Now →"}
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Main Header */}
       <header className="sticky top-0 z-40 bg-[#F9F6F0]/95 backdrop-blur-md border-b border-[#E8DED1]/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">

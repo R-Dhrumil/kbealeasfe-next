@@ -1,20 +1,38 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkles, Check } from "lucide-react";
+import { getBanners, BannerItem } from "@/service/banners";
 
 export function PromoBanners() {
+  const [banners, setBanners] = useState<BannerItem[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    getBanners("PromoBanner", true).then((items) => {
+      if (isMounted && items && items.length > 0) {
+        setBanners(items);
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
+
+  const topBanner = banners[0];
+  const sideBanners = banners.slice(1);
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-14">
       <div className="space-y-6">
-        {/* 1. Large Top Hero Banner: Master Blend Royal Cardamom Saffron Chai */}
+        {/* 1. Large Top Hero Banner */}
         <div className="relative rounded-3xl overflow-hidden border border-[#E8DED1] shadow-sm hover:shadow-md bg-[#FAF7F2] transition-all duration-500 group">
           <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
             {/* Image side - clean high-resolution crop without placeholder artifacts */}
             <div className="lg:col-span-7 relative min-h-[300px] sm:min-h-[380px] lg:min-h-[440px] w-full overflow-hidden bg-[#F2EDE4]">
               <Image
-                src="/assets/banners/banner-master-blend.png"
-                alt="Master Blend - Royal Cardamom & Kashmiri Saffron Chai"
+                src={topBanner?.imageUrl || "/assets/banners/banner-master-blend.png"}
+                alt={topBanner?.title || "Master Blend - Royal Cardamom & Kashmiri Saffron Chai"}
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 58vw"
@@ -30,20 +48,20 @@ export function PromoBanners() {
               <div className="flex flex-wrap items-center gap-2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[#143425] text-[#D4AF37] shadow-xs">
                   <Sparkles className="h-3 w-3 text-[#D4AF37]" />
-                  <span>Signature Blend</span>
+                  <span>{topBanner?.badgeText || "Signature Blend"}</span>
                 </div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#A87E28] px-2.5 py-0.5 rounded-full bg-[#A87E28]/10 border border-[#A87E28]/20">
-                  Vrinda Heritage
+                  {topBanner?.brandName || "Vrinda Heritage"}
                 </span>
               </div>
 
               {/* Title & Description */}
               <div className="space-y-2.5">
                 <h2 className="text-2xl sm:text-3xl lg:text-[32px] font-serif text-[#143425] font-normal leading-[1.2] tracking-tight">
-                  Royal Cardamom &amp; Kashmiri Saffron
+                  {topBanner?.title || "Royal Cardamom & Kashmiri Saffron"}
                 </h2>
                 <p className="text-stone-600 text-xs sm:text-sm leading-relaxed">
-                  Handcrafted formulation infused with whole crushed Idukki cardamom pods, authentic Kashmiri saffron strands, and single-origin Assam CTC tea for an unforgettable royal warmth.
+                  {topBanner?.subtitle || "Handcrafted formulation infused with whole crushed Idukki cardamom pods, authentic Kashmiri saffron strands, and single-origin Assam CTC tea for an unforgettable royal warmth."}
                 </p>
               </div>
 
@@ -78,7 +96,7 @@ export function PromoBanners() {
               {/* CTA Section */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <Link
-                  href="/shop?category=cat-tea-premixes"
+                  href={topBanner?.linkUrl || "/shop?category=cat-tea-premixes"}
                   className="h-11 sm:h-12 px-6 sm:px-7 rounded-xl bg-[#143425] hover:bg-[#1C4834] text-white text-xs sm:text-sm font-semibold tracking-wide uppercase transition-all shadow-sm hover:shadow inline-flex items-center gap-2.5 group/btn"
                 >
                   <span>Shop Brand</span>

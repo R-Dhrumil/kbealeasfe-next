@@ -88,16 +88,50 @@ const HERO_SLIDES: SlideItem[] = [
   },
 ];
 
-export function HeroSlider() {
+import { getBanners } from "@/service/banners";
+
+export function HeroSlider({ initialSlides }: { initialSlides?: SlideItem[] }) {
+  const [slides, setSlides] = useState<SlideItem[]>(initialSlides && initialSlides.length > 0 ? initialSlides : HERO_SLIDES);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
+  useEffect(() => {
+    let isMounted = true;
+    getBanners("HomeHero", true).then((items) => {
+      if (isMounted && items && items.length > 0) {
+        const mapped = items.map((b) => ({
+          id: b.id,
+          brand: b.brandName ? b.brandName.toUpperCase() : (b.badgeText || "KB SELECTION"),
+          title: b.title,
+          highlightText: b.badgeText || "Pure Taste.",
+          description: b.subtitle || "Discover handcrafted premium tea, coffee, and cold beverage premixes.",
+          priceTag: "Special Selection",
+          offerText: b.badgeText || "Featured Blend",
+          primaryCtaText: "Shop Collection",
+          primaryCtaHref: b.linkUrl || "/shop",
+          secondaryCtaText: "Explore Blend",
+          secondaryCtaHref: b.linkUrl || "/shop",
+          image: b.imageUrl || "/assets/HeroSlider_images/vrinda_tea.png",
+          themeColor: b.themeColor || "#143425",
+        }));
+        setSlides(mapped);
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
+
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    setSlides((current) => {
+      setCurrentSlide((prev) => (prev + 1) % current.length);
+      return current;
+    });
   }, []);
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+    setSlides((current) => {
+      setCurrentSlide((prev) => (prev - 1 + current.length) % current.length);
+      return current;
+    });
   }, []);
 
   useEffect(() => {
@@ -106,7 +140,7 @@ export function HeroSlider() {
     return () => clearInterval(interval);
   }, [isPaused, nextSlide]);
 
-  const slide = HERO_SLIDES[currentSlide];
+  const slide = slides[currentSlide] || slides[0] || HERO_SLIDES[0];
 
   return (
     <section
@@ -222,9 +256,9 @@ export function HeroSlider() {
           <div className="flex items-center justify-between pt-6 mt-6 border-t border-stone-100">
             {/* Dots */}
             <div className="flex items-center gap-2">
-              {HERO_SLIDES.map((s, idx) => (
+              {slides.map((s, idx) => (
                 <button
-                  key={s.id}
+                  key={s.id || idx}
                   onClick={() => setCurrentSlide(idx)}
                   className={`h-2.5 rounded-full transition-all duration-300 ${
                     idx === currentSlide
