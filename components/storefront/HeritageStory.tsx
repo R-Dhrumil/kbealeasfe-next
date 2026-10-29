@@ -1,9 +1,30 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
+import { getBanners, BannerItem } from "@/service/banners";
 
 export function HeritageStory() {
+  const [heritageData, setHeritageData] = useState<BannerItem | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    getBanners("HeritageStory", true).then((items) => {
+      if (isMounted && items && items.length > 0) {
+        setHeritageData(items[0]);
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
+
+  const title = heritageData?.title || "Crafted for Moments That Matter.";
+  const narrative = heritageData?.subtitle || "At KB Beverage, we honor the time-tested rituals of Indian tea making. Instead of artificial flavorings or excessive sugar fillers, our premixes start with single-estate black teas and whole cardamom pods crushed in traditional stone mills.";
+  const badgeText = heritageData?.badgeText || "Heritage & Sourcing";
+  const imageSrc = heritageData?.imageUrl || "/assets/banners/banner-master-blend.png";
+  const linkHref = heritageData?.linkUrl || "/about";
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-16 md:my-24">
       <div className="rounded-3xl bg-[#FAF7F2] border border-[#E8DED1] p-6 sm:p-10 lg:p-14 overflow-hidden relative">
@@ -12,9 +33,10 @@ export function HeritageStory() {
           <div className="lg:col-span-6 relative">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border-4 border-white bg-white">
               <Image
-                src="/assets/products/vrinda-cardamom-cup.png"
+                src={imageSrc}
                 alt="KB Tea & Beverages Art of Brewing"
                 fill
+                priority
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover hover:scale-105 transition-transform duration-700"
               />
@@ -38,15 +60,15 @@ export function HeritageStory() {
           <div className="lg:col-span-6 space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E8F2EC] text-[#143425] text-xs font-semibold uppercase tracking-wider">
               <Sparkles className="h-3.5 w-3.5 text-[#C89B3C]" />
-              <span>Heritage & Sourcing</span>
+              <span>{badgeText}</span>
             </div>
 
             <div className="space-y-3">
               <h2 className="text-3xl sm:text-4xl font-serif text-[#143425] tracking-tight leading-tight">
-                Crafted for Moments That Matter.
+                {title}
               </h2>
               <p className="text-stone-600 text-sm sm:text-base leading-relaxed">
-                At KB Beverage, we honor the time-tested rituals of Indian tea making. Instead of artificial flavorings or excessive sugar fillers, our premixes start with single-estate black teas and whole cardamom pods crushed in traditional stone mills.
+                {narrative}
               </p>
             </div>
 
@@ -80,7 +102,7 @@ export function HeritageStory() {
             {/* Link to Full Story */}
             <div className="pt-3">
               <Link
-                href="/about"
+                href={linkHref}
                 className="inline-flex items-center gap-2 text-sm font-semibold text-[#143425] hover:text-[#A87E28] transition-colors group"
               >
                 <span>Read The Full KB Story</span>

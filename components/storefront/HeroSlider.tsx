@@ -48,10 +48,10 @@ const HERO_SLIDES: SlideItem[] = [
     priceTag: "Starting at ₹360",
     offerText: "Special 500g Pack",
     primaryCtaText: "Shop Iced Teas",
-    primaryCtaHref: "/shop?category=cat-iced-teas",
+    primaryCtaHref: "/shop?category=iced-tea",
     secondaryCtaText: "Explore Sangam",
     secondaryCtaHref: "/brands/sangam",
-    image: "/assets/HeroSlider_images/ice_tea.png",
+    image: "/assets/banners/banner-iced-tea.png",
     themeColor: "#0E4D7A",
   },
   {
@@ -64,10 +64,10 @@ const HERO_SLIDES: SlideItem[] = [
     priceTag: "Starting at ₹580",
     offerText: "Whole Bean & Grounds",
     primaryCtaText: "Explore Coffee",
-    primaryCtaHref: "/shop?category=cat-coffees",
+    primaryCtaHref: "/shop?category=coffee",
     secondaryCtaText: "Explore Urban Roast",
     secondaryCtaHref: "/brands/urban-roast",
-    image: "/assets/HeroSlider_images/Gemini_Generated_Image_ikp642ikp642ikp6.png",
+    image: "/assets/banners/banner-coffee.png",
     themeColor: "#1E2638",
   },
   {
@@ -80,11 +80,11 @@ const HERO_SLIDES: SlideItem[] = [
     priceTag: "Starting at ₹399",
     offerText: "Rich Belgian Style",
     primaryCtaText: "Shop Chocolate Drinks",
-    primaryCtaHref: "/shop?category=cat-chocolate-drinks",
+    primaryCtaHref: "/shop?category=chocolate",
     secondaryCtaText: "Explore CocoJoy",
     secondaryCtaHref: "/brands/cocojoy",
-    image: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=1200&q=80",
-    themeColor: "#4A2810",
+    image: "/assets/banners/banner-chocolate.png",
+    themeColor: "#2D1810",
   },
 ];
 
@@ -99,21 +99,52 @@ export function HeroSlider({ initialSlides }: { initialSlides?: SlideItem[] }) {
     let isMounted = true;
     getBanners("HomeHero", true).then((items) => {
       if (isMounted && items && items.length > 0) {
-        const mapped = items.map((b) => ({
-          id: b.id,
-          brand: b.brandName ? b.brandName.toUpperCase() : (b.badgeText || "KB SELECTION"),
-          title: b.title,
-          highlightText: b.badgeText || "Pure Taste.",
-          description: b.subtitle || "Discover handcrafted premium tea, coffee, and cold beverage premixes.",
-          priceTag: "Special Selection",
-          offerText: b.badgeText || "Featured Blend",
-          primaryCtaText: "Shop Collection",
-          primaryCtaHref: b.linkUrl || "/shop",
-          secondaryCtaText: "Explore Blend",
-          secondaryCtaHref: b.linkUrl || "/shop",
-          image: b.imageUrl || "/assets/HeroSlider_images/vrinda_tea.png",
-          themeColor: b.themeColor || "#143425",
-        }));
+        const mapped = items.map((b) => {
+          const titleLower = (b.title || "").toLowerCase();
+          const badgeLower = (b.badgeText || "").toLowerCase();
+
+          // Image normalization: ensure Order 2 uses landscape iced tea and Order 4 uses chocolate
+          let img = b.imageUrl || "/assets/HeroSlider_images/vrinda_tea.png";
+          if (img.includes("ice_tea.png")) {
+            img = "/assets/banners/banner-iced-tea.png";
+          } else if (titleLower.includes("chocolate") || badgeLower.includes("chocolate") || badgeLower.includes("craft")) {
+            if (img.includes("master-blend")) {
+              img = "/assets/banners/banner-chocolate.png";
+            }
+          }
+
+          // Link normalization
+          let link = b.linkUrl || "/shop";
+          if (link === "/catalog") link = "/shop";
+
+          // Dynamic secondary brand exploration link
+          let brandHref = "/shop";
+          if (titleLower.includes("chai") || titleLower.includes("cardamom") || titleLower.includes("vrinda")) {
+            brandHref = "/brands/vrinda";
+          } else if (titleLower.includes("lemon") || titleLower.includes("iced") || titleLower.includes("sangam")) {
+            brandHref = "/brands/sangam";
+          } else if (titleLower.includes("arabica") || titleLower.includes("coffee") || titleLower.includes("urban")) {
+            brandHref = "/brands/urban-roast";
+          } else if (titleLower.includes("chocolate") || titleLower.includes("cocoa") || titleLower.includes("cocojoy")) {
+            brandHref = "/brands/cocojoy";
+          }
+
+          return {
+            id: b.id,
+            brand: b.brandName ? b.brandName.toUpperCase() : (b.badgeText ? b.badgeText.toUpperCase() : "KB SELECTION"),
+            title: b.title,
+            highlightText: b.brandName && b.badgeText ? b.badgeText : "",
+            description: b.subtitle || "Discover handcrafted premium tea, coffee, and cold beverage premixes.",
+            priceTag: "Special Selection",
+            offerText: b.badgeText || "Featured Blend",
+            primaryCtaText: "Shop Collection",
+            primaryCtaHref: link,
+            secondaryCtaText: "Explore Brand",
+            secondaryCtaHref: brandHref,
+            image: img,
+            themeColor: b.themeColor || "#143425",
+          };
+        });
         setSlides(mapped);
       }
     });
@@ -121,18 +152,12 @@ export function HeroSlider({ initialSlides }: { initialSlides?: SlideItem[] }) {
   }, []);
 
   const nextSlide = useCallback(() => {
-    setSlides((current) => {
-      setCurrentSlide((prev) => (prev + 1) % current.length);
-      return current;
-    });
-  }, []);
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
 
   const prevSlide = useCallback(() => {
-    setSlides((current) => {
-      setCurrentSlide((prev) => (prev - 1 + current.length) % current.length);
-      return current;
-    });
-  }, []);
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
 
   useEffect(() => {
     if (isPaused) return;
@@ -177,10 +202,12 @@ export function HeroSlider({ initialSlides }: { initialSlides?: SlideItem[] }) {
                   {slide.brand}
                 </p>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#143425] tracking-tight leading-[1.15]">
-                  {slide.title}{" "}
-                  <span className="italic block text-[#A87E28] font-normal">
-                    {slide.highlightText}
-                  </span>
+                  {slide.title}
+                  {slide.highlightText && slide.highlightText.toLowerCase() !== slide.brand.toLowerCase() && (
+                    <span className="italic block text-[#A87E28] font-normal mt-1">
+                      {slide.highlightText}
+                    </span>
+                  )}
                 </h1>
                 <p className="text-stone-600 text-sm sm:text-base leading-relaxed max-w-lg font-normal">
                   {slide.description}

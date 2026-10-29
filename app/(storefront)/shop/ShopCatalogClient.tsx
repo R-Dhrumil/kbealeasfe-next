@@ -32,19 +32,21 @@ export function ShopCatalogClient({
   initialBrand = "",
   initialCollection = "",
 }: ShopCatalogClientProps) {
+  const resolveCollectionFromCategory = (cat?: string) => {
+    if (!cat) return "";
+    const c = cat.toLowerCase();
+    if (c === "tea" || c === "cat-tea" || c === "tea-premixes" || c === "cat-tea-premixes") return "vrinda";
+    if (c === "iced-tea" || c === "cat-iced-tea" || c === "iced-teas" || c === "cat-iced-teas") return "sangam";
+    if (c === "coffee" || c === "cat-coffee" || c === "coffees" || c === "cat-coffees" || c === "artisan-coffee" || c === "cat-artisan-coffee") return "urban-roast";
+    if (c === "chocolate" || c === "cat-chocolate" || c === "chocolate-drinks" || c === "cat-chocolate-drinks" || c === "plant-based-specialties") return "cocojoy";
+    return "";
+  };
+
   // Normalize initial collection from category or brand
   const startingCollection =
     initialCollection ||
     (initialBrand ? initialBrand.replace(/^brand-/, "") : "") ||
-    (initialCategory === "tea-premixes" || initialCategory === "cat-tea-premixes"
-      ? "vrinda"
-      : initialCategory === "iced-teas" || initialCategory === "cat-iced-teas"
-      ? "sangam"
-      : initialCategory === "artisan-coffee" || initialCategory === "cat-artisan-coffee"
-      ? "urban-roast"
-      : initialCategory === "chocolate-drinks" || initialCategory === "cat-chocolate-drinks" || initialCategory === "plant-based-specialties"
-      ? "cocojoy"
-      : "");
+    resolveCollectionFromCategory(initialCategory);
 
   const [filters, setFilters] = useState<FilterState>({
     collection: startingCollection,
@@ -99,15 +101,7 @@ export function ShopCatalogClient({
     return (
       filters.collection ||
       (filters.brand ? filters.brand.replace(/^brand-/, "") : "") ||
-      (filters.category === "tea-premixes" || filters.category === "cat-tea-premixes"
-        ? "vrinda"
-        : filters.category === "iced-teas" || filters.category === "cat-iced-teas"
-        ? "sangam"
-        : filters.category === "artisan-coffee" || filters.category === "cat-artisan-coffee"
-        ? "urban-roast"
-        : filters.category === "chocolate-drinks" || filters.category === "cat-chocolate-drinks" || filters.category === "plant-based-specialties"
-        ? "cocojoy"
-        : "")
+      resolveCollectionFromCategory(filters.category)
     );
   }, [filters.collection, filters.brand, filters.category]);
 
