@@ -21,6 +21,7 @@ import { useCustomer } from "@/context/CustomerContext";
 import { BRAND_COLLECTIONS } from "@/service/collections";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { getBanners, BannerItem } from "@/service/banners";
+import { getNavigationTree, NavigationTreeItem } from "@/service/cms";
 
 export function Header() {
   const { openCart, summary } = useCart();
@@ -30,12 +31,18 @@ export function Header() {
   const [brandsOpen, setBrandsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<BannerItem | null>(null);
+  const [navItems, setNavItems] = useState<NavigationTreeItem[]>([]);
 
   useEffect(() => {
     let isMounted = true;
     getBanners("AnnouncementBar", true).then((items) => {
       if (isMounted && items && items.length > 0) {
         setAnnouncement(items[0]);
+      }
+    });
+    getNavigationTree("Header").then((items) => {
+      if (isMounted && items && items.length > 0) {
+        setNavItems(items);
       }
     });
     return () => { isMounted = false; };
@@ -106,116 +113,227 @@ export function Header() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-stone-700">
-            <Link
-              href="/shop"
-              className="hover:text-[#143425] transition-colors py-2"
-            >
-              Shop All
-            </Link>
-
-            {/* Unified Brands Dropdown */}
-            <div
-              className="relative group py-2"
-              onMouseEnter={() => setBrandsOpen(true)}
-              onMouseLeave={() => setBrandsOpen(false)}
-            >
-              <button
-                type="button"
-                onClick={() => setBrandsOpen(!brandsOpen)}
-                className="flex items-center gap-1 hover:text-[#143425] transition-colors"
-              >
-                <span>Brands</span>
-                <ChevronDown className="h-3.5 w-3.5 text-stone-400 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
-
-              {brandsOpen && (
-                <div className="absolute top-full -left-4 w-96 bg-white rounded-3xl shadow-2xl border border-[#E8DED1] p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#A87E28] border-b border-[#F2ECE1] flex items-center justify-between">
-                    <span>Our 4 Dedicated Brands</span>
-                    <Link
-                      href="/brands"
-                      onClick={() => setBrandsOpen(false)}
-                      className="text-[#143425] hover:text-[#C89B3C] font-bold text-[10px] transition-colors"
+            {navItems.length > 0 ? (
+              navItems.map((item) => {
+                if (item.url === "/brands") {
+                  return (
+                    <div
+                      key={item.id}
+                      className="relative group py-2"
+                      onMouseEnter={() => setBrandsOpen(true)}
+                      onMouseLeave={() => setBrandsOpen(false)}
                     >
-                      All Brands &rarr;
-                    </Link>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() => setBrandsOpen(!brandsOpen)}
+                        className="flex items-center gap-1 hover:text-[#143425] transition-colors"
+                      >
+                        <span>{item.label}</span>
+                        <ChevronDown className="h-3.5 w-3.5 text-stone-400 group-hover:rotate-180 transition-transform duration-200" />
+                      </button>
 
-                  <div className="pt-2 space-y-1">
-                    {BRAND_COLLECTIONS.map((col) => {
-                      const logoSrc = `/brands/${col.id === "cocojoy" ? "coco-joy" : col.id}-logo.png`;
-                      return (
-                        <Link
-                          key={col.id}
-                          href={`/brands/${col.brandSlug}`}
-                          onClick={() => setBrandsOpen(false)}
-                          className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FAF7F2] transition-colors group/item"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="relative h-10 w-10 rounded-xl bg-white border border-[#E8DED1] p-1.5 flex items-center justify-center shrink-0 shadow-2xs group-hover/item:border-stone-300">
-                              <SafeImage
-                                src={logoSrc}
-                                alt={col.brandName}
-                                fill
-                                className="object-contain p-0.5"
-                                fallbackSrc="/assets/HeroSlider_images/vrinda_tea.png"
-                              />
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold text-stone-900 group-hover/item:text-[#143425] leading-tight">
-                                {col.brandName}{" "}
-                                <span className="text-[11px] font-normal text-[#A87E28]">
-                                  • {col.categoryName}
-                                </span>
-                              </p>
-                              <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
-                                {col.tagline}
-                              </p>
-                            </div>
+                      {brandsOpen && (
+                        <div className="absolute top-full -left-4 w-96 bg-white rounded-3xl shadow-2xl border border-[#E8DED1] p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                          <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#A87E28] border-b border-[#F2ECE1] flex items-center justify-between">
+                            <span>Our 4 Dedicated Brands</span>
+                            <Link
+                              href="/brands"
+                              onClick={() => setBrandsOpen(false)}
+                              className="text-[#143425] hover:text-[#C89B3C] font-bold text-[10px] transition-colors"
+                            >
+                              All Brands &rarr;
+                            </Link>
                           </div>
 
-                          <span className="text-[10px] font-mono font-medium text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full shrink-0">
-                            {col.productCount}
-                          </span>
+                          <div className="pt-2 space-y-1">
+                            {BRAND_COLLECTIONS.map((col) => {
+                              const logoSrc = `/brands/${col.id === "cocojoy" ? "coco-joy" : col.id}-logo.png`;
+                              return (
+                                <Link
+                                  key={col.id}
+                                  href={`/brands/${col.brandSlug}`}
+                                  onClick={() => setBrandsOpen(false)}
+                                  className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FAF7F2] transition-colors group/item"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="relative h-10 w-10 rounded-xl bg-white border border-[#E8DED1] p-1.5 flex items-center justify-center shrink-0 shadow-2xs group-hover/item:border-stone-300">
+                                      <SafeImage
+                                        src={logoSrc}
+                                        alt={col.brandName}
+                                        fill
+                                        className="object-contain p-0.5"
+                                        fallbackSrc="/assets/HeroSlider_images/vrinda_tea.png"
+                                      />
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-semibold text-stone-900 group-hover/item:text-[#143425] leading-tight">
+                                        {col.brandName}{" "}
+                                        <span className="text-[11px] font-normal text-[#A87E28]">
+                                          • {col.categoryName}
+                                        </span>
+                                      </p>
+                                      <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
+                                        {col.tagline}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <span className="text-[10px] font-mono font-medium text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full shrink-0">
+                                    {col.productCount}
+                                  </span>
+                                </Link>
+                              );
+                            })}
+                          </div>
+
+                          <div className="mt-2 pt-2.5 border-t border-[#F2ECE1] px-3 py-1 flex items-center justify-between">
+                            <Link
+                              href="/brands"
+                              onClick={() => setBrandsOpen(false)}
+                              className="text-xs font-semibold text-[#143425] hover:text-[#C89B3C] inline-flex items-center gap-1 transition-colors"
+                            >
+                              <span>Explore Brands Portfolio</span>
+                              <ArrowRight className="h-3 w-3" />
+                            </Link>
+                            <Link
+                              href="/shop"
+                              onClick={() => setBrandsOpen(false)}
+                              className="text-xs text-stone-500 hover:text-stone-900 font-medium"
+                            >
+                              Shop All
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.url}
+                    target={item.openInNewTab ? "_blank" : undefined}
+                    className="hover:text-[#143425] transition-colors py-2"
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })
+            ) : (
+              <>
+                <Link
+                  href="/shop"
+                  className="hover:text-[#143425] transition-colors py-2"
+                >
+                  Shop All
+                </Link>
+
+                {/* Unified Brands Dropdown */}
+                <div
+                  className="relative group py-2"
+                  onMouseEnter={() => setBrandsOpen(true)}
+                  onMouseLeave={() => setBrandsOpen(false)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setBrandsOpen(!brandsOpen)}
+                    className="flex items-center gap-1 hover:text-[#143425] transition-colors"
+                  >
+                    <span>Brands</span>
+                    <ChevronDown className="h-3.5 w-3.5 text-stone-400 group-hover:rotate-180 transition-transform duration-200" />
+                  </button>
+
+                  {brandsOpen && (
+                    <div className="absolute top-full -left-4 w-96 bg-white rounded-3xl shadow-2xl border border-[#E8DED1] p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                      <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#A87E28] border-b border-[#F2ECE1] flex items-center justify-between">
+                        <span>Our 4 Dedicated Brands</span>
+                        <Link
+                          href="/brands"
+                          onClick={() => setBrandsOpen(false)}
+                          className="text-[#143425] hover:text-[#C89B3C] font-bold text-[10px] transition-colors"
+                        >
+                          All Brands &rarr;
                         </Link>
-                      );
-                    })}
-                  </div>
+                      </div>
 
-                  <div className="mt-2 pt-2.5 border-t border-[#F2ECE1] px-3 py-1 flex items-center justify-between">
-                    <Link
-                      href="/brands"
-                      onClick={() => setBrandsOpen(false)}
-                      className="text-xs font-semibold text-[#143425] hover:text-[#C89B3C] inline-flex items-center gap-1 transition-colors"
-                    >
-                      <span>Explore Brands Portfolio</span>
-                      <ArrowRight className="h-3 w-3" />
-                    </Link>
-                    <Link
-                      href="/shop"
-                      onClick={() => setBrandsOpen(false)}
-                      className="text-xs text-stone-500 hover:text-stone-900 font-medium"
-                    >
-                      Shop All
-                    </Link>
-                  </div>
+                      <div className="pt-2 space-y-1">
+                        {BRAND_COLLECTIONS.map((col) => {
+                          const logoSrc = `/brands/${col.id === "cocojoy" ? "coco-joy" : col.id}-logo.png`;
+                          return (
+                            <Link
+                              key={col.id}
+                              href={`/brands/${col.brandSlug}`}
+                              onClick={() => setBrandsOpen(false)}
+                              className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FAF7F2] transition-colors group/item"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="relative h-10 w-10 rounded-xl bg-white border border-[#E8DED1] p-1.5 flex items-center justify-center shrink-0 shadow-2xs group-hover/item:border-stone-300">
+                                  <SafeImage
+                                    src={logoSrc}
+                                    alt={col.brandName}
+                                    fill
+                                    className="object-contain p-0.5"
+                                    fallbackSrc="/assets/HeroSlider_images/vrinda_tea.png"
+                                  />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-semibold text-stone-900 group-hover/item:text-[#143425] leading-tight">
+                                    {col.brandName}{" "}
+                                    <span className="text-[11px] font-normal text-[#A87E28]">
+                                      • {col.categoryName}
+                                    </span>
+                                  </p>
+                                  <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
+                                    {col.tagline}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <span className="text-[10px] font-mono font-medium text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full shrink-0">
+                                {col.productCount}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-2 pt-2.5 border-t border-[#F2ECE1] px-3 py-1 flex items-center justify-between">
+                        <Link
+                          href="/brands"
+                          onClick={() => setBrandsOpen(false)}
+                          className="text-xs font-semibold text-[#143425] hover:text-[#C89B3C] inline-flex items-center gap-1 transition-colors"
+                        >
+                          <span>Explore Brands Portfolio</span>
+                          <ArrowRight className="h-3 w-3" />
+                        </Link>
+                        <Link
+                          href="/shop"
+                          onClick={() => setBrandsOpen(false)}
+                          className="text-xs text-stone-500 hover:text-stone-900 font-medium"
+                        >
+                          Shop All
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <Link
-              href="/about"
-              className="hover:text-[#143425] transition-colors py-2"
-            >
-              About
-            </Link>
+                <Link
+                  href="/about"
+                  className="hover:text-[#143425] transition-colors py-2"
+                >
+                  About
+                </Link>
 
-            <Link
-              href="/contact"
-              className="hover:text-[#143425] transition-colors py-2"
-            >
-              Contact
-            </Link>
+                <Link
+                  href="/contact"
+                  className="hover:text-[#143425] transition-colors py-2"
+                >
+                  Contact
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Right Action Icons (Search, Wishlist, Account, Cart) */}

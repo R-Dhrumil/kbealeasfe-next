@@ -3,9 +3,31 @@ import Link from "next/link";
 import Image from "next/image";
 import { Sparkles, ArrowUpRight, Mail, Phone, MapPin } from "lucide-react";
 import { getBrands } from "@/service/brands";
+import { getNavigationTree } from "@/service/cms";
 
 export async function Footer() {
-  const displayBrands = await getBrands().catch(() => []);
+  const [displayBrands, quickLinks, legalLinks] = await Promise.all([
+    getBrands().catch(() => []),
+    getNavigationTree("FooterQuickLinks").catch(() => []),
+    getNavigationTree("FooterLegal").catch(() => []),
+  ]);
+
+  const defaultQuickLinks = [
+    { label: "About Heritage", url: "/about" },
+    { label: "Track Your Order", url: "/account/orders" },
+    { label: "Saved Wishlist", url: "/wishlist" },
+    { label: "Customer Account", url: "/account" },
+  ];
+
+  const defaultLegalLinks = [
+    { label: "Privacy Policy", url: "/privacy-policy" },
+    { label: "Terms of Service", url: "/terms-of-service" },
+    { label: "Shipping & Delivery", url: "/shipping-policy" },
+    { label: "Returns & Refunds", url: "/returns-policy" },
+  ];
+
+  const renderedQuickLinks = quickLinks && quickLinks.length > 0 ? quickLinks : defaultQuickLinks;
+  const renderedLegalLinks = legalLinks && legalLinks.length > 0 ? legalLinks : defaultLegalLinks;
 
   return (
     <footer className="bg-[#143425] text-[#F9F6F0] pt-16 pb-12 border-t border-[#1C4834]">
@@ -73,27 +95,17 @@ export async function Footer() {
               Quick Links
             </h3>
             <ul className="space-y-2.5 text-sm text-stone-300">
-              <li>
-                <Link href="/about" className="hover:text-white transition-colors">
-                  About Heritage
-                </Link>
-              </li>
-
-              <li>
-                <Link href="/account/orders" className="hover:text-white transition-colors">
-                  Track Your Order
-                </Link>
-              </li>
-              <li>
-                <Link href="/wishlist" className="hover:text-white transition-colors">
-                  Saved Wishlist
-                </Link>
-              </li>
-              <li>
-                <Link href="/account" className="hover:text-white transition-colors">
-                  Customer Account
-                </Link>
-              </li>
+              {renderedQuickLinks.map((link) => (
+                <li key={link.url}>
+                  <Link
+                    href={link.url}
+                    target={"openInNewTab" in link && link.openInNewTab ? "_blank" : undefined}
+                    className="hover:text-white transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -115,12 +127,10 @@ export async function Footer() {
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-[#C89B3C] shrink-0" />
                 <div className="flex flex-col">
-
                   <span>+91 96240 91000</span>
                   <span>+91 85111 16618</span>
                 </div>
               </div>
-
 
               <div className="pt-2">
                 <Link
@@ -133,10 +143,24 @@ export async function Footer() {
             </div>
           </div>
         </div>
-          {/* Bottom Bar */}
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
-            <p>© {new Date().getFullYear()} KB Beverage. All rights reserved.</p>
+
+        {/* Bottom Bar: Copyright & Dynamic Legal Links */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
+          <p>© {new Date().getFullYear()} KB Beverage Operations. All rights reserved.</p>
+
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+            {renderedLegalLinks.map((legal) => (
+              <Link
+                key={legal.url}
+                href={legal.url}
+                target={"openInNewTab" in legal && legal.openInNewTab ? "_blank" : undefined}
+                className="hover:text-stone-200 transition-colors"
+              >
+                {legal.label}
+              </Link>
+            ))}
           </div>
+        </div>
       </div>
     </footer>
   );

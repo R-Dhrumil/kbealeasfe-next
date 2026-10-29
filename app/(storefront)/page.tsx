@@ -6,6 +6,7 @@ import { TabbedProductShowcase } from "@/components/storefront/TabbedProductShow
 import { HeritageStory } from "@/components/storefront/HeritageStory";
 import { BrandCarousel } from "@/components/storefront/BrandCarousel";
 import { ClienteleShowcase } from "@/components/storefront/ClienteleShowcase";
+import { TestimonialSlider } from "@/components/storefront/TestimonialSlider";
 
 import { getBrands } from "@/service/brands";
 import { getCategories } from "@/service/categories";
@@ -34,10 +35,13 @@ export default async function HomePage() {
       {/* 5. EDITORIAL HERITAGE STORY */}
       <HeritageStory />
 
-      {/* 6. BRAND ARCHITECTURE & CERTIFICATIONS */}
+      {/* 6. PATRON & CRITIC TESTIMONIALS SLIDER */}
+      <TestimonialSlider />
+
+      {/* 7. BRAND ARCHITECTURE & CERTIFICATIONS */}
       <BrandCarousel initialBrands={brands} />
 
-      {/* 7. VERIFIED CLIENTELE SHOWCASE (FROM OFFICIAL BROCHURE) */}
+      {/* 8. VERIFIED CLIENTELE SHOWCASE (FROM OFFICIAL BROCHURE) */}
       <ClienteleShowcase />
     </div>
   );
