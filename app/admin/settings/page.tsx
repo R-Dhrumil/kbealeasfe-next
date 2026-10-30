@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { CheckCircle2, Store, CreditCard, Truck, Bell } from "lucide-react";
+import { CheckCircle2, Store, CreditCard, Truck, Bell, HardDrive, Globe, ArrowRight } from "lucide-react";
 
 export default function AdminSettingsPage() {
   const [storeName, setStoreName] = useState("KB Beverage Ltd.");
@@ -26,6 +27,41 @@ export default function AdminSettingsPage() {
         <p className="text-xs text-stone-500 mt-0.5">
           General settings for company identity, shipping rules, and tax parameters.
         </p>
+      </div>
+
+      {/* Quick Navigation to specialized settings */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Link
+          href="/admin/settings/storage"
+          className="bg-white rounded-2xl border border-stone-200/80 p-4 flex items-center justify-between hover:border-[#143425] hover:shadow-2xs transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#A87E28] flex items-center justify-center group-hover:bg-[#143425] group-hover:text-white transition-colors">
+              <HardDrive className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-serif font-bold text-xs text-[#143425]">Media & Image Storage</h3>
+              <p className="text-[11px] text-stone-500">Configure wwwroot, Database, or Cloudinary</p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-stone-400 group-hover:text-[#143425] transition-colors" />
+        </Link>
+
+        <Link
+          href="/admin/settings/seo"
+          className="bg-white rounded-2xl border border-stone-200/80 p-4 flex items-center justify-between hover:border-[#143425] hover:shadow-2xs transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center group-hover:bg-[#143425] group-hover:text-white transition-colors">
+              <Globe className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-serif font-bold text-xs text-[#143425]">Global SEO & Social</h3>
+              <p className="text-[11px] text-stone-500">Meta tags, OpenGraph previews & schema</p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-stone-400 group-hover:text-[#143425] transition-colors" />
+        </Link>
       </div>
 
       {saved && (

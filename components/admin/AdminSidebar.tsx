@@ -24,7 +24,8 @@ import {
   Compass,
   Globe,
   MessageSquareQuote,
-  Files
+  Files,
+  HardDrive
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -65,6 +66,7 @@ const NAV_ITEMS = [
     items: [
       { href: "/admin/reports", label: "Sales Reports", icon: BarChart3 },
       { href: "/admin/settings", label: "Store Settings", icon: Settings },
+      { href: "/admin/settings/storage", label: "Media & Storage", icon: HardDrive },
       { href: "/admin/settings/seo", label: "Global SEO", icon: Globe },
       { href: "/admin/settings/email-accounts", label: "Email Accounts", icon: Mail },
     ],
