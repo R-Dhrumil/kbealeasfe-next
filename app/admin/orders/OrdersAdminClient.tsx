@@ -120,7 +120,7 @@ export function OrdersAdminClient() {
           </div>
           <h3 className="font-serif text-xl font-bold text-stone-900 mb-2">Unable to load orders</h3>
           <p className="text-stone-500 text-sm max-w-md text-center mb-6">
-            We're having trouble connecting to the backend server. Please make sure the API is running or try refreshing the page.
+            We&apos;re having trouble connecting to the backend server. Please make sure the API is running or try refreshing the page.
           </p>
           <button 
             onClick={() => window.location.reload()}

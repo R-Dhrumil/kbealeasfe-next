@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image, { ImageProps } from "next/image";
 
 interface SafeImageProps extends Omit<ImageProps, "src"> {
@@ -39,11 +39,13 @@ function sanitizeImageSrc(url: unknown): string | null {
 }
 
 export function SafeImage({ src, fallbackSrc = DEFAULT_FALLBACK, alt, ...props }: SafeImageProps) {
+  const [prevSrc, setPrevSrc] = useState(src);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
+  if (prevSrc !== src) {
+    setPrevSrc(src);
     setError(false);
-  }, [src]);
+  }
 
   const sanitized = sanitizeImageSrc(src);
   const finalSrc = !sanitized || error ? fallbackSrc : sanitized;

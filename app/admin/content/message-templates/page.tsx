@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   MailCheck,
   Search,
@@ -95,10 +96,6 @@ export default function MessageTemplatesPage() {
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
     setIsLoading(true);
     setError(null);
@@ -145,28 +142,6 @@ export default function MessageTemplatesPage() {
     }
   };
 
-  useEffect(() => {
-    const handlePopState = () => {
-      if (typeof window === "undefined") return;
-      const params = new URLSearchParams(window.location.search);
-      const tId = params.get("template");
-
-      if (!tId) {
-        setCurrentView("list");
-        setEditingTemplate(null);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } else if (templates.length > 0) {
-        const found = templates.find((t) => t.id === tId || t.name === tId);
-        if (found) {
-          handleSelectTemplate(found, false);
-        }
-      }
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [templates]);
-
   const handleSelectTemplate = (template: MessageTemplate, pushState: boolean = true) => {
     setEditingTemplate(template);
     setFormState({
@@ -195,6 +170,32 @@ export default function MessageTemplatesPage() {
       window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const tId = params.get("template");
+
+      if (!tId) {
+        setCurrentView("list");
+        setEditingTemplate(null);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (templates.length > 0) {
+        const found = templates.find((t) => t.id === tId || t.name === tId);
+        if (found) {
+          handleSelectTemplate(found, false);
+        }
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [templates]);
 
   const handleBackToList = () => {
     setCurrentView("list");
@@ -390,12 +391,12 @@ export default function MessageTemplatesPage() {
             <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
             <span>{error}</span>
             {error.toLowerCase().includes("log in") && (
-              <a
+              <Link
                 href="/account/login?redirect=/admin/content/message-templates"
                 className="underline font-bold text-[#143425] hover:text-[#C89B3C] ml-1"
               >
                 Sign In Now &rarr;
-              </a>
+              </Link>
             )}
           </div>
           <button onClick={() => setError(null)} className="text-rose-500 hover:text-rose-700">

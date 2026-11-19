@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Mail,
   Plus,
@@ -77,6 +78,21 @@ export default function EmailAccountsPage() {
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
+  const loadAccounts = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await fetchApi("/emailaccounts");
+      if (Array.isArray(data)) {
+        setAccounts(data);
+      }
+    } catch (err: any) {
+      setError(err?.message || "Failed to load email accounts.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadAccounts();
   }, []);
@@ -113,21 +129,6 @@ export default function EmailAccountsPage() {
     const top = opensUpward ? Math.max(16, rect.top - menuHeight - 4) : rect.bottom + 4;
 
     setOpenMenu({ account, top, left });
-  };
-
-  const loadAccounts = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await fetchApi("/emailaccounts");
-      if (Array.isArray(data)) {
-        setAccounts(data);
-      }
-    } catch (err: any) {
-      setError(err?.message || "Failed to load email accounts.");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -308,12 +309,12 @@ export default function EmailAccountsPage() {
             <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
             <span>{error}</span>
             {error.toLowerCase().includes("log in") && (
-              <a
+              <Link
                 href="/account/login?redirect=/admin/settings/email-accounts"
                 className="underline font-bold text-[#143425] hover:text-[#C89B3C] ml-1"
               >
                 Sign In Now &rarr;
-              </a>
+              </Link>
             )}
           </div>
           <button onClick={() => setError(null)} className="text-rose-500 hover:text-rose-700">
@@ -395,7 +396,7 @@ export default function EmailAccountsPage() {
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-stone-500">
                     <Mail className="h-8 w-8 text-stone-300 mx-auto mb-2" />
-                    <span>No email accounts configured. Click "+ Add new..." to create your first gateway.</span>
+                    <span>No email accounts configured. Click &ldquo;+ Add new...&rdquo; to create your first gateway.</span>
                   </td>
                 </tr>
               ) : (

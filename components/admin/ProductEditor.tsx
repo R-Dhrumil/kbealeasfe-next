@@ -1948,7 +1948,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                     {variants.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="py-6 px-3 text-center text-stone-500 italic">
-                          No custom variants added. A default standard pack will be automatically created using the product's SKU, price, and stock.
+                          No custom variants added. A default standard pack will be automatically created using the product&apos;s SKU, price, and stock.
                         </td>
                       </tr>
                     ) : (

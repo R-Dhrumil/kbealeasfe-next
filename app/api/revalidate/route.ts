@@ -8,8 +8,7 @@ export async function POST(request: NextRequest) {
     const path = body.path || request.nextUrl.searchParams.get("path");
 
     if (tag) {
-      // @ts-ignore - Next.js revalidateTag
-      revalidateTag(tag);
+      revalidateTag(tag, { expire: 0 });
       return NextResponse.json({ revalidated: true, tag, now: Date.now() });
     }
 
@@ -35,8 +34,7 @@ export async function GET(request: NextRequest) {
   const path = request.nextUrl.searchParams.get("path");
 
   if (tag) {
-    // @ts-ignore
-    revalidateTag(tag);
+    revalidateTag(tag, { expire: 0 });
     return NextResponse.json({ revalidated: true, tag, now: Date.now() });
   }
 
