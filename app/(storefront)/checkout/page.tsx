@@ -122,9 +122,9 @@ export default function CheckoutPage() {
       setIsSubmitting(false);
       setIsConfirmed(true);
       clearCart();
-    } catch {
+    } catch (err: any) {
       setIsSubmitting(false);
-      setValidationError("Failed to place order. Please try again.");
+      setValidationError(err?.message || "Failed to place order. Please try again.");
     }
   };
 

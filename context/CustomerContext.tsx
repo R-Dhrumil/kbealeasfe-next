@@ -474,6 +474,10 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
   };
 
   const placeOrder = async (input: PlaceOrderInput): Promise<Order> => {
+    if (!isLoggedIn || !customer) {
+      throw new Error("Please sign in to your customer account to complete your order.");
+    }
+
     try {
       let addressId = "";
       if (customer && customer.addresses.length > 0) {
@@ -533,8 +537,19 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
       const nextOrders = [newOrder, ...orders];
       syncOrders(nextOrders);
       return newOrder;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Place order failed", err);
+      const msg = err?.message ? String(err.message).toLowerCase() : "";
+      if (
+        msg.includes("unauthorized") ||
+        msg.includes("session expired") ||
+        msg.includes("sign in") ||
+        msg.includes("token")
+      ) {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        setCustomer(null);
+        setIsLoggedIn(false);
+      }
       throw err;
     }
   };
