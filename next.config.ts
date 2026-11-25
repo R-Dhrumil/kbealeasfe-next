@@ -45,6 +45,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/brand",
+        destination: "/brands",
+        permanent: true,
+      },
+      {
+        source: "/brand/:slug",
+        destination: "/brands/:slug",
+        permanent: true,
+      },
+      {
         source: "/brands/coco-joy",
         destination: "/brands/cocojoy",
         permanent: true,

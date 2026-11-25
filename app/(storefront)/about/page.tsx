@@ -6,6 +6,7 @@ import { Sparkles, ShieldCheck, CheckCircle2, Leaf, HeartHandshake, ArrowRight }
 import { getBrands } from "@/service/brands";
 import { BRAND_PILLARS } from "@/service/homepage";
 import { Button } from "@/components/ui/Button";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 export const metadata: Metadata = {
   title: "About KB Heritage & Craftsmanship | Pure Taste, Every Time",
@@ -112,8 +113,20 @@ export default async function AboutPage() {
               key={brand.id}
               className="p-8 rounded-3xl bg-white border border-stone-200/80 shadow-2xs flex gap-6 items-start"
             >
-              <div className="h-14 w-14 rounded-2xl bg-[#F9F6F0] flex items-center justify-center text-3xl shrink-0">
-                {brand.logo}
+              <div className="relative h-14 w-14 rounded-2xl bg-[#F9F6F0] border border-stone-200/80 p-2 flex items-center justify-center shrink-0 overflow-hidden">
+                {typeof brand.logo === "string" && (brand.logo.startsWith("/") || brand.logo.startsWith("http")) ? (
+                  <SafeImage
+                    src={brand.logo}
+                    alt={brand.name}
+                    fill
+                    className="object-contain p-1.5"
+                    fallbackSrc="/assets/HeroSlider_images/vrinda_tea.png"
+                  />
+                ) : (
+                  <span className="font-serif font-bold text-sm text-[#143425]">
+                    {brand.logo || brand.name.substring(0, 2).toUpperCase()}
+                  </span>
+                )}
               </div>
               <div className="space-y-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#A87E28]">

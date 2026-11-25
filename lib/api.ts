@@ -25,7 +25,12 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   if (!response.ok) {
     let errorMessage = "An error occurred";
     if (response.status === 401) {
-      errorMessage = "Session expired or unauthorized. Please log in with your Admin credentials.";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || "Session expired or unauthorized. Please sign in to continue.";
+      } catch {
+        errorMessage = "Session expired or unauthorized. Please sign in to continue.";
+      }
     } else if (response.status === 403) {
       errorMessage = "Access denied: Administrator privileges required.";
     } else {

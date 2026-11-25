@@ -22,6 +22,13 @@ export function PromoBanners() {
   const topBanner = banners[0];
   const sideBanners = banners.slice(1);
 
+  const rawTopLink = topBanner?.linkUrl || "/shop?category=cat-tea-premixes";
+  const resolvedTopLink = rawTopLink.startsWith("/brand/")
+    ? rawTopLink.replace(/^\/brand\//, "/brands/")
+    : rawTopLink === "/brand"
+    ? "/brands"
+    : rawTopLink;
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-14">
       <div className="space-y-6">
@@ -96,7 +103,7 @@ export function PromoBanners() {
               {/* CTA Section */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <Link
-                  href={topBanner?.linkUrl || "/shop?category=cat-tea-premixes"}
+                  href={resolvedTopLink}
                   className="h-11 sm:h-12 px-6 sm:px-7 rounded-xl bg-[#143425] hover:bg-[#1C4834] text-white text-xs sm:text-sm font-semibold tracking-wide uppercase transition-all shadow-sm hover:shadow inline-flex items-center gap-2.5 group/btn"
                 >
                   <span>Shop Brand</span>

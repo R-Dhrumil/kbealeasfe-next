@@ -25,7 +25,7 @@ type PaymentMethodType = "upi" | "card" | "netbanking" | "cod";
 
 export default function CheckoutPage() {
   const { items, summary, clearCart } = useCart();
-  const { customer, isLoggedIn, placeOrder } = useCustomer();
+  const { customer, isLoggedIn, isLoaded, placeOrder } = useCustomer();
 
   // Form State
   const [email, setEmail] = useState("");
@@ -47,27 +47,26 @@ export default function CheckoutPage() {
   // Pre-fill if customer profile exists
   useEffect(() => {
     if (customer) {
-      setEmail((prev) => prev || customer.email);
-      setPhone((prev) => prev || customer.phone);
-      setFullName((prev) => prev || customer.fullName);
+      setEmail((prev) => prev || customer.email || "");
+      setPhone((prev) => prev || customer.phone || "");
+      setFullName((prev) => prev || customer.fullName || "");
 
-      const defaultAddr = customer.addresses.find((a) => a.isDefault) || customer.addresses[0];
+      const defaultAddr = customer.addresses?.find((a) => a.isDefault) || customer.addresses?.[0];
       if (defaultAddr) {
-        setAddressLine((prev) => prev || defaultAddr.addressLine1);
-        setCity((prev) => prev || defaultAddr.city);
-        setState((prev) => prev || defaultAddr.state);
-        setPostalCode((prev) => prev || defaultAddr.postalCode);
+        setAddressLine((prev) => prev || defaultAddr.addressLine1 || "");
+        setCity((prev) => prev || defaultAddr.city || "Pune");
+        setState((prev) => prev || defaultAddr.state || "Maharashtra");
+        setPostalCode((prev) => prev || defaultAddr.postalCode || "411045");
       }
-    } else {
-      setEmail((prev) => prev || "aarav.sharma@example.com");
-      setPhone((prev) => prev || "+91 98201 44521");
-      setFullName((prev) => prev || "Aarav Sharma");
-      setAddressLine((prev) => prev || "Flat 402, Nilgiri Heights, Baner Road");
     }
   }, [customer]);
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoggedIn) {
+      setValidationError("Please sign in or register to place your order.");
+      return;
+    }
     if (!fullName.trim() || !addressLine.trim() || !postalCode.trim() || !phone.trim() || !email.trim()) {
       setValidationError("Please fill out all required shipping and contact fields.");
       return;
@@ -195,6 +194,62 @@ export default function CheckoutPage() {
               Continue Shopping
             </Button>
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // AUTHENTICATION GUARD: Prompt customer to sign in before completing checkout
+  if (isLoaded && !isLoggedIn) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-6">
+        <div className="h-20 w-20 mx-auto rounded-full bg-[#E8F2EC] flex items-center justify-center text-[#143425] shadow-xs">
+          <Lock className="h-9 w-9 text-[#143425]" />
+        </div>
+
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-widest text-[#A87E28]">
+            Customer Account Required
+          </span>
+          <h1 className="text-3xl font-serif font-bold text-[#143425] mt-1">
+            Please Sign In to Complete Your Order
+          </h1>
+        </div>
+
+        <p className="text-stone-600 text-sm max-w-md mx-auto leading-relaxed">
+          To ensure accurate delivery tracking, secure payment processing, and instant order updates, please sign in or register before checking out. Your cart items are preserved.
+        </p>
+
+        {items.length > 0 && (
+          <div className="p-6 bg-white rounded-3xl border border-stone-200/80 text-left space-y-3.5 max-w-md mx-auto shadow-2xs">
+            <div className="flex items-center justify-between text-xs text-stone-600 pb-3 border-b border-stone-100">
+              <span className="font-medium">Items in Cart</span>
+              <span className="font-bold text-stone-900">{items.length} {items.length === 1 ? "item" : "items"}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs text-stone-600">
+              <span className="font-medium">Order Total</span>
+              <span className="font-mono font-bold text-base text-[#143425]">{formatPrice(summary.total)}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link href="/account/login?redirect=/checkout" className="w-full sm:w-auto">
+            <Button variant="primary" size="lg" className="w-full sm:w-auto gap-2 shadow-sm">
+              <span>Sign In / Register</span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href="/cart" className="w-full sm:w-auto">
+            <Button variant="outline" size="lg" className="w-full sm:w-auto">
+              Return to Cart
+            </Button>
+          </Link>
+        </div>
+
+        <div className="flex items-center justify-center gap-1.5 text-xs text-stone-400 pt-2">
+          <ShieldCheck className="h-4 w-4 text-emerald-600" />
+          <span>Safe & Secure 256-Bit Encrypted Checkout</span>
         </div>
       </div>
     );
